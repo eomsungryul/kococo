@@ -16,6 +16,7 @@
 package co.kr.dwebss.kococo.activity;
 
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -28,6 +29,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
@@ -35,19 +37,23 @@ import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import co.kr.dwebss.kococo.R;
 import co.kr.dwebss.kococo.adapter.RecodeListAdapter;
 import co.kr.dwebss.kococo.model.RecodeData;
 import co.kr.dwebss.kococo.model.Section;
 
-public class ResultActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener {
+public class ResultActivity extends AppCompatActivity implements OnSeekBarChangeListener {
 
     private static final String TAG = "ResultActivity";
     private BarChart chart;
@@ -86,6 +92,21 @@ public class ResultActivity extends AppCompatActivity implements SeekBar.OnSeekB
         String dateVal = transFormat.format(from);
         dateTxtHeader.setText(dateVal);
 
+        // Adapter 생성
+        RecodeListAdapter adapter = new RecodeListAdapter() ;
+        //listView 생성
+        ListView listview = (ListView) findViewById(R.id.recordListview);
+        listview.setAdapter(adapter);
+        // 첫 번째 아이템 추가.
+        adapter.addItem("녹음파일1") ;
+        adapter.addItem("녹음파일2") ;
+        adapter.addItem("녹음파일3") ;
+        adapter.addItem("녹음파일4") ;
+        adapter.addItem("녹음파일5") ;
+        // 두 번째 아이템 추가.
+//        adapter.addItem(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_36dp),
+//                "Circle", "Account Circle Black 36dp") ;
+
 
         //차트 시작
         chart = findViewById(R.id.chart1);
@@ -111,22 +132,26 @@ public class ResultActivity extends AppCompatActivity implements SeekBar.OnSeekB
         chart.getLegend().setEnabled(false);
 
 
-        // Adapter 생성
-        RecodeListAdapter adapter = new RecodeListAdapter() ;
-        //listView 생성
-        ListView listview = (ListView) findViewById(R.id.recordListview);
-        listview.setAdapter(adapter);
-        // 첫 번째 아이템 추가.
-        adapter.addItem("녹음파일1") ;
-        adapter.addItem("녹음파일2") ;
-        adapter.addItem("녹음파일3") ;
-        adapter.addItem("녹음파일4") ;
-        adapter.addItem("녹음파일5") ;
-        // 두 번째 아이템 추가.
-//        adapter.addItem(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_36dp),
-//                "Circle", "Account Circle Black 36dp") ;
+        chart = (BarChart)findViewById(R.id.chart1);
 
+        List<BarEntry> entries = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            float multi = (100 + 1);
+            float val = (float) (Math.random() * multi) + multi / 3;
+            entries.add(new BarEntry(i, val));
+        }
+        BarDataSet set1;
+        set1 = new BarDataSet(entries, "Data Set");
+        set1.setColors(ColorTemplate.VORDIPLOM_COLORS);
+        set1.setDrawValues(false);
 
+        ArrayList<IBarDataSet> dataSets = new ArrayList<>();
+        dataSets.add(set1);
+
+        BarData data = new BarData(dataSets);
+        chart.setData(data);
+        chart.setFitBars(true);
+        chart.invalidate();
 
     }
 

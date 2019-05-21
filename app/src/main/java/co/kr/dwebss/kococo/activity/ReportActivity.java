@@ -15,10 +15,12 @@
  */
 package co.kr.dwebss.kococo.activity;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
@@ -30,6 +32,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -62,7 +65,7 @@ public class ReportActivity extends AppCompatActivity {
         float density = metrics.density;
         super.onCreate(savedInstanceState);
 
-        TextView test  = findViewById(R.id.test);
+        TextView test  = findViewById(R.id.declareTxtHeader);
         Bundle extras = getIntent().getExtras();
         String extra = extras.getString("testData");
         test.setText(extra);
@@ -75,6 +78,40 @@ public class ReportActivity extends AppCompatActivity {
             }
         });
 
+        Button declareBtn = (Button) findViewById(R.id.declareBtn);
+        declareBtn.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDeclareDialog();
+            }
+        });
+
+    }
+
+    //얼럿 다이얼로그 띄우기
+    void showDeclareDialog()
+    {
+        //Style을 넣어서 커스텀 가능
+        // 타이틀이 없으면 안나오고 메세지 길이에 따라 경고창길이가 달라진다.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this,R.style.MyAlertDialogStyle);
+        builder.setTitle("제출하기");
+        builder.setMessage("제출하시겠습니까?");
+        //setView()를 이용하여 view를 넣고 커스텀 할 수 있다.
+        builder.setPositiveButton("예",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Toast.makeText(getApplicationContext(),"예를 선택했습니다.",Toast.LENGTH_LONG).show();
+                    }
+                });
+        builder.setNegativeButton("아니오",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Toast.makeText(getApplicationContext(),"아니오를 선택했습니다.", Toast.LENGTH_LONG).show();
+                    }
+                });
+        builder.show();
+        //이런식으로 높이와 길이를 지정할수있지만 비율에 맞게 버튼위치가 늘어나지않음 비추.
+//        builder.show().getWindow().setLayout(600, 400);
     }
 
     @Override

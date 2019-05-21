@@ -95,8 +95,11 @@ public class RecodeListAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 //창 띄우기 startActivity를 이용하여 안에 intent를 생성
+                //intent (Context,class)
                 Intent i = new Intent(context, ReportActivity.class);
-                i.putExtra("testData","신고하기"+getItem(position));
+                //intent에 값을 넣어야 해당 값을 신고하기 페이지에서 가져올수있다.
+                i.putExtra("testData",getItem(position).toString());
+                //신고하기 창 열기
                 v.getContext().startActivity(i);
             }
         });

@@ -28,11 +28,12 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraintLayout2"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="co.kr.dwebss.kococo.activity.ReportActivity">
 
-<!--이미지 버튼 투명   android:background="@android:color/transparent"
+    <!--이미지 버튼 투명   android:background="@android:color/transparent"
     이미지 버튼 스케일 조정    android:scaleType="fitXY"
     이미지의 색을 바꾸는 방법 android:tint="@color/background_dark"
 
@@ -56,7 +57,7 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/date_txt_header"
+        android:id="@+id/declareTxtHeader"
         android:layout_width="wrap_content"
         android:layout_height="20dp"
         android:layout_centerInParent="true"
@@ -75,7 +76,7 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         app:layout_constraintVertical_bias="0.011" />
 
     <TextView
-        android:id="@+id/test"
+        android:id="@+id/declareTxtBody"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
@@ -83,15 +84,71 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:text="제목"
+        android:text="신고내용"
         android:textSize="18dp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.025"
+        app:layout_constraintHorizontal_bias="0.024"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/previousButton"
-        app:layout_constraintVertical_bias="0.022" />
+        app:layout_constraintVertical_bias="0.05" />
 
+    <!--
+    EditText 태그 설명
+        textColor 글자 변경
+        textCursorDrawable 텍스트 포커스시에 나오는 커서 색 변경
+        gravity 커서의 위치 변경 top left 같이 하면 왼쪽 상단에 커서로 바뀐다.
+    -->
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/declareBtn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/declareTxtBody"
+        app:layout_constraintVertical_bias="0.288">
+
+        <EditText
+            android:id="@+id/EditText02"
+            android:layout_width="0dp"
+            android:layout_height="300dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="8dp"
+            android:gravity="top|left"
+            android:background="@drawable/button_shape_darkgray"
+            android:inputType="textMultiLine"
+            android:lines="5"
+            android:scrollHorizontally="false"
+            android:textColor="#ffffff"
+            android:textCursorDrawable="@color/colorPrimary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.473"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.035" />
+    </android.support.constraint.ConstraintLayout>
+
+    <Button
+        android:id="@+id/declareBtn"
+        android:layout_width="100dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/button_shape_puple"
+        android:text="제출하기"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.972"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.753" />
 
 </android.support.constraint.ConstraintLayout>
