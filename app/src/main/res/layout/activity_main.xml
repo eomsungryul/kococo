@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2018 Google LLC
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~    https://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<!-- ConstraintLayout 레이아웃 안의 다른 뷰들의 관계에 따라 위치를 한정지어 자식 뷰들을 배치시킬 수 있습니다.
+layout_constraintBottom_toTopOf : 내 레이아웃 밑의 누구의 위에 있겠다
+layout_constraintEnd_toEndOf :
+-->
+<!-- tools:context : 명시적으로 사용될 Activity 를 지정함으로써 에디터에서 조금더 명확하게 직관적으로 표기할수 있도록 하는 용도  -->
+<!--
+match_parent : 부모가 가지는 모든 길이를 채울때
+wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
+10px,10dp, 10sp는 절대값
+0dp를 하게 되면 비율만큼 늘어남 layout_weight 와 같이 사용하지만 내가 0dp를 했을 때는 weight를 지정하지않았기 때문에 비율이 1로 자동적으로 됨
+-->
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="co.kr.dwebss.kococo.MainActivity">
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/tabs"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        app:layout_constraintBottom_toTopOf="@+id/view_content"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <include
+            android:id="@+id/include"
+            layout="@layout/layout_tabs_landscape"
+            tools:layout_editor_absoluteX="198dp"
+            tools:layout_editor_absoluteY="0dp" />
+
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/view_content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tabs">
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </android.support.constraint.ConstraintLayout>
+
+</android.support.constraint.ConstraintLayout>

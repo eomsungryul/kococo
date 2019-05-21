@@ -1,0 +1,25 @@
+
+<android.support.constraint.ConstraintLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+android:id="@+id/section_container"
+android:layout_width="match_parent"
+android:layout_height="match_parent">
+
+<android.support.v7.widget.RecyclerView
+    android:id="@+id/accounts"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="16dp"
+    android:layout_marginStart="0dp"
+    android:layout_marginTop="32dp"
+    android:background="@color/background_light"
+    android:nestedScrollingEnabled="false"
+    app:layout_constraintHorizontal_weight="0.5"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/tabs"
+    app:layout_constraintStart_toStartOf="parent">
+
+</android.support.v7.widget.RecyclerView>
+
+</android.support.constraint.ConstraintLayout>
