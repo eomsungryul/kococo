@@ -37,10 +37,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import co.kr.dwebss.kococo.AlertAdapter;
-import co.kr.dwebss.kococo.NonScrollableFlexboxLayoutManager;
+import co.kr.dwebss.kococo.adapter.AlertAdapter;
+import co.kr.dwebss.kococo.helper.NonScrollableFlexboxLayoutManager;
 import co.kr.dwebss.kococo.R;
-import co.kr.dwebss.kococo.SectionAdapter;
+import co.kr.dwebss.kococo.adapter.SectionAdapter;
 import co.kr.dwebss.kococo.model.Alert;
 import co.kr.dwebss.kococo.model.Bill;
 import co.kr.dwebss.kococo.model.Budget;

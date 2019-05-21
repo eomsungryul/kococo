@@ -43,7 +43,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import co.kr.dwebss.kococo.R;
-import co.kr.dwebss.kococo.RecodeListAdapter;
+import co.kr.dwebss.kococo.adapter.RecodeListAdapter;
 import co.kr.dwebss.kococo.model.RecodeData;
 import co.kr.dwebss.kococo.model.Section;
 
@@ -110,23 +110,12 @@ public class ResultActivity extends AppCompatActivity implements SeekBar.OnSeekB
         chart.animateY(1500);
         chart.getLegend().setEnabled(false);
 
-        //RecyclerView 시작
-//        resultListRv = findViewById(R.id.resultListRv);
-//        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-//        resultListRv.setLayoutManager(layoutManager);
-//        RecyclerView.Adapter resultListdapter = new RecodeListAdapter(resultListSection);
-//        resultListRv.setAdapter(resultListdapter);
-
-        //listView 생성
-
 
         // Adapter 생성
         RecodeListAdapter adapter = new RecodeListAdapter() ;
-
-        // 리스트뷰 참조 및 Adapter달기
+        //listView 생성
         ListView listview = (ListView) findViewById(R.id.recordListview);
         listview.setAdapter(adapter);
-//        initializeData();
         // 첫 번째 아이템 추가.
         adapter.addItem("녹음파일1") ;
         adapter.addItem("녹음파일2") ;
@@ -136,6 +125,9 @@ public class ResultActivity extends AppCompatActivity implements SeekBar.OnSeekB
         // 두 번째 아이템 추가.
 //        adapter.addItem(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_36dp),
 //                "Circle", "Account Circle Black 36dp") ;
+
+
+
     }
 
     //getSupportActionBar 사용하려면 추가해야함

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import co.kr.dwebss.kococo.R;
-import co.kr.dwebss.kococo.SectionAdapter;
+import co.kr.dwebss.kococo.adapter.SectionAdapter;
 import co.kr.dwebss.kococo.model.Account;
 import co.kr.dwebss.kococo.model.RowData;
 import co.kr.dwebss.kococo.model.Section;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package co.kr.dwebss.kococo;
+package co.kr.dwebss.kococo.adapter;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -22,13 +22,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import co.kr.dwebss.kococo.R;
 import co.kr.dwebss.kococo.model.RowData;
 import co.kr.dwebss.kococo.model.Section;
 import co.kr.dwebss.kococo.view.FractionBarView;
 
 import java.util.List;
 
-public class SectionAdapterBK extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class SectionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int TYPE_HEADER = 100;
     private static final int TYPE_ROW = 101;
@@ -41,7 +42,7 @@ public class SectionAdapterBK extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     private boolean mUseHorizontalBar;
 
-    public SectionAdapterBK(Section section) {
+    public SectionAdapter(Section section) {
         mSection = section;
     }
 
@@ -80,7 +81,8 @@ public class SectionAdapterBK extends RecyclerView.Adapter<RecyclerView.ViewHold
         if (holder instanceof HeaderViewHolder) {
             HeaderViewHolder hvh = (HeaderViewHolder) holder;
             hvh.sectionName.setText(mSection.getName());
-            hvh.sectionTotal1.setText(mSection.getTotal1String());
+//            hvh.sectionTotal1.setText(mSection.getTotal1String());
+            hvh.sectionTotal1.setText("80점");
 
             if (mSection.showTotal()) {
                 hvh.sectionTotal2.setVisibility(View.VISIBLE);
@@ -102,9 +104,9 @@ public class SectionAdapterBK extends RecyclerView.Adapter<RecyclerView.ViewHold
             RowViewHolder rvh = (RowViewHolder) holder;
             RowData rowData = mSection.getItems().get(position - 1);
             rvh.primaryText.setText(rowData.getRowName());
-            rvh.secondaryText.setText(rowData.getRowSecondaryString());
-            rvh.secondaryTextObfuscation.setVisibility(rowData.showSecondaryStringObfuscation() ?
-                    View.VISIBLE : View.GONE);
+//            rvh.secondaryText.setText(rowData.getRowSecondaryString());
+//            rvh.secondaryTextObfuscation.setVisibility(rowData.showSecondaryStringObfuscation() ?
+//                    View.VISIBLE : View.GONE);
 
             rvh.amountText.setText(rowData.getRowAmountString());
 
@@ -117,11 +119,11 @@ public class SectionAdapterBK extends RecyclerView.Adapter<RecyclerView.ViewHold
 
             if (rowData.getAmountQualifierString() == null) {
                 rvh.amountQualifierText.setVisibility(View.GONE);
-                rvh.arrow.setVisibility(View.VISIBLE);
+//                rvh.arrow.setVisibility(View.VISIBLE);
             } else {
                 rvh.amountQualifierText.setVisibility(View.VISIBLE);
                 rvh.amountQualifierText.setText(rowData.getAmountQualifierString());
-                rvh.arrow.setVisibility(View.GONE);
+//                rvh.arrow.setVisibility(View.GONE);
             }
         }
     }
@@ -150,8 +152,8 @@ public class SectionAdapterBK extends RecyclerView.Adapter<RecyclerView.ViewHold
     public class RowViewHolder extends RecyclerView.ViewHolder {
 
         public TextView primaryText;
-        public TextView secondaryText;
-        public TextView secondaryTextObfuscation;
+//        public TextView secondaryText;
+//        public TextView secondaryTextObfuscation;
         public TextView amountText;
         public TextView amountQualifierText;
         public FractionBarView barView;
@@ -160,9 +162,9 @@ public class SectionAdapterBK extends RecyclerView.Adapter<RecyclerView.ViewHold
         public RowViewHolder(View itemView) {
             super(itemView);
             primaryText = itemView.findViewById(R.id.account_primary_text);
-            secondaryText = itemView.findViewById(R.id.account_secondary_text);
-            secondaryTextObfuscation = itemView.findViewById(R.id
-                    .account_secondary_text_obfuscation);
+//            secondaryText = itemView.findViewById(R.id.account_secondary_text);
+//            secondaryTextObfuscation = itemView.findViewById(R.id
+//                    .account_secondary_text_obfuscation);
             barView = itemView.findViewById(R.id.row_bar_chart);
             amountText = itemView.findViewById(R.id.amount_text);
             amountQualifierText = itemView.findViewById(R.id.amount_qualifier_text);

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package co.kr.dwebss.kococo;
+package co.kr.dwebss.kococo.adapter;
 
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import co.kr.dwebss.kococo.R;
 import co.kr.dwebss.kococo.model.Alert;
 import com.google.android.flexbox.FlexboxLayoutManager;
 

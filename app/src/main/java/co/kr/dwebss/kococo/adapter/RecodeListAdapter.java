@@ -13,15 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package co.kr.dwebss.kococo;
+package co.kr.dwebss.kococo.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
+import co.kr.dwebss.kococo.R;
+import co.kr.dwebss.kococo.activity.ResultActivity;
 import co.kr.dwebss.kococo.model.RecodeData;
 
 import java.util.ArrayList;
@@ -65,6 +69,17 @@ public class RecodeListAdapter extends BaseAdapter {
 //        iconImageView.setImageDrawable(listViewItem.getIcon());
         titleTextView.setText(listViewItem.getRowName());
 //        descTextView.setText(listViewItem.getDesc());
+
+
+        //lisrViews내의 아이콘 버튼 참조 및 onclick추가
+        ImageButton playBtn = (ImageButton) convertView.findViewById(R.id.recordPlay);
+        playBtn.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+            }
+        });
 
         return convertView;
     }
