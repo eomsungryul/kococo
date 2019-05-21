@@ -5,7 +5,7 @@
     android:id="@+id/recodeFr"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Fragment.RecodeFragment">
+    tools:context=".fragment.RecodeFragment">
 
     <ScrollView
         android:id="@+id/scroll_view"

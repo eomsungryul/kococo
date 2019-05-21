@@ -1,4 +1,4 @@
-package co.kr.dwebss.kococo.Fragment;
+package co.kr.dwebss.kococo.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import co.kr.dwebss.kococo.R;
-import co.kr.dwebss.kococo.ResultActivity;
+import co.kr.dwebss.kococo.activity.ResultActivity;
 
 
 public class RecodeFragment extends Fragment {

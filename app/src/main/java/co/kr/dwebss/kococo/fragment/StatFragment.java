@@ -1,4 +1,4 @@
-package co.kr.dwebss.kococo.Fragment;
+package co.kr.dwebss.kococo.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;

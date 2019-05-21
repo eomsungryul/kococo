@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package co.kr.dwebss.kococo;
+package co.kr.dwebss.kococo.activity;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -30,8 +30,6 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import co.kr.dwebss.kococo.model.RecodeData;
-import co.kr.dwebss.kococo.model.Section;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
@@ -43,6 +41,11 @@ import com.github.mikephil.charting.utils.ColorTemplate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+
+import co.kr.dwebss.kococo.R;
+import co.kr.dwebss.kococo.RecodeListAdapter;
+import co.kr.dwebss.kococo.model.RecodeData;
+import co.kr.dwebss.kococo.model.Section;
 
 public class ResultActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener {
 

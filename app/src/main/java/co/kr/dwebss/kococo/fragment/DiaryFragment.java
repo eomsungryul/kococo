@@ -1,4 +1,4 @@
-package co.kr.dwebss.kococo.Fragment;
+package co.kr.dwebss.kococo.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -8,10 +8,10 @@ import android.view.ViewGroup;
 
 import co.kr.dwebss.kococo.R;
 
-public class SettingFragment extends Fragment {
 
+public class DiaryFragment extends Fragment {
 
-    public SettingFragment() {
+    public DiaryFragment() {
         // Required empty public constructor
     }
 
@@ -24,7 +24,7 @@ public class SettingFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_setting, container, false);
-        return v;
+        return inflater.inflate(R.layout.fragment_diary, container, false);
     }
+
 }

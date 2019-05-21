@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package co.kr.dwebss.kococo;
+package co.kr.dwebss.kococo.activity;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -29,11 +29,6 @@ import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import co.kr.dwebss.kococo.model.Alert;
-import co.kr.dwebss.kococo.model.Bill;
-import co.kr.dwebss.kococo.model.Budget;
-import co.kr.dwebss.kococo.model.RowData;
-import co.kr.dwebss.kococo.model.Section;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexWrap;
 import com.google.android.flexbox.FlexboxLayoutManager;
@@ -41,6 +36,16 @@ import com.google.android.flexbox.FlexboxLayoutManager;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import co.kr.dwebss.kococo.AlertAdapter;
+import co.kr.dwebss.kococo.NonScrollableFlexboxLayoutManager;
+import co.kr.dwebss.kococo.R;
+import co.kr.dwebss.kococo.SectionAdapter;
+import co.kr.dwebss.kococo.model.Alert;
+import co.kr.dwebss.kococo.model.Bill;
+import co.kr.dwebss.kococo.model.Budget;
+import co.kr.dwebss.kococo.model.RowData;
+import co.kr.dwebss.kococo.model.Section;
 
 public class MainActivityBK extends AppCompatActivity {
 

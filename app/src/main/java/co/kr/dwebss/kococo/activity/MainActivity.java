@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package co.kr.dwebss.kococo;
+package co.kr.dwebss.kococo.activity;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -26,14 +26,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
-import co.kr.dwebss.kococo.Fragment.DiaryFragment;
-import co.kr.dwebss.kococo.Fragment.RecodeFragment;
-import co.kr.dwebss.kococo.Fragment.SettingFragment;
-import co.kr.dwebss.kococo.Fragment.StatFragment;
-import co.kr.dwebss.kococo.main.SectionsPagerAdapter;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import co.kr.dwebss.kococo.R;
+import co.kr.dwebss.kococo.fragment.DiaryFragment;
+import co.kr.dwebss.kococo.fragment.RecodeFragment;
+import co.kr.dwebss.kococo.fragment.SettingFragment;
+import co.kr.dwebss.kococo.fragment.StatFragment;
+import co.kr.dwebss.kococo.main.SectionsPagerAdapter;
 
 public class MainActivity extends AppCompatActivity {
 
