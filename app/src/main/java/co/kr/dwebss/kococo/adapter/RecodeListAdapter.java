@@ -16,6 +16,7 @@
 package co.kr.dwebss.kococo.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,20 +24,21 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
-
-import co.kr.dwebss.kococo.R;
-import co.kr.dwebss.kococo.activity.ResultActivity;
-import co.kr.dwebss.kococo.model.RecodeData;
+import android.widget.Toast;
 
 import java.util.ArrayList;
+
+import co.kr.dwebss.kococo.R;
+import co.kr.dwebss.kococo.activity.ReportActivity;
+import co.kr.dwebss.kococo.model.RecodeData;
 
 public class RecodeListAdapter extends BaseAdapter {
     // Adapter에 추가된 데이터를 저장하기 위한 ArrayList
     private ArrayList<RecodeData> listViewItemList = new ArrayList<RecodeData>() ;
+    Boolean playBtnFlag = false;
 
     // ListViewAdapter의 생성자
     public RecodeListAdapter() {
-
     }
 
     // Adapter에 사용되는 데이터의 개수를 리턴. : 필수 구현
@@ -70,14 +72,32 @@ public class RecodeListAdapter extends BaseAdapter {
         titleTextView.setText(listViewItem.getRowName());
 //        descTextView.setText(listViewItem.getDesc());
 
-
+        playBtnFlag = false;
         //lisrViews내의 아이콘 버튼 참조 및 onclick추가
         ImageButton playBtn = (ImageButton) convertView.findViewById(R.id.recordPlay);
         playBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Toast.makeText(context, "ㅎㅇ : "+position+" : "+getItem(position), Toast.LENGTH_SHORT).show();
+                //재생버튼 누를 시 정지버튼으로 변경하는 메소드
+                if(!playBtnFlag){
+                    playBtn.setImageResource(R.drawable.baseline_pause_white_48dp);
+                    playBtnFlag = true;
+                }else{
+                    playBtn.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
+                    playBtnFlag = false;
+                }
+            }
+        });
 
-
+        ImageButton reportBtn = (ImageButton) convertView.findViewById(R.id.recordReport);
+        reportBtn.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //창 띄우기 startActivity를 이용하여 안에 intent를 생성
+                Intent i = new Intent(context, ReportActivity.class);
+                i.putExtra("testData","신고하기"+getItem(position));
+                v.getContext().startActivity(i);
             }
         });
 
@@ -93,7 +113,7 @@ public class RecodeListAdapter extends BaseAdapter {
     // 지정한 위치(position)에 있는 데이터 리턴 : 필수 구현
     @Override
     public Object getItem(int position) {
-        return listViewItemList.get(position) ;
+        return listViewItemList.get(position).getRowName();
     }
 
     // 아이템 데이터 추가를 위한 함수. 개발자가 원하는대로 작성 가능.
