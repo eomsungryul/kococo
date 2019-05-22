@@ -2,22 +2,21 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/recodeFr"
+    android:id="@+id/diaryFr"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragment.RecodeFragment">
+    tools:context=".fragment.DiaryFragment">
 
-    <ScrollView
-        android:id="@+id/scroll_view"
+    <!--리스트뷰의 디폴트 선(item의 하단의 선 )을 없애는 법 :  android:divider = "#ffffff"-->
+    <ListView
+        android:id="@+id/diaryListview"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
+        android:divider="#ffffff"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tabs">
+        app:layout_constraintVertical_bias="0.0"
+        tools:layout_editor_absoluteX="0dp" />
 
-        <include layout="@layout/layout_section_container_tablet"/>
-
-    </ScrollView>
 
 </android.support.constraint.ConstraintLayout>
 

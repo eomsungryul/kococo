@@ -16,7 +16,6 @@
 package co.kr.dwebss.kococo.activity;
 
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -37,9 +36,6 @@ import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
@@ -49,7 +45,7 @@ import java.util.Date;
 import java.util.List;
 
 import co.kr.dwebss.kococo.R;
-import co.kr.dwebss.kococo.adapter.RecodeListAdapter;
+import co.kr.dwebss.kococo.adapter.RecordListAdapter;
 import co.kr.dwebss.kococo.model.RecodeData;
 import co.kr.dwebss.kococo.model.Section;
 
@@ -93,7 +89,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
         dateTxtHeader.setText(dateVal);
 
         // Adapter 생성
-        RecodeListAdapter adapter = new RecodeListAdapter() ;
+        RecordListAdapter adapter = new RecordListAdapter() ;
         //listView 생성
         ListView listview = (ListView) findViewById(R.id.recordListview);
         listview.setAdapter(adapter);

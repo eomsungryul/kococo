@@ -32,13 +32,13 @@ import co.kr.dwebss.kococo.R;
 import co.kr.dwebss.kococo.activity.ReportActivity;
 import co.kr.dwebss.kococo.model.RecodeData;
 
-public class RecodeListAdapter extends BaseAdapter {
+public class DiaryListAdapter extends BaseAdapter {
     // Adapter에 추가된 데이터를 저장하기 위한 ArrayList
     private ArrayList<RecodeData> listViewItemList = new ArrayList<RecodeData>() ;
     Boolean playBtnFlag = false;
 
     // ListViewAdapter의 생성자
-    public RecodeListAdapter() {
+    public DiaryListAdapter() {
     }
 
     // Adapter에 사용되는 데이터의 개수를 리턴. : 필수 구현
@@ -56,13 +56,11 @@ public class RecodeListAdapter extends BaseAdapter {
         // "listview_item" Layout을 inflate하여 convertView 참조 획득.
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.layout_record_row, parent, false);
+            convertView = inflater.inflate(R.layout.layout_diary_row, parent, false);
         }
 
         // 화면에 표시될 View(Layout이 inflate된)으로부터 위젯에 대한 참조 획득
-//        ImageView iconImageView = (ImageView) convertView.findViewById(R.id.imageView1) ;
-        TextView titleTextView = (TextView) convertView.findViewById(R.id.recordNameText) ;
-//        TextView descTextView = (TextView) convertView.findViewById(R.id.textView2) ;
+        TextView titleTextView = (TextView) convertView.findViewById(R.id.diaryNameText) ;
 
         // Data Set(listViewItemList)에서 position에 위치한 데이터 참조 획득
         RecodeData listViewItem = listViewItemList.get(position);
@@ -71,38 +69,6 @@ public class RecodeListAdapter extends BaseAdapter {
 //        iconImageView.setImageDrawable(listViewItem.getIcon());
         titleTextView.setText(listViewItem.getRowName());
 //        descTextView.setText(listViewItem.getDesc());
-
-        playBtnFlag = false;
-        //lisrViews내의 아이콘 버튼 참조 및 onclick추가
-        ImageButton playBtn = (ImageButton) convertView.findViewById(R.id.recordPlay);
-        playBtn.setOnClickListener(new Button.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(context, "ㅎㅇ : "+position+" : "+getItem(position), Toast.LENGTH_SHORT).show();
-                //재생버튼 누를 시 정지버튼으로 변경하는 메소드
-                if(!playBtnFlag){
-                    playBtn.setImageResource(R.drawable.baseline_pause_white_48dp);
-                    playBtnFlag = true;
-                }else{
-                    playBtn.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
-                    playBtnFlag = false;
-                }
-            }
-        });
-
-        ImageButton reportBtn = (ImageButton) convertView.findViewById(R.id.recordReport);
-        reportBtn.setOnClickListener(new Button.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //창 띄우기 startActivity를 이용하여 안에 intent를 생성
-                //intent (Context,class)
-                Intent i = new Intent(context, ReportActivity.class);
-                //intent에 값을 넣어야 해당 값을 신고하기 페이지에서 가져올수있다.
-                i.putExtra("testData",getItem(position).toString());
-                //신고하기 창 열기
-                v.getContext().startActivity(i);
-            }
-        });
 
         return convertView;
     }

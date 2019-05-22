@@ -55,6 +55,7 @@ public class SectionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         View v = null;
         RecyclerView.ViewHolder vh = null;
 
+
         if (viewType == TYPE_HEADER) {
             v = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_section_header,
                     parent, false);

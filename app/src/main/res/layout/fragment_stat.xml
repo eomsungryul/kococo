@@ -2,24 +2,35 @@
 <android.support.constraint.ConstraintLayout
 xmlns:android="http://schemas.android.com/apk/res/android"
 xmlns:app="http://schemas.android.com/apk/res-auto"
-android:id="@+id/section_container"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/section_container"
 android:layout_width="match_parent"
 android:layout_height="match_parent">
 
-<android.support.v7.widget.RecyclerView
-    android:id="@+id/accounts"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginEnd="16dp"
-    android:layout_marginStart="0dp"
-    android:layout_marginTop="32dp"
-    android:background="@color/background_light"
-    android:nestedScrollingEnabled="false"
-    app:layout_constraintHorizontal_weight="0.5"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/tabs"
-    app:layout_constraintStart_toStartOf="parent">
+    <com.github.mikephil.charting.charts.PieChart
+        android:id="@+id/chart1"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.019"
+        tools:layout_editor_absoluteX="0dp" />
 
-</android.support.v7.widget.RecyclerView>
+
+    <!--nestedScrollingEnabled 조금 더 자연 스럽게 스크롤 된다. -->
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/statView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@color/background_light"
+        android:nestedScrollingEnabled="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/chart1"
+        app:layout_constraintVertical_bias="0.0"
+        tools:layout_editor_absoluteX="0dp"></android.support.v7.widget.RecyclerView>
 
 </android.support.constraint.ConstraintLayout>
