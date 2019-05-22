@@ -131,7 +131,6 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
         chart.animateY(1500);
         chart.getLegend().setEnabled(false);
 
-
         chart = (BarChart)findViewById(R.id.chart1);
 
         List<BarEntry> entries = new ArrayList<>();
