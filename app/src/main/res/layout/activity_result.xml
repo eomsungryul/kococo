@@ -117,6 +117,8 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.057" />
 
+        <!-- 팝업 백그라운드는 기본적으로 흰색이기떄문에 커스텀을 해야함
+        android:popupBackground="#121212"-->
         <Spinner
             android:id="@+id/statusVal"
             android:layout_width="wrap_content"
@@ -126,6 +128,7 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
+            android:popupBackground="#121212"
             android:entries="@array/statusArr"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

@@ -15,10 +15,16 @@
  */
 package co.kr.dwebss.kococo.activity;
 
+import android.Manifest;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.media.AudioRecord;
+import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -27,6 +33,8 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -49,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private TabLayout tabs;
     private ViewPager viewPager;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
@@ -69,9 +78,9 @@ public class MainActivity extends AppCompatActivity {
         tabs = (TabLayout)findViewById(R.id.tablayouts);
         tabs.setupWithViewPager(viewPager);
         setupTabIcons();
+
+        String [] permissions = {Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE};
     }
-
-
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -133,4 +142,5 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
     }
+
 }
