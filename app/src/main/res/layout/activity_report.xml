@@ -31,7 +31,7 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
     android:id="@+id/constraintLayout2"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="co.kr.dwebss.kococo.activity.ReportActivity">
+    tools:context="kr.co.dwebss.kococo.activity.ReportActivity">
 
     <!--이미지 버튼 투명   android:background="@android:color/transparent"
     이미지 버튼 스케일 조정    android:scaleType="fitXY"

@@ -31,7 +31,7 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="co.kr.dwebss.kococo.activity.MainActivity">
+    tools:context="kr.co.dwebss.kococo.activity.MainActivity">
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/tabs"
