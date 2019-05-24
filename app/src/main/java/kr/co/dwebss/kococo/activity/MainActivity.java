@@ -37,6 +37,9 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.gson.JsonObject;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +49,15 @@ import kr.co.dwebss.kococo.fragment.DiaryFragment;
 import kr.co.dwebss.kococo.fragment.RecodeFragment;
 import kr.co.dwebss.kococo.fragment.SettingFragment;
 import kr.co.dwebss.kococo.fragment.StatFragment;
+import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.main.SectionsPagerAdapter;
+import kr.co.dwebss.kococo.model.ApiCode;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -63,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
     private static final String WELCOME_MESSAGE_KEY = "welcome_message";
 
+    Retrofit retrofit;
+    ApiService apiService;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
@@ -85,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
         // [START get_remote_config_instance]
         mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
         // [END get_remote_config_instance]
-
 
         //개발자 모드를 사용하려면 원격 구성 설정을 작성
         // 이 모드를 사용하여 개발 중에 시간당 사용 가능한 페치 수를 늘림
@@ -140,6 +152,55 @@ public class MainActivity extends AppCompatActivity {
         tabs.setupWithViewPager(viewPager);
         setupTabIcons();
 
+        //http 통신
+        retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();
+        apiService = retrofit.create(ApiService.class);
+
+//  java.lang.IllegalArgumentException: Unable to create converter for class kr.co.dwebss.kococo.model.ApiCode
+
+        System.out.println(" ========================statr: ");
+        apiService.getApiCode().enqueue(new Callback<ApiCode>() {
+            @Override
+            public void onResponse(Call<ApiCode> call, Response<ApiCode> response) {
+                Toast.makeText(MainActivity.this, "sucess"+response,
+                        Toast.LENGTH_SHORT).show();
+
+                System.out.println(" ========================response: "+response.body().toString());
+
+                ApiCode result = response.body();
+                result.getEmbedded().getCode().get(0).getCode();
+                System.out.println(" ========================result.getEmbedded().getCode().get(0).getCode();: "+result.getEmbedded().getCode().get(0).getCode());
+                System.out.println(" ========================result.getEmbedded().getCode().get(0).getCode();: "+result.getEmbedded().getCode().get(0).getCodeCateogry());
+                System.out.println(" ========================result.getEmbedded().getCode().get(0).getCode();: "+result.getEmbedded().getCode().get(1).getCode());
+                System.out.println(" ========================result.getEmbedded().getCode().get(0).getCode();: "+result.getEmbedded().getCode().get(1).getCodeCateogry());
+            }
+
+            @Override
+            public void onFailure(Call<ApiCode> call, Throwable t) {
+
+            }
+        });
+
+//        retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).build();
+//        apiService = retrofit.create(ApiService.class);
+
+        apiService.getApiCode2().enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+
+                System.out.println(" ===========getApiCode2=============response22: "+response);
+                System.out.println(" ===========getApiCode2=============response22: "+response.body().toString());
+
+                JsonObject result = response.body();
+                System.out.println(" ============getApiCode2============result: "+result);
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+
+            }
+        });
+////
     }
 
     @Override

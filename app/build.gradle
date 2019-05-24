@@ -68,4 +68,12 @@ dependencies {
     implementation 'com.google.firebase:firebase-storage:16.1.0'
     //firebase crashlytics  강력한 오류 보고 솔루션으로 앱 문제에 대한 명확하고 활용 가능한 분석 정보를 확인하는 보조도구 정도
     implementation 'com.crashlytics.sdk.android:crashlytics:2.9.9'
+
+    implementation('com.squareup.retrofit2:retrofit:2.3.0') {
+        exclude module: 'okhttp'
+    }
+    implementation 'com.google.code.gson:gson:2.8.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.1.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.9.1'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.9.1'
 }

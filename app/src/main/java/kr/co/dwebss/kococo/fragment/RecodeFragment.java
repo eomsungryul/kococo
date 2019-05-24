@@ -18,7 +18,7 @@ import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.activity.ResultActivity;
 
 
-public class RecodeFragment extends Fragment {
+public class RecodeFragment extends Fragment  {
 
     Boolean recodeFlag = false;
     private String LOG_TAG = "Audio_Recording";
@@ -36,8 +36,6 @@ public class RecodeFragment extends Fragment {
     private static final int REQUEST_CAMERA = 1;
 
 
-
-    private int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 0;
 
 
     public RecodeFragment() {
@@ -75,7 +73,7 @@ public class RecodeFragment extends Fragment {
                 }
             }
         });
-        // Inflate the layout for this fragment
+        // Inflate the layout for this
 
         return v;
 
