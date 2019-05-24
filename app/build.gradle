@@ -59,4 +59,8 @@ dependencies {
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0-alpha'
     //firebase 추가
     implementation 'com.google.firebase:firebase-core:16.0.9'
+    //firebase 리모트 컨피그 추가 (사용자가 앱 업데이트를 다운로드할 필요 없이 앱의 동작과 모양을 변경할 수 있는 클라우드 서비스 )
+    implementation 'com.google.firebase:firebase-config:16.5.0'
+    //firebase storage 제공하는 선언적 규칙 언어로 데이터의 구조, 색인 생성 방법, 데이터를 읽거나 쓸 수 있는 조건을 정의할 수 있습니다. 기본적으로 저장소에 대한 읽기 및 쓰기 액세스는 인증된 사용자만 가능하도록 제한
+    implementation 'com.google.firebase:firebase-storage:16.1.0'
 }

@@ -18,6 +18,7 @@ package kr.co.dwebss.kococo.activity;
 import android.Manifest;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -26,6 +27,15 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.BuildConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +58,10 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager viewPager;
 
 
+    //remote config
+    private FirebaseRemoteConfig mFirebaseRemoteConfig;
+    private static final String WELCOME_MESSAGE_KEY = "welcome_message";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
@@ -62,6 +76,59 @@ public class MainActivity extends AppCompatActivity {
 
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
 
+        //Remote Config 시작
+        // Get Remote Config instance.
+        // [START get_remote_config_instance]
+        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+        // [END get_remote_config_instance]
+
+
+        //개발자 모드를 사용하려면 원격 구성 설정을 작성
+        // 이 모드를 사용하여 개발 중에 시간당 사용 가능한 페치 수를 늘림
+        // 또한 원격 구성 설정을 사용하여 페치 간격을 설정
+        // [START enable_dev_mode]
+        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+                .setDeveloperModeEnabled(BuildConfig.DEBUG)
+                .setMinimumFetchIntervalInSeconds(3600)
+                .build();
+        mFirebaseRemoteConfig.setConfigSettings(configSettings);
+        // 기본 Remote Config 매개 변수 값을 설정합니다. 앱은 인앱 기본 값을 사용하고
+        // 이러한 기본값을 조정해야하는 경우, 사용자가 지정한 값에 대해서만 업데이트 된 값을 설정
+        // [START set_default_values]
+        mFirebaseRemoteConfig.setDefaults( R.xml.remote_config_defaults);
+        // [end set_default_values]
+        // [START fetch_config_with_callback]
+        mFirebaseRemoteConfig.fetchAndActivate()
+                .addOnCompleteListener(this, new OnCompleteListener<Boolean>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Boolean> task) {
+                        if (task.isSuccessful()) {
+                            boolean updated = task.getResult();
+                            Log.d(TAG, "Config params updated: " + updated);
+                            Toast.makeText(MainActivity.this, "Fetch and activate succeeded",
+                                    Toast.LENGTH_SHORT).show();
+
+                        } else {
+                            Toast.makeText(MainActivity.this, "Fetch failed",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                        //여기서 함 설정 가져옴!
+
+                        String welcomeMessage = mFirebaseRemoteConfig.getString(WELCOME_MESSAGE_KEY);
+                        Toast.makeText(MainActivity.this, welcomeMessage,Toast.LENGTH_SHORT).show();
+                    }
+                });
+        // [END fetch_config_with_callback]
+        //Remote Config 끝
+
+        //firebase storage 시작
+        // [START storage_field_initialization]
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        // [END storage_field_initialization]
+        includesForCreateReference();
+        //firebase storage 끝
+
+
         viewPager = (ViewPager) findViewById(R.id.view_pager);
         setupViewPager(viewPager);
 
@@ -69,7 +136,6 @@ public class MainActivity extends AppCompatActivity {
         tabs.setupWithViewPager(viewPager);
         setupTabIcons();
 
-        String [] permissions = {Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE};
     }
 
     @Override
@@ -131,6 +197,90 @@ public class MainActivity extends AppCompatActivity {
             // return null to display only the icon
             return null;
         }
+    }
+
+
+
+    public void includesForCreateReference() {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+
+        // ## Create a Reference
+
+        // [START create_storage_reference]
+        // Create a storage reference from our app
+        StorageReference storageRef = storage.getReference();
+        // [END create_storage_reference]
+
+        // [START create_child_reference]
+        // Create a child reference
+        // imagesRef now points to "images"
+        StorageReference imagesRef = storageRef.child("images");
+
+        // Child references can also take paths
+        // spaceRef now points to "images/space.jpg
+        // imagesRef still points to "images"
+        StorageReference spaceRef = storageRef.child("images/space.jpg");
+        // [END create_child_reference]
+
+        // ## Navigate with References
+
+        // [START navigate_references]
+        // getParent allows us to move our reference to a parent node
+        // imagesRef now points to 'images'
+        imagesRef = spaceRef.getParent();
+
+        // getRoot allows us to move all the way back to the top of our bucket
+        // rootRef now points to the root
+        StorageReference rootRef = spaceRef.getRoot();
+        // [END navigate_references]
+
+        // [START chain_navigation]
+        // References can be chained together multiple times
+        // earthRef points to 'images/earth.jpg'
+        StorageReference earthRef = spaceRef.getParent().child("earth.jpg");
+
+        // nullRef is null, since the parent of root is null
+        StorageReference nullRef = spaceRef.getRoot().getParent();
+        // [END chain_navigation]
+
+        // ## Reference Properties
+
+        // [START reference_properties]
+        // Reference's path is: "images/space.jpg"
+        // This is analogous to a file path on disk
+        spaceRef.getPath();
+
+        // Reference's name is the last segment of the full path: "space.jpg"
+        // This is analogous to the file name
+        spaceRef.getName();
+
+        // Reference's bucket is the name of the storage bucket that the files are stored in
+        spaceRef.getBucket();
+        // [END reference_properties]
+
+        // ## Full Example
+
+        // [START reference_full_example]
+        // Points to the root reference
+        storageRef = storage.getReference();
+
+        // Points to "images"
+        imagesRef = storageRef.child("images");
+
+        // Points to "images/space.jpg"
+        // Note that you can use variables to create child values
+        String fileName = "space.jpg";
+        spaceRef = imagesRef.child(fileName);
+
+        // File path is "images/space.jpg"
+        String path = spaceRef.getPath();
+
+        // File name is "space.jpg"
+        String name = spaceRef.getName();
+
+        // Points to "images"
+        imagesRef = spaceRef.getParent();
+        // [END reference_full_example]
     }
 
 }
