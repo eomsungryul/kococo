@@ -2,6 +2,9 @@ apply plugin: 'com.android.application'
 //파이어베이스 추가
 apply plugin: 'com.google.gms.google-services'
 
+//파이어베이스 crashlytics
+apply plugin: 'io.fabric'
+
 android {
     compileSdkVersion 28
     buildToolsVersion "28.0.3"
@@ -63,4 +66,6 @@ dependencies {
     implementation 'com.google.firebase:firebase-config:16.5.0'
     //firebase storage 제공하는 선언적 규칙 언어로 데이터의 구조, 색인 생성 방법, 데이터를 읽거나 쓸 수 있는 조건을 정의할 수 있습니다. 기본적으로 저장소에 대한 읽기 및 쓰기 액세스는 인증된 사용자만 가능하도록 제한
     implementation 'com.google.firebase:firebase-storage:16.1.0'
+    //firebase crashlytics  강력한 오류 보고 솔루션으로 앱 문제에 대한 명확하고 활용 가능한 분석 정보를 확인하는 보조도구 정도
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.9'
 }

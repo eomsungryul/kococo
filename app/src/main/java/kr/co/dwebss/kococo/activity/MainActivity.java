@@ -29,6 +29,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.BuildConfig;
@@ -73,6 +74,9 @@ public class MainActivity extends AppCompatActivity {
         float density = metrics.density;
         int width = metrics.widthPixels;
         int height = metrics.heightPixels;
+
+        //Crashlytics 강제종료 테스트
+//        Crashlytics.getInstance().crash(); // Force a crash
 
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
 
