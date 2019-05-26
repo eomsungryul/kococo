@@ -38,7 +38,7 @@ import java.util.Date;
 import java.util.List;
 
 import kr.co.dwebss.kococo.adapter.AlertAdapter;
-import kr.co.dwebss.kococo.helper.NonScrollableFlexboxLayoutManager;
+import kr.co.dwebss.kococo.util.NonScrollableFlexboxLayoutManager;
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.adapter.SectionAdapter;
 import kr.co.dwebss.kococo.model.Alert;

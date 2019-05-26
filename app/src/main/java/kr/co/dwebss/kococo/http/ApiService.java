@@ -23,7 +23,7 @@ public interface ApiService {
     @GET("kococo/api/code")
     Call<ApiCode> getApiCode();
 
-
+    //json으로도 받을 수 있는 형태
     @Headers({
             "Accept: application/json",
             "Content-Type: application/json"

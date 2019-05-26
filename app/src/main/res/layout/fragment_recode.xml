@@ -25,13 +25,13 @@
 
 
     <!--android onclick 시에 자바 클래스의 메소드를 실행 할 수 있다.  -->
+    <!--android:onClick="recordClick"-->
     <Button
         android:id="@+id/recodeBtn"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:background="@drawable/button_shape"
         android:text="녹음 시작"
-        android:onClick="recordClick"
         android:textSize="28sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

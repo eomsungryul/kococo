@@ -11,13 +11,12 @@
     <ListView
         android:id="@+id/settingListview"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_marginTop="8dp"
+        android:layout_height="80dp"
         android:layout_marginBottom="320dp"
         android:divider="#ffffff"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.039"
+        app:layout_constraintVertical_bias="0.001"
         tools:layout_editor_absoluteX="0dp" />
 
     <!--리스트뷰의 디폴트 선(item의 하단의 선 )을 없애는 법 :  android:divider = "#ffffff"-->
@@ -30,7 +29,7 @@
         android:divider="#ffffff"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/settingListview"
-        app:layout_constraintVertical_bias="0.029"
+        app:layout_constraintVertical_bias="0.010"
         tools:layout_editor_absoluteX="16dp" />
 
 
