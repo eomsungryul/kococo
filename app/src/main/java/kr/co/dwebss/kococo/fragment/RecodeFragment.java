@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.ParcelFileDescriptor;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -29,6 +31,7 @@ import java.util.List;
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.activity.ResultActivity;
 import kr.co.dwebss.kococo.util.AudioCalculator;
+import kr.co.dwebss.kococo.util.MediaPlayerUtility;
 import kr.co.dwebss.kococo.util.WaveFormatConverter;
 
 
@@ -60,6 +63,9 @@ public class RecodeFragment extends Fragment  {
 
     boolean isRecording = false;
     ByteArrayOutputStream baos;
+    //재생할때 필요한
+    MediaPlayer mediaPlayer;
+    Boolean testFlag = false;
 
     byte[] audioData = new byte[frameByteSize];
 
@@ -114,12 +120,75 @@ public class RecodeFragment extends Fragment  {
         // Inflate the layout for this
 
 
+
+
+        Button testBtn = (Button) v.findViewById(R.id.testBtn) ;
+
+        testBtn.setText("시작");
+
+        //xml 내에서 onclick으로 가능하다. 하지만 그건 activity 내에서만 가능하고 프래그먼트에서는 onclickListener()로 해야함
+        testBtn.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if( testFlag == false){
+                    testBtn.setText("종료");
+                    testFlag = true;
+                    mediaPlayer = MediaPlayer.create(getActivity(), R.raw.queen);
+                    //구간 재생
+                    mediaPlayer.seekTo(15000);
+                    mediaPlayer.getCurrentPosition();
+                    mediaPlayer.start();
+                    int endTime =21000;
+                    //카운트 다운
+                    new CountDownTimer(endTime, 100) {
+                        public void onTick(long millisUntilFinished) {
+
+                            if(MediaPlayerUtility.getTime(mediaPlayer)>=endTime){
+                                mediaPlayer.stop();
+                                // 초기화
+                                mediaPlayer.reset();
+                                testFlag = false;
+                                testBtn.setText("시작");
+                            }
+                        }
+                        public void onFinish() {
+                            testBtn.setText("시작2");
+                        }
+                    }.start();
+                }else{
+                    testFlag = false;
+                    testBtn.setText("시작");
+                    // 정지버튼
+                    mediaPlayer.stop();
+                    // 초기화
+                    mediaPlayer.reset();
+                }
+            }
+        });
+        // Inflate the layout for this
+
+
         return v;
 
 
 //        java.lang.IllegalStateException: Could not find method recordClick(View) in a parent or ancestor Context for android:onClick attribute defined on view class android.support.v7.widget.AppCompatButton with id recodeBtn
 
     }
+
+
+    // MediaPlayer는 시스템 리소스를 잡아먹는다.
+    // MediaPlayer는 필요이상으로 사용하지 않도록 주의해야 한다.
+    //Fragment에서는 onDestoryView , activity에서는 onDestory
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // MediaPlayer 해지
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+    }
+
 
 
     public void start() {
