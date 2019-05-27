@@ -103,6 +103,7 @@ public class SleepCheck {
 				frequency >= 150 && frequency <= 250 && sefrequency >= 950 && sefrequency < 1050
 		) {
 			snoringContinue++;
+			return 1;
 		} else {
 			snoringContinueOpp++;
 		}
