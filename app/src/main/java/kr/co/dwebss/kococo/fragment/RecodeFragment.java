@@ -30,6 +30,8 @@ import java.util.List;
 
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.activity.ResultActivity;
+import kr.co.dwebss.kococo.fragment.recorder.Analysis;
+import kr.co.dwebss.kococo.fragment.recorder.AnalysisDetails;
 import kr.co.dwebss.kococo.util.AudioCalculator;
 import kr.co.dwebss.kococo.util.MediaPlayerUtility;
 import kr.co.dwebss.kococo.util.WaveFormatConverter;
@@ -58,6 +60,7 @@ public class RecodeFragment extends Fragment  {
     private boolean mShouldContinue = true;
     private AudioCalculator audioCalculator;
     int frameByteSize = 1024;
+    static List<StartEnd> snoringTermList;
     public static List<StartEnd> osaTermList;
     static List<StartEnd> grindingTermList;
 
@@ -308,8 +311,10 @@ public class RecodeFragment extends Fragment  {
                 SleepCheck.grindingRepeatAmpCnt = 0;
                 @SuppressWarnings("unused")
                 long recordStartingTIme = 0L;
+                snoringTermList = new ArrayList<StartEnd>();
                 grindingTermList = new ArrayList<StartEnd>();
                 osaTermList = new ArrayList<StartEnd>();
+                List<Analysis> ansList = new ArrayList<Analysis>();
                 int read = 0;
 
                 double times=0.0;
@@ -357,16 +362,97 @@ public class RecodeFragment extends Fragment  {
                             Log.v(LOG_TAG2,(String.format("%.2f", times)+"s "));
                             baos = new ByteArrayOutputStream();
                             baos.write(frameBytes);
-                            long time = System.currentTimeMillis();
                             SimpleDateFormat dayTime = new SimpleDateFormat("yyyymmdd_hhmm");
-                            String fileName = dayTime.format(new Date(time));
-                            recordStartingTIme = System.currentTimeMillis();
+                            String fileName = dayTime.format(new Date(recordStartingTIme));
                             dayTime = new SimpleDateFormat("dd_hhmm");
+                            long time = System.currentTimeMillis();
                             fileName += "-" + dayTime.format(new Date(time));
                             byte[] waveData = baos.toByteArray();
+                            //TODO 녹음된 파일이 저장되는 시점
                             WaveFormatConverter wfc = new WaveFormatConverter(44100, (short)1, waveData, 0, waveData.length);
                             String filePath = wfc.saveLongTermWave(fileName);
-                            Log.v(LOG_TAG2,("녹음 종료! "+filePath));
+                            Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
+                            Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (audioData.length / (44100d * 16 * 1))) * 8));
+                            Analysis ans = new Analysis();
+                            //ans.setAnalysisStartDt(LocalDateTime.ofInstant(Instant.ofEpochMilli(recordStartingTIme), ZoneId.systemDefault()));
+                            //ans.setAnalysisEndDt(LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()));
+                            ans.setAnalysisStartDt(new Date(recordStartingTIme));
+                            ans.setAnalysisEndDt(new Date(time));
+                            ans.setAnalysisFileAppPath("raw/raw_convert/");
+                            ans.setAnalysisFileNm("event-"+fileName+"_"+System.currentTimeMillis()+".wav");
+                            List<AnalysisDetails> ansDList = new ArrayList<AnalysisDetails>();
+                            AnalysisDetails ansd = new AnalysisDetails();
+                            for(StartEnd se : snoringTermList) {
+                                ansd = new AnalysisDetails();
+                                ansd.setTermTypeCd(200101);
+                                ansd.setTermStartDt(new Date((long) (recordStartingTIme+se.start*1000)));
+                                ansd.setTermEndDt(new Date((long) (recordStartingTIme+se.end*1000)));
+                                ansDList.add(ansd);
+                            }
+                            for(StartEnd se : grindingTermList) {
+                                ansd = new AnalysisDetails();
+                                ansd.setTermTypeCd(200102);
+                                ansd.setTermStartDt(new Date((long) (recordStartingTIme+se.start*1000)));
+                                ansd.setTermEndDt(new Date((long) (recordStartingTIme+se.end*1000)));
+                                ansDList.add(ansd);
+                            }
+                            for(StartEnd se : osaTermList) {
+                                ansd = new AnalysisDetails();
+                                ansd.setTermTypeCd(200103);
+                                ansd.setTermStartDt(new Date((long) (recordStartingTIme+se.start*1000)));
+                                ansd.setTermEndDt(new Date((long) (recordStartingTIme+se.end*1000)));
+                                ansDList.add(ansd);
+                            }
+                            ans.setAnalysisDetailsList(ansDList);
+                            ansList.add(ans);
+                            //TODO 여기까지 AnswerList를 계속 생성한다.
+                            //TODO 녹음 중단 했을 떄 AnswerList를 Record의 AnswerList필드에 담는다.
+                            //TODO Record의 recordStartDt, recordEndDt에 녹음 시작시간과 녹음 종료 시간을, userAppId에는 사용자 앱 ID를 입력 해서 VO를 완성한다.
+                            //TODO 최종 완료 vo 형태
+                            /*
+                            {
+                                "userAppId" : "c0362dd4-97f4-488c-b31c-12cb23b534cf",
+                                    "recordStartDt" : "2019-05-24T12:00:16.614",
+                                    "recordEndDt" : "2019-05-24T20:00:16.614",
+                                    "analysisList" : [ {
+                                "analysisStartDt" : "2019-05-24T12:00:16.613",
+                                        "analysisEndDt" : "2019-05-24T15:00:16.613",
+                                        "analysisFileNm" : "2019-05-24T12:00:16.613_testFileNm.wav",
+                                        "analysisFileAppPath" : "/rec_data/",
+                                        "analysisDetailsList" : [ {
+                                    "termTypeCd" : 200101,
+                                            "termStartDt" : "2019-05-24T12:00:26.612",
+                                            "termEndDt" : "2019-05-24T12:02:20.613"
+                                }, {
+                                    "termTypeCd" : 200102,
+                                            "termStartDt" : "2019-05-24T12:08:48.613",
+                                            "termEndDt" : "2019-05-24T13:33:48.613"
+                                }, {
+                                    "termTypeCd" : 200103,
+                                            "termStartDt" : "2019-05-24T14:21:10.613",
+                                            "termEndDt" : "2019-05-24T15:22:40.613"
+                                } ]
+                            } ]
+                            }
+                            */
+                            //TODO POST /api/record를 호출한다.
+							/*
+							System.out.println("analysisStartDt: "+dayTimeT.format(new Date(recordStartingTIme)));
+							System.out.println("analysisEndDt: "+dayTimeT.format(new Date(time)));
+							System.out.println("analysisFileNm: "+"event-"+fileName+"_"+System.currentTimeMillis()+".wav");
+							System.out.println("analysisFileAppPath: raw/raw_convert/");
+							System.out.println("analysisDetailsList 시작, 리스트, 길이: "+snoringTermList.size()+ grindingTermList.size()+osaTermList.size());
+							for(StartEnd se : snoringTermList) {
+								System.out.println(se.getTermForRequest(200101, recordStartingTIme));
+							}
+							for(StartEnd se : grindingTermList) {
+								System.out.println(se.getTermForRequest(200102, recordStartingTIme));
+							}
+							for(StartEnd se : osaTermList) {
+								System.out.println(se.getTermForRequest(200103, recordStartingTIme));
+							}
+							*/
+                            Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 끝====="));
                             recordStartingTIme = 0;
                             isRecording = false;
                         }
@@ -375,16 +461,95 @@ public class RecodeFragment extends Fragment  {
                             Log.v(LOG_TAG2,(String.format("%.2f", times)+"s "));
                             baos = new ByteArrayOutputStream();
                             baos.write(frameBytes);
-                            long time = System.currentTimeMillis();
                             SimpleDateFormat dayTime = new SimpleDateFormat("yyyymmdd_hhmm");
-                            String fileName = dayTime.format(new Date(time));
-                            recordStartingTIme = System.currentTimeMillis();
+                            String fileName = dayTime.format(new Date(recordStartingTIme));
                             dayTime = new SimpleDateFormat("dd_hhmm");
+                            long time = System.currentTimeMillis();
                             fileName += "-" + dayTime.format(new Date(time));
                             byte[] waveData = baos.toByteArray();
+                            //TODO 여기까지 AnswerList를 계속 생성한다.
+                            //TODO 녹음 중단 했을 떄 AnswerList를 Record의 AnswerList필드에 담는다.
+                            //TODO Record의 recordStartDt, recordEndDt에 녹음 시작시간과 녹음 종료 시간을, userAppId에는 사용자 앱 ID를 입력 해서 VO를 완성한다.
+                            //TODO 최종 완료 vo 형태
+                            /*
+                            {
+                                "userAppId" : "c0362dd4-97f4-488c-b31c-12cb23b534cf",
+                                    "recordStartDt" : "2019-05-24T12:00:16.614",
+                                    "recordEndDt" : "2019-05-24T20:00:16.614",
+                                    "analysisList" : [ {
+                                "analysisStartDt" : "2019-05-24T12:00:16.613",
+                                        "analysisEndDt" : "2019-05-24T15:00:16.613",
+                                        "analysisFileNm" : "2019-05-24T12:00:16.613_testFileNm.wav",
+                                        "analysisFileAppPath" : "/rec_data/",
+                                        "analysisDetailsList" : [ {
+                                    "termTypeCd" : 200101,
+                                            "termStartDt" : "2019-05-24T12:00:26.612",
+                                            "termEndDt" : "2019-05-24T12:02:20.613"
+                                }, {
+                                    "termTypeCd" : 200102,
+                                            "termStartDt" : "2019-05-24T12:08:48.613",
+                                            "termEndDt" : "2019-05-24T13:33:48.613"
+                                }, {
+                                    "termTypeCd" : 200103,
+                                            "termStartDt" : "2019-05-24T14:21:10.613",
+                                            "termEndDt" : "2019-05-24T15:22:40.613"
+                                } ]
+                            } ]
+                            }
+                            */
+                            //TODO POST /api/record를 호출한다.
                             WaveFormatConverter wfc = new WaveFormatConverter(44100, (short)1, waveData, 0, waveData.length);
                             String filePath = wfc.saveLongTermWave(fileName);
-                            Log.v(LOG_TAG2,("녹음 종료!(사운드 파일 테스트용) "+filePath));
+                            SimpleDateFormat dayTimeT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+                            Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
+                            Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (audioData.length / (44100d * 16 * 1))) * 8));
+                            Analysis ans = new Analysis();
+                            ans.setAnalysisStartDt(new Date(recordStartingTIme));
+                            ans.setAnalysisEndDt(new Date(time));
+                            ans.setAnalysisFileAppPath("raw/raw_convert/");
+                            ans.setAnalysisFileNm("event-"+fileName+"_"+System.currentTimeMillis()+".wav");
+                            List<AnalysisDetails> ansDList = new ArrayList<AnalysisDetails>();
+                            AnalysisDetails ansd = new AnalysisDetails();
+                            for(StartEnd se : snoringTermList) {
+                                ansd = new AnalysisDetails();
+                                ansd.setTermTypeCd(200101);
+                                ansd.setTermStartDt(new Date((long) (recordStartingTIme+se.start*1000)));
+                                ansd.setTermEndDt(new Date((long) (recordStartingTIme+se.end*1000)));
+                                ansDList.add(ansd);
+                            }
+                            for(StartEnd se : grindingTermList) {
+                                ansd = new AnalysisDetails();
+                                ansd.setTermTypeCd(200102);
+                                ansd.setTermStartDt(new Date((long) (recordStartingTIme+se.start*1000)));
+                                ansd.setTermEndDt(new Date((long) (recordStartingTIme+se.end*1000)));
+                                ansDList.add(ansd);
+                            }
+                            for(StartEnd se : osaTermList) {
+                                ansd = new AnalysisDetails();
+                                ansd.setTermTypeCd(200103);
+                                ansd.setTermStartDt(new Date((long) (recordStartingTIme+se.start*1000)));
+                                ansd.setTermEndDt(new Date((long) (recordStartingTIme+se.end*1000)));
+                                ansDList.add(ansd);
+                            }
+                            ans.setAnalysisDetailsList(ansDList);
+                            ansList.add(ans);
+							/*
+                            System.out.println("analysisStartDt: "+dayTimeT.format(new Date(recordStartingTIme)));
+                            System.out.println("analysisEndDt: "+dayTimeT.format(new Date(time)));
+                            System.out.println("analysisFileNm: "+"event-"+fileName+"_"+System.currentTimeMillis()+".wav");
+                            System.out.println("analysisFileAppPath: raw/raw_convert/");
+                            System.out.println("analysisDetailsList 시작, 리스트, 길이: "+snoringTermList.size()+ grindingTermList.size()+osaTermList.size());
+                            for(StartEnd se : snoringTermList) {
+                                System.out.println(se.getTermForRequest(200101, recordStartingTIme));
+                            }
+                            for(StartEnd se : grindingTermList) {
+                                System.out.println(se.getTermForRequest(200102, recordStartingTIme));
+                            }
+                            for(StartEnd se : osaTermList) {
+                                System.out.println(se.getTermForRequest(200103, recordStartingTIme));
+                            }
+							*/
+                            Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 끝====="));
                             recordStartingTIme = 0;
                             isRecording = false;
                         }
@@ -399,7 +564,21 @@ public class RecodeFragment extends Fragment  {
 
                         // 녹음이 끝나고 나면 코골이가 발생했는지를 체크해서 녹음된 파일의 코골이 유무를 결정한다. X
                         // 코골이 여부를 체크한다.
-                        SleepCheck.snoringCheck(decibel, frequency, sefrequency);
+                        int snoreChecked = SleepCheck.snoringCheck(decibel, frequency, sefrequency);
+                        if(snoreChecked==1) {
+                            if(snoringTermList.size()>0) {
+                                double beforeTime = snoringTermList.get(snoringTermList.size()-1).start;
+                                if(Math.floor(beforeTime)+100<Math.floor(times)) {
+                                    snoringTermList.add(new StartEnd());
+                                    snoringTermList.get(snoringTermList.size()-1).start=times;
+                                    snoringTermList.get(snoringTermList.size()-1).end=times;
+                                }
+                            }else {
+                                snoringTermList.add(new StartEnd());
+                                snoringTermList.get(0).start=times;
+                                snoringTermList.get(0).end=times;
+                            }
+                        }
                         // 이갈이는 기존 로직대로 체크해서, 어디 구간에서 발생했는지 체크한다.
                         SleepCheck.grindingCheck(times, decibel, sefamplitude, frequency, sefrequency);
                         // 이갈이 신호가 발생하고, 이갈이 체크 상태가 아니면 이갈이 체크를 시작한다.
@@ -623,5 +802,9 @@ class StartEnd {
     double end;
     public String getTerm() {
         return String.format("%.0f", start)+"~"+String.format("%.0f", end);
+    }
+    public String getTermForRequest(int termCd, long recordStartingTIme) {
+        SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        return "termTypeCd: "+termCd +", termStartDt: "+dayTime.format(new Date((long) (recordStartingTIme+this.start*1000)))+", termEndDt"+dayTime.format(new Date((long) (recordStartingTIme+this.end*1000)));
     }
 }
