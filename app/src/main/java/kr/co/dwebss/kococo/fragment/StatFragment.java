@@ -28,6 +28,7 @@ import kr.co.dwebss.kococo.adapter.StatAdapter;
 import kr.co.dwebss.kococo.model.Account;
 import kr.co.dwebss.kococo.model.RowData;
 import kr.co.dwebss.kococo.model.Section;
+import kr.co.dwebss.kococo.util.StatFormatter;
 
 public class StatFragment extends Fragment implements SeekBar.OnSeekBarChangeListener {
 
@@ -66,7 +67,7 @@ public class StatFragment extends Fragment implements SeekBar.OnSeekBarChangeLis
 
         chart = v.findViewById(R.id.chart1);
         //값을 넣어버리면 퍼센트로바꿈
-        chart.setUsePercentValues(false);
+        chart.setUsePercentValues(true);
         //설명충 등판 (하단에 Description Label이라는게 생김 ㅡㅡ)
         chart.getDescription().setEnabled(false);
         chart.setExtraOffsets(5, 10, 5, 5);
@@ -179,6 +180,24 @@ public class StatFragment extends Fragment implements SeekBar.OnSeekBarChangeLis
 //        data.setValueFormatter(new PercentFormatter(chart));
         data.setValueTextSize(11f);
         data.setValueTextColor(Color.WHITE);
+
+        dataSet.setValueFormatter(new StatFormatter());
+
+
+        dataSet.setValueLinePart1OffsetPercentage(80.f);
+        //Y축이 길어진다.
+        dataSet.setValueLinePart1Length(0.4f);
+        //X축이 길어진다.
+        dataSet.setValueLinePart2Length(0.4f);
+
+
+        dataSet.setValueLineColor(Color.WHITE);
+
+        //데이터 이름이 파이차트에서 빠지고 밖으로 값을 나타내게 변경됨
+        dataSet.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
+        //값들이 파이차트에서 빠지고 밖으로 값을 나타내게 변경됨
+        dataSet.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
+
 //        data.setValueTypeface(tfLight);
         chart.setData(data);
 
@@ -197,10 +216,14 @@ public class StatFragment extends Fragment implements SeekBar.OnSeekBarChangeLis
 
     //안드로이드에서 TextView에 setText시 text에 부분적으로 밑줄을 긋거나 색상을 바꾸거나 이미지를 중간에 삽입하거나 등이 필요 시
     private SpannableString generateCenterSpannableText() {
-        SpannableString s = new SpannableString("평균\n80점");
-        //사이즈 크기조절 RelativeSizeSpan
-        s.setSpan(new RelativeSizeSpan(1.7f), 0, s.length()-3, 0);
-        s.setSpan(new RelativeSizeSpan(3.7f), s.length()-3, s.length(), 0);
+//        SpannableString s = new SpannableString("평균\n80점");
+//        //사이즈 크기조절 RelativeSizeSpan
+//        s.setSpan(new RelativeSizeSpan(1.7f), 0, s.length()-3, 0);
+//        s.setSpan(new RelativeSizeSpan(3.7f), s.length()-3, s.length(), 0);
+
+        SpannableString s = new SpannableString("80점");
+        s.setSpan(new RelativeSizeSpan(3.7f), 0, s.length(), 0);
+
 
 
 //        s.setSpan(new ForegroundColorSpan(Color.GRAY), 14, s.length() - 15, 0);
@@ -215,7 +238,7 @@ public class StatFragment extends Fragment implements SeekBar.OnSeekBarChangeLis
     //무호흡 (퍼플) #B15DFF RGB	177, 93, 255
     private void initializeData() {
         accounts = new ArrayList<RowData>();
-        accounts.add(new Account("총 수면시간","8시간", 480f, "1", 0xFF1EB980));
+        accounts.add(new Account("숙면","8시간", 480f, "1", 0xFF1EB980));
         accounts.add(new Account("코골이", "1시간 20분",80f, "1", 0xFFFF6859));
         accounts.add(new Account("무호흡","20분", 20f, "1", 0xFFFFCF44));
         accounts.add(new Account("이갈이","20분", 20f, "1", 0xFFB15DFF));

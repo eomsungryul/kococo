@@ -94,11 +94,9 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
         ListView listview = (ListView) findViewById(R.id.recordListview);
         listview.setAdapter(adapter);
         // 첫 번째 아이템 추가.
-        adapter.addItem("녹음파일1") ;
-        adapter.addItem("녹음파일2") ;
-        adapter.addItem("녹음파일3") ;
-        adapter.addItem("녹음파일4") ;
-        adapter.addItem("녹음파일5") ;
+        for(int i=0; i<10; i++){
+            adapter.addItem("녹음파일"+i) ;
+        }
         // 두 번째 아이템 추가.
 //        adapter.addItem(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_36dp),
 //                "Circle", "Account Circle Black 36dp") ;
@@ -209,14 +207,9 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
     //녹음 리스트 더미 데이터
     private void initializeData() {
         ArrayList<RecodeData> resultList = new ArrayList<RecodeData>();
-        resultList.add(new RecodeData("녹음 파일 1","1"));
-        resultList.add(new RecodeData("녹음 파일 2","2"));
-        resultList.add(new RecodeData("녹음 파일 3","3"));
-        resultList.add(new RecodeData("녹음 파일 4","4"));
-        resultList.add(new RecodeData("녹음 파일 5","5"));
-        resultList.add(new RecodeData("녹음 파일 6","6"));
-        resultList.add(new RecodeData("녹음 파일 7","7"));
+        for(int i=0; i<10; i++){
+            resultList.add(new RecodeData("녹음 파일"+i,"i"));
+        }
 //        resultListSection = new Section(resultList, "recodes", false);
-
     }
 }
