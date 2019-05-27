@@ -256,19 +256,19 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Toast.makeText(MainActivity.this, "파일이 있네유" +data,Toast.LENGTH_SHORT).show();
+//            Toast.makeText(MainActivity.this, "파일이 있네유" +data,Toast.LENGTH_SHORT).show();
 
         } else {
             //파일이 없을시
-            Toast.makeText(MainActivity.this, "파일이 읍네요",Toast.LENGTH_SHORT).show();
+//            Toast.makeText(MainActivity.this, "파일이 읍네요",Toast.LENGTH_SHORT).show();
             //저장하기
             apiService.getAppid().enqueue(new Callback<JsonObject>() {
                 @Override
                 public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
 
                     JsonObject result = response.body();
-                    System.out.println("=====================dddddd======================"+response);
-                    System.out.println("==========================================="+result);
+//                    System.out.println("=====================dddddd======================"+response);
+//                    System.out.println("==========================================="+result);
                     APP_ID = result.get("userAppId").toString();
 
                     FileOutputStream fos = null;
