@@ -50,7 +50,6 @@ public class RecodeFragment extends Fragment  {
     private static final int REQUEST_CAMERA = 1;
 
     //녹음 관련
-    private GetAudio getAudio;
     private String LOG_TAG2 = "Audio_Recording2";
     int state = 0;
     private boolean mShouldContinue = true;
@@ -87,9 +86,22 @@ public class RecodeFragment extends Fragment  {
             @Override
             public void onClick(View view) {
                 if( recodeFlag == false){
-                    recodeBtn.setText("녹음 종료");
-                    recodeFlag = true;
-                    start();
+                    String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.RECORD_AUDIO};
+
+                    int permissionReadStorage = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE);
+                    int permissionWriteStorage = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                    int permissionAudio = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.RECORD_AUDIO);
+                    if(permissionReadStorage == PackageManager.PERMISSION_DENIED || permissionWriteStorage == PackageManager.PERMISSION_DENIED||permissionAudio == PackageManager.PERMISSION_DENIED) {
+                        Toast.makeText(getActivity(), " permission x", Toast.LENGTH_SHORT).show();
+                        requestPermissions(permissions, REQUEST_EXTERNAL_STORAGE);
+                        return;
+                    } else {
+                        Toast.makeText(getActivity(), "permission 승인", Toast.LENGTH_SHORT).show();
+                        Log.e(LOG_TAG, "permission 승인");
+                        recodeBtn.setText("녹음 종료");
+                        recodeFlag = true;
+                        start();
+                    }
                 }else{
                     //창 띄우기
                     startActivity(new Intent(getActivity(), ResultActivity.class));
@@ -100,8 +112,6 @@ public class RecodeFragment extends Fragment  {
             }
         });
         // Inflate the layout for this
-        getAudio = new GetAudio();
-        getAudio.execute();
 
 
         return v;
@@ -113,19 +123,6 @@ public class RecodeFragment extends Fragment  {
 
 
     public void start() {
-        String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.RECORD_AUDIO};
-
-        int permissionReadStorage = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE);
-        int permissionWriteStorage = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        int permissionAudio = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.RECORD_AUDIO);
-        if(permissionReadStorage == PackageManager.PERMISSION_DENIED || permissionWriteStorage == PackageManager.PERMISSION_DENIED||permissionAudio == PackageManager.PERMISSION_DENIED) {
-//            Toast.makeText(getActivity(), " permission x", Toast.LENGTH_SHORT).show();
-            requestPermissions(permissions, REQUEST_EXTERNAL_STORAGE);
-        } else {
-//            Toast.makeText(getActivity(), "permission authorized", Toast.LENGTH_SHORT).show();
-            Log.e(LOG_TAG, "permission authorized");
-        }
-
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO);
         //int bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT);
         int recBufSize = AudioRecord.getMinBufferSize(sampleRate, channelConfiguration, audioEncoding);;
@@ -152,8 +149,8 @@ public class RecodeFragment extends Fragment  {
             //System.exit(0);
         }
         Log.v(LOG_TAG, "Recording has started");
-
         mShouldContinue = true;
+
         Audio_Recording();
         state = 1;
 //        Toast.makeText(getActivity(), "Started Recording", Toast.LENGTH_SHORT).show();
@@ -179,7 +176,7 @@ public class RecodeFragment extends Fragment  {
                     int grantResult = grantResults[i];
                     if (permission.equals(Manifest.permission.CAMERA)) {
                         if(grantResult == PackageManager.PERMISSION_GRANTED) {
-                            Toast.makeText(getActivity(), "camera permission authorized", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(), "camera permission 승인", Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(getActivity(), "camera permission denied", Toast.LENGTH_SHORT).show();
                         }
@@ -192,7 +189,7 @@ public class RecodeFragment extends Fragment  {
                     int grantResult = grantResults[i];
                     if (permission.equals(Manifest.permission.READ_EXTERNAL_STORAGE)) {
                         if(grantResult == PackageManager.PERMISSION_GRANTED) {
-                            Toast.makeText(getActivity(), "read/write storage permission authorized", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(), "read/write storage permission 승인", Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(getActivity(), "read/write storage permission denied", Toast.LENGTH_SHORT).show();
                         }
@@ -205,7 +202,7 @@ public class RecodeFragment extends Fragment  {
                     int grantResult = grantResults[i];
                     if (permission.equals(Manifest.permission.RECORD_AUDIO)) {
                         if(grantResult == PackageManager.PERMISSION_GRANTED) {
-                            Toast.makeText(getActivity(), "audio permission authorized", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(), "audio permission 승인", Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(getActivity(), "audio permission denied", Toast.LENGTH_SHORT).show();
                         }
@@ -551,67 +548,7 @@ public class RecodeFragment extends Fragment  {
 
 }
 
-class GetAudio extends AsyncTask<String, Void, String> {
 
-    private ByteArrayOutputStream byteArrayOutputStream;
-    private InputStream inputStream;
-    private MediaRecorder recorder;
-
-    ByteArrayOutputStream getByteArrayOutputStream() {
-        return byteArrayOutputStream;
-    }
-
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-        try {
-            byteArrayOutputStream = new ByteArrayOutputStream();
-
-            ParcelFileDescriptor[] descriptors = ParcelFileDescriptor.createPipe();
-            ParcelFileDescriptor parcelRead = new ParcelFileDescriptor(descriptors[0]);
-            ParcelFileDescriptor parcelWrite = new ParcelFileDescriptor(descriptors[1]);
-
-            inputStream = new ParcelFileDescriptor.AutoCloseInputStream(parcelRead);
-
-            recorder = new MediaRecorder();
-            recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            recorder.setOutputFormat(MediaRecorder.OutputFormat.AMR_NB);
-            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-            recorder.setOutputFile(parcelWrite.getFileDescriptor());
-            recorder.prepare();
-
-            recorder.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    @Override
-    protected String doInBackground(String... params) {
-        int read;
-        byte[] data = new byte[16384];
-        try {
-            while ((read = inputStream.read(data, 0, data.length)) != -1) {
-                byteArrayOutputStream.write(data, 0, read);
-            }
-            System.out.println(byteArrayOutputStream);
-            byteArrayOutputStream.flush();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    @Override
-    protected void onPostExecute(String s) {
-        recorder.stop();
-        recorder.reset();
-        recorder.release();
-        super.onPostExecute(s);
-    }
-}
 class StartEnd {
     double start;
     double end;

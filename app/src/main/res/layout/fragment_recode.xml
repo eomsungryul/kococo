@@ -26,10 +26,14 @@
 
     <!--android onclick 시에 자바 클래스의 메소드를 실행 할 수 있다.  -->
     <!--android:onClick="recordClick"-->
+    <!--하지만 그건 activity 내에서만 가능하고 프래그먼트에서는 onclickListener()로 해야함
+    프래그먼트에서 android:onclick 을 하여 생긴 오류-->
     <Button
         android:id="@+id/recodeBtn"
         android:layout_width="match_parent"
         android:layout_height="60dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         android:background="@drawable/button_shape"
         android:text="녹음 시작"
         android:textSize="28sp"

@@ -16,6 +16,7 @@
 package kr.co.dwebss.kococo.activity;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -41,6 +42,14 @@ import com.google.gson.JsonObject;
 
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
     private TabLayout tabs;
     private ViewPager viewPager;
 
+    private static String  APP_ID = null;
 
     //remote config
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
@@ -145,6 +155,9 @@ public class MainActivity extends AppCompatActivity {
         //firebase storage 끝
 
 
+
+
+
         viewPager = (ViewPager) findViewById(R.id.view_pager);
         setupViewPager(viewPager);
 
@@ -155,8 +168,6 @@ public class MainActivity extends AppCompatActivity {
         //http 통신
         retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();
         apiService = retrofit.create(ApiService.class);
-
-//  java.lang.IllegalArgumentException: Unable to create converter for class kr.co.dwebss.kococo.model.ApiCode
 
         System.out.println(" ========================statr: ");
         apiService.getApiCode().enqueue(new Callback<ApiCode>() {
@@ -201,7 +212,91 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 ////
+
+        //기기의 스토리지에 AppIp.text가 존재하지않으면 앱ID를 생성해주고 기기에 저장하는 기능
+        //두번째 로그인에는 앱아이디가 존재하므로 그냥 조회만 해줌
+        //항상 사용가능하며 내부에 저장된 파일은 기본적으로 해당 앱만 접근 가능하다.
+        //시스템은 앱이 제거될때 내부에 저장된 파일을 모두 제거한다.
+
+        //앱 IP 존재 여부 확인 (Internal Storage 사용할거임)
+        //Internal Storage 항상 사용가능하며 내부에 저장된 파일은 기본적으로 해당 앱만 접근 가능하다.
+        //시스템은 앱이 제거될때 내부에 저장된 파일을 모두 제거한다.
+        InitAppId();
+
+
     }
+
+    private void InitAppId() {
+
+        String path = getFilesDir().getAbsolutePath();
+        //path 부분엔 파일 경로를 지정해주세요.
+        File files = new File(path+"/appId.txt");
+        //파일 유무를 확인합니다.
+        if(files.exists()==true) {
+            //파일이 있을시
+            //데이터 출력하기
+            StringBuffer buffer = new StringBuffer();
+            String data = null;
+            FileInputStream fis = null;
+            try {
+                fis = openFileInput("appId.txt");
+                BufferedReader iReader = new BufferedReader(new InputStreamReader((fis)));
+
+                data = iReader.readLine();
+                //여러줄이 있을 경우에 처리 하지만 지금은 한줄이라 안씀
+//                while(data != null)
+//                {
+//                    buffer.append(data);
+//                    data = iReader.readLine();
+//                }
+//                buffer.append("\n");
+                iReader.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Toast.makeText(MainActivity.this, "파일이 있네유" +data,Toast.LENGTH_SHORT).show();
+
+        } else {
+            //파일이 없을시
+            Toast.makeText(MainActivity.this, "파일이 읍네요",Toast.LENGTH_SHORT).show();
+            //저장하기
+            apiService.getAppid().enqueue(new Callback<JsonObject>() {
+                @Override
+                public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+
+                    JsonObject result = response.body();
+                    System.out.println("=====================dddddd======================"+response);
+                    System.out.println("==========================================="+result);
+                    APP_ID = result.get("userAppId").toString();
+
+                    FileOutputStream fos = null;
+                    //MODE_PRIVATE 모드는 파일을 생성하여(또는 동일한 이름의 파일을 대체하여) 해당 파일을 여러분의 애플리케이션에 대해 전용으로만든다.
+                    try {
+                        fos = openFileOutput("appId.txt", Context.MODE_PRIVATE);
+                        PrintWriter out = new PrintWriter(fos);
+                        out.println(APP_ID);
+                        out.close();
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                @Override
+                public void onFailure(Call<JsonObject> call, Throwable t) {
+                    //에러 날시에 다시 시작해야됨
+                }
+            });
+
+        }
+
+    }
+
+
+
+
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
