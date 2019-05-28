@@ -271,8 +271,8 @@ public class MainActivity extends AppCompatActivity {
                     JsonObject result = response.body();
 //                    System.out.println("=====================dddddd======================"+response);
 //                    System.out.println("==========================================="+result);
-                    APP_ID = result.get("userAppId").toString();
-                    Toast.makeText(MainActivity.this, "파일이 읍네요"+APP_ID,Toast.LENGTH_SHORT).show();
+                    APP_ID = result.get("userAppId").toString().replace("\"" ,"");
+//                    Toast.makeText(MainActivity.this, "파일이 읍네요"+APP_ID,Toast.LENGTH_SHORT).show();
 
                     FileOutputStream fos = null;
                     //MODE_PRIVATE 모드는 파일을 생성하여(또는 동일한 이름의 파일을 대체하여) 해당 파일을 여러분의 애플리케이션에 대해 전용으로만든다.

@@ -96,8 +96,8 @@ public class RecodeFragment extends Fragment  {
     //request 데이터 모음
     JSONObject recordData;
     String userAppId;
-    Long recordStartDt;
-    Long recordEndDt;
+    String recordStartDt;
+    String recordEndDt;
 
 
     public RecodeFragment() {
@@ -123,6 +123,7 @@ public class RecodeFragment extends Fragment  {
         apiService = retrofit.create(ApiService.class);
 
 
+        SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
         String path = getContext().getFilesDir().getAbsolutePath();
         //path 부분엔 파일 경로를 지정해주세요.
@@ -142,6 +143,9 @@ public class RecodeFragment extends Fragment  {
             e.printStackTrace();
         }
         Toast.makeText(getActivity(), "userAppId :  "+userAppId, Toast.LENGTH_SHORT).show();
+
+
+
 
         //xml 내에서 onclick으로 가능하다. 하지만 그건 activity 내에서만 가능하고 프래그먼트에서는 onclickListener()로 해야함
         recodeBtn.setOnClickListener(new Button.OnClickListener() {
@@ -163,13 +167,13 @@ public class RecodeFragment extends Fragment  {
                         Log.e(LOG_TAG, "permission 승인");
                         recodeBtn.setText("녹음 종료");
                         recodeFlag = true;
-                        recordStartDt= System.currentTimeMillis();
+                        recordStartDt= dayTime.format(new Date(System.currentTimeMillis()));
                         start();
                     }
                 }else{
                     //창 띄우기
                     startActivity(new Intent(getActivity(), ResultActivity.class));
-                    recordEndDt= System.currentTimeMillis();
+                    recordEndDt= dayTime.format(new Date(System.currentTimeMillis()));
                     recodeFlag = false;
                     stop(v);
                     recodeBtn.setText("녹음 시작");
