@@ -35,6 +35,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -439,7 +440,8 @@ public class RecodeFragment extends Fragment  {
 
                             //TODO 녹음된 파일이 저장되는 시점
                             WaveFormatConverter wfc = new WaveFormatConverter(44100, (short)1, waveData, 0, waveData.length-1);
-                            String filePath = wfc.saveLongTermWave(fileName);
+                            String filePath = wfc.saveLongTermWave(fileName, getContext());
+
                             Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
                             Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (audioData.length / (44100d * 16 * 1))) * 8));
 
@@ -448,7 +450,7 @@ public class RecodeFragment extends Fragment  {
                             //ans.setAnalysisEndDt(LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()));
                             ans.addProperty("analysisStartDt",dayTimeDefalt.format(new Date(recordStartingTIme)));
                             ans.addProperty("analysisEndDt",dayTimeDefalt.format(new Date(time)));
-                            ans.addProperty("analysisFileAppPath","raw/raw_convert/");
+                            ans.addProperty("analysisFileAppPath",filePath);
                             ans.addProperty("analysisFileNm","event-"+fileName+"_"+System.currentTimeMillis()+".wav");
                             JsonArray ansDList = new JsonArray();
                             JsonObject ansd = new JsonObject();
@@ -561,7 +563,7 @@ public class RecodeFragment extends Fragment  {
                             byte[] waveData = baos.toByteArray();
 
                             WaveFormatConverter wfc = new WaveFormatConverter(44100, (short)1, waveData, 0, waveData.length);
-                            String filePath = wfc.saveLongTermWave(fileName);
+                            String filePath = wfc.saveLongTermWave(fileName,getContext());
                             SimpleDateFormat dayTimeT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
                             Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
                             Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (audioData.length / (44100d * 16 * 1))) * 8));
@@ -571,7 +573,7 @@ public class RecodeFragment extends Fragment  {
                             //ans.setAnalysisEndDt(LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()));
                             ans.addProperty("analysisStartDt",dayTimeDefalt.format(new Date(recordStartingTIme)));
                             ans.addProperty("analysisEndDt",dayTimeDefalt.format(new Date(time)));
-                            ans.addProperty("analysisFileAppPath","raw/raw_convert/");
+                            ans.addProperty("analysisFileAppPath",filePath);
                             ans.addProperty("analysisFileNm","event-"+fileName+"_"+System.currentTimeMillis()+".wav");
                             JsonArray ansDList = new JsonArray();
                             JsonObject ansd = new JsonObject();

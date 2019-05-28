@@ -1,5 +1,6 @@
 package kr.co.dwebss.kococo.util;
 
+import android.content.Context;
 import android.os.Environment;
 
 import java.io.File;
@@ -23,6 +24,9 @@ public class WaveFormatConverter {
 	private final int SAMPLE_SIZE = 2;
 	int cursor, nSamples;
 	byte[] output;
+
+
+	int folderCnt;
 
 	public WaveFormatConverter(int sampleRate, short nChannels, byte[] data, int start, int end)
 	{
@@ -88,10 +92,21 @@ public class WaveFormatConverter {
 	}
 	// ------------------------------------------------------------
 
-	public String saveLongTermWave(String fileName) {
-		File myDir = new File(Environment.getExternalStorageDirectory(), "rec_data/");
-//		File myDir = new File(getFilesDir().getAbsolutePath(), "rec_data/");
+
+
+	public String saveLongTermWave(String fileName, Context x) {
+//		File myDir = new File(Environment.getExternalStorageDirectory(), "rec_data/");
+
+		System.out.println(x.getFilesDir().getAbsolutePath()+"/rec_data/"+ "----------------------save rec_data/rec_data/rec_data/rec_data/rec_data/rec_data/");
+		subDirList(x.getFilesDir().getAbsolutePath()+"/rec_data/");
+		folderCnt++;
+		File myDir = new File(x.getFilesDir().getAbsolutePath(), "rec_data/"+folderCnt+"/");
+		if(!myDir.exists()){
+			myDir.mkdirs();
+		}
+
 		System.out.println(fileName+ "----------------------save start");
+		System.out.println(myDir.toString()+ "----------------------save wdawdawdawdawdawdawdadw");
 		String filename = "snoring-"+fileName+"_"+System.currentTimeMillis()+".wav";
 		try {
 			File path=new File(myDir,filename);
@@ -108,6 +123,31 @@ public class WaveFormatConverter {
 		}
 		System.out.println(fileName+ "----------------------save end");
 		return myDir.toString();
+	}
+
+	public void subDirList(String source){
+		folderCnt = 0;
+		File dir = new File(source);
+		if(!dir.exists()){
+			dir.mkdirs();
+		}
+//		System.out.println("\t 파일 이름 = " + dir.getName());
+
+		File[] fileList = dir.listFiles();
+		for(int i = 0 ; i < fileList.length ; i++){
+			File file = fileList[i];
+			if(file.isFile()){
+				// 파일이 있다면 파일 이름 출력
+//				System.out.println("\t 파일 이름 = " + file.getName());
+			}else if(file.isDirectory()){
+//				System.out.println("디렉토리 이름 = " + file.getName());
+				folderCnt++;
+				// 서브디렉토리가 존재하면 재귀적 방법으로 다시 탐색
+//					subDirList(file.getCanonicalPath().toString());
+			}
+
+		}
+
 	}
 
 }
