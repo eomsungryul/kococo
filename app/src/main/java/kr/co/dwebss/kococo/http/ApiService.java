@@ -22,7 +22,6 @@ public interface ApiService {
 //    public static final String API_URL = "http://ec2-52-79-240-67.ap-northeast-2.compute.amazonaws.com:8080/";
     public static final String API_URL = "http://52.79.88.47:8080/";
 
-
     @GET("kococo/api/code")
     Call<ApiCode> getApiCode();
 
@@ -36,6 +35,16 @@ public interface ApiService {
 
     @POST("kococo/api/userappid")
     Call<JsonObject> getAppid();
+
+
+    //json으로도 받을 수 있는 형태
+    @Headers({
+            "Accept: application/json",
+            "Content-Type: application/json"
+    })
+    @POST("kococo/api/record")
+    Call<JSONObject> addRecord(@Body JSONObject data);
+//    Call<JsonObject> addRecord(JsonObject data);
 
 //    @POST("api/users")
 //    Call<User> createUser(@Body User user);

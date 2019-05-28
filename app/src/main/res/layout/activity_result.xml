@@ -339,10 +339,10 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         android:src="@drawable/baseline_edit_white_48dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.952"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.968" />
+        app:layout_constraintTop_toBottomOf="@+id/recordListScrollview"
+        app:layout_constraintVertical_bias="0.703" />
 
 
 </android.support.constraint.ConstraintLayout>

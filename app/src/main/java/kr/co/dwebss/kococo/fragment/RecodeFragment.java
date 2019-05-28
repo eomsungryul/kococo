@@ -20,21 +20,38 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import kr.co.dwebss.kococo.R;
+import kr.co.dwebss.kococo.activity.MainActivity;
 import kr.co.dwebss.kococo.activity.ResultActivity;
 import kr.co.dwebss.kococo.fragment.recorder.Analysis;
 import kr.co.dwebss.kococo.fragment.recorder.AnalysisDetails;
+import kr.co.dwebss.kococo.http.ApiService;
+import kr.co.dwebss.kococo.model.ApiCode;
 import kr.co.dwebss.kococo.util.AudioCalculator;
 import kr.co.dwebss.kococo.util.MediaPlayerUtility;
 import kr.co.dwebss.kococo.util.WaveFormatConverter;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 
 public class RecodeFragment extends Fragment  {
@@ -72,6 +89,17 @@ public class RecodeFragment extends Fragment  {
 
     byte[] audioData = new byte[frameByteSize];
 
+    Retrofit retrofit;
+    ApiService apiService;
+
+
+    //request 데이터 모음
+    JSONObject recordData;
+    String userAppId;
+    Long recordStartDt;
+    Long recordEndDt;
+
+
     public RecodeFragment() {
         // Required empty public constructor
     }
@@ -90,6 +118,31 @@ public class RecodeFragment extends Fragment  {
         recodeFlag = false;
         recodeBtn.setText("녹음 시작");
 
+
+        retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();
+        apiService = retrofit.create(ApiService.class);
+
+
+
+        String path = getContext().getFilesDir().getAbsolutePath();
+        //path 부분엔 파일 경로를 지정해주세요.
+        File files = new File(path+"/appId.txt");
+        //get app Id
+        StringBuffer buffer = new StringBuffer();
+        String data = null;
+        FileInputStream fis = null;
+        try {
+            fis = getContext().openFileInput("appId.txt");
+            BufferedReader iReader = new BufferedReader(new InputStreamReader((fis)));
+            userAppId = iReader.readLine();
+            iReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Toast.makeText(getActivity(), "userAppId :  "+userAppId, Toast.LENGTH_SHORT).show();
+
         //xml 내에서 onclick으로 가능하다. 하지만 그건 activity 내에서만 가능하고 프래그먼트에서는 onclickListener()로 해야함
         recodeBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
@@ -105,17 +158,20 @@ public class RecodeFragment extends Fragment  {
                         requestPermissions(permissions, REQUEST_EXTERNAL_STORAGE);
                         return;
                     } else {
+                        //녹음 시작 클릭
                         Toast.makeText(getActivity(), "permission 승인", Toast.LENGTH_SHORT).show();
                         Log.e(LOG_TAG, "permission 승인");
                         recodeBtn.setText("녹음 종료");
                         recodeFlag = true;
+                        recordStartDt= System.currentTimeMillis();
                         start();
                     }
                 }else{
                     //창 띄우기
                     startActivity(new Intent(getActivity(), ResultActivity.class));
-                    stop(v);
+                    recordEndDt= System.currentTimeMillis();
                     recodeFlag = false;
+                    stop(v);
                     recodeBtn.setText("녹음 시작");
                 }
             }
@@ -177,6 +233,7 @@ public class RecodeFragment extends Fragment  {
 //        java.lang.IllegalStateException: Could not find method recordClick(View) in a parent or ancestor Context for android:onClick attribute defined on view class android.support.v7.widget.AppCompatButton with id recodeBtn
 
     }
+
 
 
     // MediaPlayer는 시스템 리소스를 잡아먹는다.
@@ -357,7 +414,7 @@ public class RecodeFragment extends Fragment  {
                             baos = new ByteArrayOutputStream();
                             baos.write(frameBytes);
                             isRecording = true;
-                        } else if (isRecording == true && SleepCheck.noiseCheck(decibel)==0) {
+                        } else if (isRecording == true && (SleepCheck.noiseCheck(decibel)==0 || recodeFlag==false) ) {
                             Log.v(LOG_TAG2,("녹음 종료! "));
                             Log.v(LOG_TAG2,(String.format("%.2f", times)+"s "));
                             baos = new ByteArrayOutputStream();
@@ -369,7 +426,7 @@ public class RecodeFragment extends Fragment  {
                             fileName += "-" + dayTime.format(new Date(time));
                             byte[] waveData = baos.toByteArray();
                             //TODO 녹음된 파일이 저장되는 시점
-                            WaveFormatConverter wfc = new WaveFormatConverter(44100, (short)1, waveData, 0, waveData.length);
+                            WaveFormatConverter wfc = new WaveFormatConverter(44100, (short)1, waveData, 0, waveData.length-1);
                             String filePath = wfc.saveLongTermWave(fileName);
                             Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
                             Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (audioData.length / (44100d * 16 * 1))) * 8));
@@ -435,7 +492,56 @@ public class RecodeFragment extends Fragment  {
                             } ]
                             }
                             */
+
+
+
+//
+//                            recordData = new JSONObject();
+//                            recordData.addProperty("userAppId",userAppId);
+//                            recordData.addProperty("recordStartDt",recordStartDt);
+//                            recordData.addProperty("recordEndDt",recordEndDt);
+//                            recordData.add("analysisList", (JsonElement) ansDList);
+//
+//                            System.out.println(" ========================recordData: "+recordData.toString());
+//                            //TODO POST /api/record를 호출한다.
+//                            apiService.addRecord(recordData).enqueue(new Callback<JSONObject>() {
+//                                @Override
+//                                public void onResponse(Call<JSONObject> call, Response<JSONObject> response) {
+//                                    Toast.makeText(getActivity(), "sucess"+response,
+//                                            Toast.LENGTH_SHORT).show();
+//                                    System.out.println(" ========================response: "+response.body().toString());
+//                                }
+//
+//                                @Override
+//                                public void onFailure(Call<JSONObject> call, Throwable t) {
+//
+//                                }
+//                            });
+
+                            recordData = new JSONObject();
+                            recordData.put("userAppId",userAppId.toString());
+                            recordData.put("recordStartDt",recordStartDt);
+                            recordData.put("recordEndDt",recordEndDt);
+                            recordData.put("analysisList",ans);
+                            System.out.println(" ========================recordData test: "+recordData);
+
+
                             //TODO POST /api/record를 호출한다.
+                            apiService.addRecord(recordData).enqueue(new Callback<JSONObject>() {
+                                @Override
+                                public void onResponse(Call<JSONObject> call, Response<JSONObject> response) {
+                                    Toast.makeText(getActivity(), "sucess"+response,
+                                            Toast.LENGTH_SHORT).show();
+                                    System.out.println(" ========================response test: "+response.body().toString());
+                                }
+
+                                @Override
+                                public void onFailure(Call<JSONObject> call, Throwable t) {
+
+                                }
+                            });
+
+
 							/*
 							System.out.println("analysisStartDt: "+dayTimeT.format(new Date(recordStartingTIme)));
 							System.out.println("analysisEndDt: "+dayTimeT.format(new Date(time)));
@@ -498,6 +604,8 @@ public class RecodeFragment extends Fragment  {
                             }
                             */
                             //TODO POST /api/record를 호출한다.
+
+
                             WaveFormatConverter wfc = new WaveFormatConverter(44100, (short)1, waveData, 0, waveData.length);
                             String filePath = wfc.saveLongTermWave(fileName);
                             SimpleDateFormat dayTimeT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -533,6 +641,28 @@ public class RecodeFragment extends Fragment  {
                             }
                             ans.setAnalysisDetailsList(ansDList);
                             ansList.add(ans);
+//
+//                            recordData = new JSONObject();
+//                            recordData.put("userAppId",userAppId);
+//                            recordData.put("recordStartDt",recordStartDt);
+//                            recordData.put("recordEndDt",recordEndDt);
+//                            recordData.put("analysisList",ansDList);
+//
+//                            System.out.println(" ========================recordData: "+recordData.toString());
+//                            //TODO POST /api/record를 호출한다.
+//                            apiService.addRecord(recordData).enqueue(new Callback<JSONObject>() {
+//                                @Override
+//                                public void onResponse(Call<JSONObject> call, Response<JSONObject> response) {
+//                                    Toast.makeText(getActivity(), "sucess"+response,
+//                                            Toast.LENGTH_SHORT).show();
+//                                    System.out.println(" ========================response: "+response.body().toString());
+//                                }
+//
+//                                @Override
+//                                public void onFailure(Call<JSONObject> call, Throwable t) {
+//
+//                                }
+//                            });
 							/*
                             System.out.println("analysisStartDt: "+dayTimeT.format(new Date(recordStartingTIme)));
                             System.out.println("analysisEndDt: "+dayTimeT.format(new Date(time)));
@@ -768,6 +898,9 @@ public class RecodeFragment extends Fragment  {
                         SleepCheck.checkTermSecond = (int) Math.floor(times);
 
                     } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
