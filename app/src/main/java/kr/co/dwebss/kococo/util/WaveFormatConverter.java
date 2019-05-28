@@ -7,6 +7,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import kr.co.dwebss.kococo.fragment.RecodeFragment;
+
 
 public class WaveFormatConverter {
 	private final int LONGINT = 4;
@@ -88,6 +90,7 @@ public class WaveFormatConverter {
 
 	public String saveLongTermWave(String fileName) {
 		File myDir = new File(Environment.getExternalStorageDirectory(), "rec_data/");
+//		File myDir = new File(getFilesDir().getAbsolutePath(), "rec_data/");
 		System.out.println(fileName+ "----------------------save start");
 		String filename = "snoring-"+fileName+"_"+System.currentTimeMillis()+".wav";
 		try {
@@ -104,7 +107,7 @@ public class WaveFormatConverter {
 			e.printStackTrace();
 		}
 		System.out.println(fileName+ "----------------------save end");
-		return filename;
+		return myDir.toString();
 	}
 
 }

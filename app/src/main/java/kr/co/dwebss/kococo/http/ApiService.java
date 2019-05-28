@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import java.util.Map;
 
 import kr.co.dwebss.kococo.model.ApiCode;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -43,7 +44,8 @@ public interface ApiService {
             "Content-Type: application/json"
     })
     @POST("kococo/api/record")
-    Call<JSONObject> addRecord(@Body JSONObject data);
+    Call<RequestBody> addRecord(@Body RequestBody data);
+//    Call<JSONObject> addRecord(@Body JSONObject data);
 //    Call<JsonObject> addRecord(JsonObject data);
 
 //    @POST("api/users")

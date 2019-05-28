@@ -20,6 +20,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,6 +54,8 @@ import kr.co.dwebss.kococo.model.ApiCode;
 import kr.co.dwebss.kococo.util.AudioCalculator;
 import kr.co.dwebss.kococo.util.MediaPlayerUtility;
 import kr.co.dwebss.kococo.util.WaveFormatConverter;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -94,11 +103,11 @@ public class RecodeFragment extends Fragment  {
 
 
     //request 데이터 모음
-    JSONObject recordData;
+    JsonObject recordData;
     String userAppId;
     String recordStartDt;
     String recordEndDt;
-
+    SimpleDateFormat dayTimeDefalt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
     public RecodeFragment() {
         // Required empty public constructor
@@ -123,7 +132,6 @@ public class RecodeFragment extends Fragment  {
         apiService = retrofit.create(ApiService.class);
 
 
-        SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
         String path = getContext().getFilesDir().getAbsolutePath();
         //path 부분엔 파일 경로를 지정해주세요.
@@ -143,8 +151,6 @@ public class RecodeFragment extends Fragment  {
             e.printStackTrace();
         }
         Toast.makeText(getActivity(), "userAppId :  "+userAppId, Toast.LENGTH_SHORT).show();
-
-
 
 
         //xml 내에서 onclick으로 가능하다. 하지만 그건 activity 내에서만 가능하고 프래그먼트에서는 onclickListener()로 해야함
@@ -167,13 +173,13 @@ public class RecodeFragment extends Fragment  {
                         Log.e(LOG_TAG, "permission 승인");
                         recodeBtn.setText("녹음 종료");
                         recodeFlag = true;
-                        recordStartDt= dayTime.format(new Date(System.currentTimeMillis()));
+                        recordStartDt= dayTimeDefalt.format(new Date(System.currentTimeMillis()));
                         start();
                     }
                 }else{
                     //창 띄우기
                     startActivity(new Intent(getActivity(), ResultActivity.class));
-                    recordEndDt= dayTime.format(new Date(System.currentTimeMillis()));
+                    recordEndDt= dayTimeDefalt.format(new Date(System.currentTimeMillis()));
                     recodeFlag = false;
                     stop(v);
                     recodeBtn.setText("녹음 시작");
@@ -375,7 +381,8 @@ public class RecodeFragment extends Fragment  {
                 snoringTermList = new ArrayList<StartEnd>();
                 grindingTermList = new ArrayList<StartEnd>();
                 osaTermList = new ArrayList<StartEnd>();
-                List<Analysis> ansList = new ArrayList<Analysis>();
+//                List<Analysis> ansList = new ArrayList<Analysis>();
+                JsonArray ansList = new JsonArray();
                 int read = 0;
 
                 double times=0.0;
@@ -429,47 +436,82 @@ public class RecodeFragment extends Fragment  {
                             long time = System.currentTimeMillis();
                             fileName += "-" + dayTime.format(new Date(time));
                             byte[] waveData = baos.toByteArray();
+
                             //TODO 녹음된 파일이 저장되는 시점
                             WaveFormatConverter wfc = new WaveFormatConverter(44100, (short)1, waveData, 0, waveData.length-1);
                             String filePath = wfc.saveLongTermWave(fileName);
                             Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
                             Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (audioData.length / (44100d * 16 * 1))) * 8));
-                            Analysis ans = new Analysis();
+
+
+//                            Analysis ans = new Analysis();
+//                            //ans.setAnalysisStartDt(LocalDateTime.ofInstant(Instant.ofEpochMilli(recordStartingTIme), ZoneId.systemDefault()));
+//                            //ans.setAnalysisEndDt(LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()));
+//                            ans.setAnalysisStartDt(dayTimeDefalt.format(new Date(recordStartingTIme)));
+//                            ans.setAnalysisEndDt(dayTimeDefalt.format(new Date(time)));
+//                            ans.setAnalysisFileAppPath("raw/raw_convert/");
+//                            ans.setAnalysisFileNm("event-"+fileName+"_"+System.currentTimeMillis()+".wav");
+//                            List<AnalysisDetails> ansDList = new ArrayList<AnalysisDetails>();
+//                            AnalysisDetails ansd = new AnalysisDetails();
+//                            for(StartEnd se : snoringTermList) {
+//                                ansd = new AnalysisDetails();
+//                                ansd.setTermTypeCd(200101);
+//                                ansd.setTermStartDt(dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
+//                                ansd.setTermEndDt(dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+//                                ansDList.add(ansd);
+//                            }
+//                            for(StartEnd se : grindingTermList) {
+//                                ansd = new AnalysisDetails();
+//                                ansd.setTermTypeCd(200102);
+//                                ansd.setTermStartDt(dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
+//                                ansd.setTermEndDt(dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+//                                ansDList.add(ansd);
+//                            }
+//                            for(StartEnd se : osaTermList) {
+//                                ansd = new AnalysisDetails();
+//                                ansd.setTermTypeCd(200103);
+//                                ansd.setTermStartDt(dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
+//                                ansd.setTermEndDt(dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+//                                ansDList.add(ansd);
+//                            }
+//                            ans.setAnalysisDetailsList(ansDList);
+//                            ansList.add(ans);
+                            JsonObject ans = new JsonObject();
                             //ans.setAnalysisStartDt(LocalDateTime.ofInstant(Instant.ofEpochMilli(recordStartingTIme), ZoneId.systemDefault()));
                             //ans.setAnalysisEndDt(LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()));
-                            ans.setAnalysisStartDt(new Date(recordStartingTIme));
-                            ans.setAnalysisEndDt(new Date(time));
-                            ans.setAnalysisFileAppPath("raw/raw_convert/");
-                            ans.setAnalysisFileNm("event-"+fileName+"_"+System.currentTimeMillis()+".wav");
-                            List<AnalysisDetails> ansDList = new ArrayList<AnalysisDetails>();
-                            AnalysisDetails ansd = new AnalysisDetails();
+                            ans.addProperty("analysisStartDt",dayTimeDefalt.format(new Date(recordStartingTIme)));
+                            ans.addProperty("analysisEndDt",dayTimeDefalt.format(new Date(time)));
+                            ans.addProperty("analysisFileAppPath","raw/raw_convert/");
+                            ans.addProperty("analysisFileNm","event-"+fileName+"_"+System.currentTimeMillis()+".wav");
+                            JsonArray ansDList = new JsonArray();
+                            JsonObject ansd = new JsonObject();
                             for(StartEnd se : snoringTermList) {
-                                ansd = new AnalysisDetails();
-                                ansd.setTermTypeCd(200101);
-                                ansd.setTermStartDt(new Date((long) (recordStartingTIme+se.start*1000)));
-                                ansd.setTermEndDt(new Date((long) (recordStartingTIme+se.end*1000)));
+                                ansd = new JsonObject();
+                                ansd.addProperty("termTypeCd",200101);
+                                ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
+                                ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
                                 ansDList.add(ansd);
                             }
                             for(StartEnd se : grindingTermList) {
-                                ansd = new AnalysisDetails();
-                                ansd.setTermTypeCd(200102);
-                                ansd.setTermStartDt(new Date((long) (recordStartingTIme+se.start*1000)));
-                                ansd.setTermEndDt(new Date((long) (recordStartingTIme+se.end*1000)));
+                                ansd = new JsonObject();
+                                ansd.addProperty("termTypeCd",200102);
+                                ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
+                                ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
                                 ansDList.add(ansd);
                             }
                             for(StartEnd se : osaTermList) {
-                                ansd = new AnalysisDetails();
-                                ansd.setTermTypeCd(200103);
-                                ansd.setTermStartDt(new Date((long) (recordStartingTIme+se.start*1000)));
-                                ansd.setTermEndDt(new Date((long) (recordStartingTIme+se.end*1000)));
+                                ansd = new JsonObject();
+                                ansd.addProperty("termTypeCd",200103);
+                                ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
+                                ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
                                 ansDList.add(ansd);
                             }
-                            ans.setAnalysisDetailsList(ansDList);
+                            ans.add("analysisDetails", ansDList);
                             ansList.add(ans);
-                            //TODO 여기까지 AnswerList를 계속 생성한다.
-                            //TODO 녹음 중단 했을 떄 AnswerList를 Record의 AnswerList필드에 담는다.
-                            //TODO Record의 recordStartDt, recordEndDt에 녹음 시작시간과 녹음 종료 시간을, userAppId에는 사용자 앱 ID를 입력 해서 VO를 완성한다.
-                            //TODO 최종 완료 vo 형태
+                            //여기까지 AnswerList를 계속 생성한다.
+                            //녹음 중단 했을 떄 AnswerList를 Record의 AnswerList필드에 담는다.
+                            //Record의 recordStartDt, recordEndDt에 녹음 시작시간과 녹음 종료 시간을, userAppId에는 사용자 앱 ID를 입력 해서 VO를 완성한다.
+                            //최종 완료 vo 형태
                             /*
                             {
                                 "userAppId" : "c0362dd4-97f4-488c-b31c-12cb23b534cf",
@@ -496,55 +538,28 @@ public class RecodeFragment extends Fragment  {
                             } ]
                             }
                             */
+                            recordData = new JsonObject();
+                            recordData.addProperty("userAppId",userAppId);
+                            recordData.addProperty("recordStartDt",recordStartDt);
+                            recordData.addProperty("recordEndDt",recordEndDt);
+                            recordData.add("analysisList", ansList);
 
-
-
-//
-//                            recordData = new JSONObject();
-//                            recordData.addProperty("userAppId",userAppId);
-//                            recordData.addProperty("recordStartDt",recordStartDt);
-//                            recordData.addProperty("recordEndDt",recordEndDt);
-//                            recordData.add("analysisList", (JsonElement) ansDList);
-//
-//                            System.out.println(" ========================recordData: "+recordData.toString());
-//                            //TODO POST /api/record를 호출한다.
-//                            apiService.addRecord(recordData).enqueue(new Callback<JSONObject>() {
-//                                @Override
-//                                public void onResponse(Call<JSONObject> call, Response<JSONObject> response) {
-//                                    Toast.makeText(getActivity(), "sucess"+response,
-//                                            Toast.LENGTH_SHORT).show();
-//                                    System.out.println(" ========================response: "+response.body().toString());
-//                                }
-//
-//                                @Override
-//                                public void onFailure(Call<JSONObject> call, Throwable t) {
-//
-//                                }
-//                            });
-
-                            recordData = new JSONObject();
-                            recordData.put("userAppId",userAppId.toString());
-                            recordData.put("recordStartDt",recordStartDt);
-                            recordData.put("recordEndDt",recordEndDt);
-                            recordData.put("analysisList",ans);
-                            System.out.println(" ========================recordData test: "+recordData);
-
-
+                            System.out.println(" ========================recordData: "+recordData.toString());
+                            RequestBody requestData = RequestBody.create(MediaType.parse("application/json"), new Gson().toJson(recordData));
                             //TODO POST /api/record를 호출한다.
-                            apiService.addRecord(recordData).enqueue(new Callback<JSONObject>() {
+                            apiService.addRecord(requestData).enqueue(new Callback<RequestBody>() {
                                 @Override
-                                public void onResponse(Call<JSONObject> call, Response<JSONObject> response) {
+                                public void onResponse(Call<RequestBody> call, Response<RequestBody> response) {
                                     Toast.makeText(getActivity(), "sucess"+response,
                                             Toast.LENGTH_SHORT).show();
-                                    System.out.println(" ========================response test: "+response.body().toString());
+                                    System.out.println(" ========================response: "+response.body().toString());
                                 }
 
                                 @Override
-                                public void onFailure(Call<JSONObject> call, Throwable t) {
+                                public void onFailure(Call<RequestBody> call, Throwable t) {
 
                                 }
                             });
-
 
 							/*
 							System.out.println("analysisStartDt: "+dayTimeT.format(new Date(recordStartingTIme)));
@@ -616,8 +631,8 @@ public class RecodeFragment extends Fragment  {
                             Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
                             Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (audioData.length / (44100d * 16 * 1))) * 8));
                             Analysis ans = new Analysis();
-                            ans.setAnalysisStartDt(new Date(recordStartingTIme));
-                            ans.setAnalysisEndDt(new Date(time));
+                            ans.setAnalysisStartDt(dayTimeDefalt.format(new Date(recordStartingTIme)));
+                            ans.setAnalysisEndDt(dayTimeDefalt.format(new Date(time)));
                             ans.setAnalysisFileAppPath("raw/raw_convert/");
                             ans.setAnalysisFileNm("event-"+fileName+"_"+System.currentTimeMillis()+".wav");
                             List<AnalysisDetails> ansDList = new ArrayList<AnalysisDetails>();
@@ -625,26 +640,29 @@ public class RecodeFragment extends Fragment  {
                             for(StartEnd se : snoringTermList) {
                                 ansd = new AnalysisDetails();
                                 ansd.setTermTypeCd(200101);
-                                ansd.setTermStartDt(new Date((long) (recordStartingTIme+se.start*1000)));
-                                ansd.setTermEndDt(new Date((long) (recordStartingTIme+se.end*1000)));
+                                ansd.setTermStartDt(dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
+                                ansd.setTermEndDt(dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
                                 ansDList.add(ansd);
                             }
                             for(StartEnd se : grindingTermList) {
                                 ansd = new AnalysisDetails();
                                 ansd.setTermTypeCd(200102);
-                                ansd.setTermStartDt(new Date((long) (recordStartingTIme+se.start*1000)));
-                                ansd.setTermEndDt(new Date((long) (recordStartingTIme+se.end*1000)));
+                                ansd.setTermStartDt(dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
+                                ansd.setTermEndDt(dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
                                 ansDList.add(ansd);
                             }
                             for(StartEnd se : osaTermList) {
                                 ansd = new AnalysisDetails();
                                 ansd.setTermTypeCd(200103);
-                                ansd.setTermStartDt(new Date((long) (recordStartingTIme+se.start*1000)));
-                                ansd.setTermEndDt(new Date((long) (recordStartingTIme+se.end*1000)));
+                                ansd.setTermStartDt(dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
+                                ansd.setTermEndDt(dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
                                 ansDList.add(ansd);
                             }
                             ans.setAnalysisDetailsList(ansDList);
-                            ansList.add(ans);
+//                            ansList.add(ans);
+
+
+
 //
 //                            recordData = new JSONObject();
 //                            recordData.put("userAppId",userAppId);
@@ -904,9 +922,9 @@ public class RecodeFragment extends Fragment  {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+//                    catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
                 }
 
                 //Log.v(LOG_TAG2,("audio length(s): " + ((double) (audioData.length / (44100d * 16 * 1))) * 8));
