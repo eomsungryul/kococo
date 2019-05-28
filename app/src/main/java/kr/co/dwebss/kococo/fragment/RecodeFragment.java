@@ -424,13 +424,10 @@ public class RecodeFragment extends Fragment  {
                             Log.v(LOG_TAG2,(String.format("%.2f", times)+"s~"));
                             recordStartingTIme = System.currentTimeMillis();
                             baos = new ByteArrayOutputStream();
-                            baos.write(frameBytes);
                             isRecording = true;
                         } else if (isRecording == true && (SleepCheck.noiseCheck(decibel)==0 || recodeFlag==false) ) {
                             Log.v(LOG_TAG2,("녹음 종료! "));
                             Log.v(LOG_TAG2,(String.format("%.2f", times)+"s "));
-                            baos = new ByteArrayOutputStream();
-                            baos.write(frameBytes);
                             SimpleDateFormat dayTime = new SimpleDateFormat("yyyymmdd_hhmm");
                             String fileName = dayTime.format(new Date(recordStartingTIme));
                             dayTime = new SimpleDateFormat("dd_hhmm");
@@ -443,7 +440,7 @@ public class RecodeFragment extends Fragment  {
                             String filePath = wfc.saveLongTermWave(fileName, getContext());
 
                             Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
-                            Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (audioData.length / (44100d * 16 * 1))) * 8));
+                            Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (waveData.length / (44100d * 16 * 1))) * 8));
 
                             JsonObject ans = new JsonObject();
                             //ans.setAnalysisStartDt(LocalDateTime.ofInstant(Instant.ofEpochMilli(recordStartingTIme), ZoneId.systemDefault()));
@@ -553,8 +550,6 @@ public class RecodeFragment extends Fragment  {
                         else if(isRecording == true && Math.floor((double) (audioData.length / (44100d * 16 * 1)) * 8) == Math.floor(times)){
                             Log.v(LOG_TAG2,("녹음 종료!(사운드 파일 테스트용) "));
                             Log.v(LOG_TAG2,(String.format("%.2f", times)+"s "));
-                            baos = new ByteArrayOutputStream();
-                            baos.write(frameBytes);
                             SimpleDateFormat dayTime = new SimpleDateFormat("yyyymmdd_hhmm");
                             String fileName = dayTime.format(new Date(recordStartingTIme));
                             dayTime = new SimpleDateFormat("dd_hhmm");
@@ -566,7 +561,7 @@ public class RecodeFragment extends Fragment  {
                             String filePath = wfc.saveLongTermWave(fileName,getContext());
                             SimpleDateFormat dayTimeT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
                             Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
-                            Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (audioData.length / (44100d * 16 * 1))) * 8));
+                            Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (waveData.length / (44100d * 16 * 1))) * 8));
 
                             JsonObject ans = new JsonObject();
                             //ans.setAnalysisStartDt(LocalDateTime.ofInstant(Instant.ofEpochMilli(recordStartingTIme), ZoneId.systemDefault()));
@@ -680,6 +675,7 @@ public class RecodeFragment extends Fragment  {
                         if (i == 1 || isRecording == false) {
                             continue;
                         }
+                        baos.write(frameBytes);
 						/*
 						System.out.print("녹음 중! ");
 						Log.v(LOG_TAG2,(String.format("%.2f", times)+"s ");
