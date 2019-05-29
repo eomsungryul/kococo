@@ -40,7 +40,7 @@ public class WaveFormatConverter {
 	private void buildHeader(int sampleRate, short nChannels)
 	{
 		write("RIFF");
-		write(output.length);
+		write(output.length/2);
 		write("WAVE");
 		writeFormat(sampleRate, nChannels);
 	}
@@ -60,7 +60,7 @@ public class WaveFormatConverter {
 	public void writeData(byte[] data, int start, int end)
 	{
 		write("data");
-		write(nSamples*SMALLINT);
+		write(nSamples*SMALLINT/2);
 		for(int i=start; i<=end; write(data[i++]));
 	}
 	// ------------------------------------------------------------

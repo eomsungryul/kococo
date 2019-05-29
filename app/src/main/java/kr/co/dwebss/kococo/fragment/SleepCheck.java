@@ -150,7 +150,7 @@ public class SleepCheck {
 					&& grindingContinueAmpOppCnt >= 50
 			) {
 				grindingRepeatAmpCnt++;
-				//System.out.println(curTermSecond + " "+checkTermSecond+" "+grindingContinueAmpCnt+" "+grindingContinueAmpOppCnt+" "+grindingRepeatAmpCnt);
+				System.out.println(curTermSecond + " "+checkTermSecond+" "+grindingContinueAmpCnt+" "+grindingContinueAmpOppCnt+" "+grindingRepeatAmpCnt);
 			}else {
 				grindingRepeatAmpCnt = 0;
 				//System.out.println("여기8");
@@ -166,7 +166,7 @@ public class SleepCheck {
 		if (decibel > chkOSADb) {
 
 			if (isOSATerm == true) {
-				if (beforeTermWord.equals(BREATH) && isOSATermCnt > 500) {
+				if (beforeTermWord.equals(BREATH) && isOSATermCnt > 3000) { //5초에서 30초로 변경
 					Log.v("YRSEO",("[" + String.format("%.2f", OSAcurTermTime) + "~" + String.format("%.2f", times)
 							+ "s, isOSATermCnt: " + isOSATermCnt + ", isOSATermCntOpp:" + isOSATermCntOpp + "]"));
 

@@ -421,6 +421,7 @@ public class RecodeFragment extends Fragment  {
                         times = (((double) (frameBytes.length / (44100d * 16 * 1))) * 8) * i;
                         i++;
                         SleepCheck.curTermSecond = (int) Math.floor(times);
+                        SleepCheck.GrindingCheckTermSecond = times;
 
                         final String amp = String.valueOf(amplitude + "Amp");
                         final String db = String.valueOf(decibel + "db");
@@ -428,7 +429,10 @@ public class RecodeFragment extends Fragment  {
                         final String sehz = String.valueOf(sefrequency + "Hz(2th)");
                         final String seamp = String.valueOf(sefamplitude + "Amp(2th)");
 
-                        System.out.println(String.format("%.2f", times)+"s "+hz +" "+db+" "+amp+" "+sehz+" "+seamp);
+                        if (i < 100) {
+                            continue;
+                        }
+                        //System.out.println(String.format("%.2f", times)+"s "+hz +" "+db+" "+amp+" "+sehz+" "+seamp);
                         // 소리의 발생은 특정 db 이상으로한다. 데시벨은 -31.5~0 으로 수치화 하고 있음.
                         // -10db에 안걸릴 수도 잇으니까, 현재 녹음 상태의 평균 데시벨값을 지속적으로 갱신하면서 평균 데시벨보다 높은 소리가 발생했는지 체크
                         // 한다.
@@ -447,16 +451,16 @@ public class RecodeFragment extends Fragment  {
                         } else if (isRecording == true && (SleepCheck.noiseCheck(decibel)==0 || recodeFlag==false) ) {
                             Log.v(LOG_TAG2,("녹음 종료! "));
                             Log.v(LOG_TAG2,(String.format("%.2f", times)+"s "));
-                            SimpleDateFormat dayTime = new SimpleDateFormat("yyyymmdd_hhmm");
+                            SimpleDateFormat dayTime = new SimpleDateFormat("yyyymmdd_HHmm");
                             String fileName = dayTime.format(new Date(recordStartingTIme));
-                            dayTime = new SimpleDateFormat("dd_hhmm");
+                            dayTime = new SimpleDateFormat("dd_HHmm");
                             //long time = System.currentTimeMillis();
                             long time = recordStartingTIme+(long)times*1000;
                             fileName += "-" + dayTime.format(new Date(time));
                             byte[] waveData = baos.toByteArray();
 
                             //TODO 녹음된 파일이 저장되는 시점
-                            WaveFormatConverter wfc = new WaveFormatConverter(44100, (short)1, waveData, 0, waveData.length/2);
+                            WaveFormatConverter wfc = new WaveFormatConverter(44100, (short)1, waveData, 0, waveData.length-1);
                             String filePath = wfc.saveLongTermWave(fileName, getContext());
 
                             Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
@@ -785,7 +789,7 @@ public class RecodeFragment extends Fragment  {
                 }
 
                 //Log.v(LOG_TAG2,("audio length(s): " + ((double) (audioData.length / (44100d * 16 * 1))) * 8));
-                Log.v(LOG_TAG2,("audio length(s): " + String.format("%.2f", times)));
+                Log.v(LOG_TAG2,("녹음시작-종료(s): " + String.format("%.2f", times)));
 
                 Log.v(LOG_TAG2,( "코골이 여부 " + SleepCheck.snoringContinue));
                 Log.v(LOG_TAG2,( "이갈이 " + grindingTermList.size()+"회 발생 "));
