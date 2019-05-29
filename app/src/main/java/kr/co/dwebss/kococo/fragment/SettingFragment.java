@@ -36,13 +36,13 @@ public class SettingFragment extends Fragment {
         ListView listview = (ListView) v.findViewById(R.id.settingListview);
         listview.setAdapter(adapter);
         // 첫 번째 아이템 추가.
-        adapter.addItem("프로필") ;
-
-        DiaryListAdapter adapter2 = new DiaryListAdapter() ;
-        ListView listview2 = (ListView) v.findViewById(R.id.settingListview2);
-        listview2.setAdapter(adapter2);
-        adapter2.addItem("전문가 상담 내역") ;
-        adapter2.addItem("의견 및 제안") ;
+//        adapter.addItem("프로필") ;
+//
+//        DiaryListAdapter adapter2 = new DiaryListAdapter() ;
+//        ListView listview2 = (ListView) v.findViewById(R.id.settingListview2);
+//        listview2.setAdapter(adapter2);
+//        adapter2.addItem("전문가 상담 내역") ;
+//        adapter2.addItem("의견 및 제안") ;
         // 두 번째 아이템 추가.
 //        adapter.addItem(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_36dp),
 //                "Circle", "Account Circle Black 36dp") ;

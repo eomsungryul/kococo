@@ -25,11 +25,11 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import kr.co.dwebss.kococo.R;
-import kr.co.dwebss.kococo.model.RecodeData;
+import kr.co.dwebss.kococo.model.RecordData;
 
 public class DiaryListAdapter extends BaseAdapter {
     // Adapter에 추가된 데이터를 저장하기 위한 ArrayList
-    private ArrayList<RecodeData> listViewItemList = new ArrayList<RecodeData>() ;
+    private ArrayList<RecordData> listViewItemList = new ArrayList<RecordData>() ;
     Boolean playBtnFlag = false;
 
     // ListViewAdapter의 생성자
@@ -58,11 +58,11 @@ public class DiaryListAdapter extends BaseAdapter {
         TextView titleTextView = (TextView) convertView.findViewById(R.id.diaryNameText) ;
 
         // Data Set(listViewItemList)에서 position에 위치한 데이터 참조 획득
-        RecodeData listViewItem = listViewItemList.get(position);
+        RecordData listViewItem = listViewItemList.get(position);
 
         // 아이템 내 각 위젯에 데이터 반영
 //        iconImageView.setImageDrawable(listViewItem.getIcon());
-        titleTextView.setText(listViewItem.getRowName());
+        titleTextView.setText(listViewItem.getTitle());
 //        descTextView.setText(listViewItem.getDesc());
 
         return convertView;
@@ -77,14 +77,14 @@ public class DiaryListAdapter extends BaseAdapter {
     // 지정한 위치(position)에 있는 데이터 리턴 : 필수 구현
     @Override
     public Object getItem(int position) {
-        return listViewItemList.get(position).getRowName();
+        return listViewItemList.get(position).getTitle();
     }
 
     // 아이템 데이터 추가를 위한 함수. 개발자가 원하는대로 작성 가능.
-    public void addItem(
-//            Drawable icon, String title,
-            String name) {
-        RecodeData item = new RecodeData(name,"1");
-        listViewItemList.add(item);
-    }
+//    public void addItem(
+////            Drawable icon, String title,
+//            String name) {
+//        RecordData item = new RecordData(name,"1");
+//        listViewItemList.add(item);
+//    }
 }

@@ -34,11 +34,11 @@ public class DiaryFragment extends Fragment {
         ListView listview = (ListView) v.findViewById(R.id.diaryListview);
         listview.setAdapter(adapter);
         // 첫 번째 아이템 추가.
-        adapter.addItem("몇월 몇일 맑음") ;
-        adapter.addItem("녹음파일2") ;
-        adapter.addItem("녹음파일3") ;
-        adapter.addItem("녹음파일4") ;
-        adapter.addItem("녹음파일5") ;
+//        adapter.addItem("몇월 몇일 맑음") ;
+//        adapter.addItem("녹음파일2") ;
+//        adapter.addItem("녹음파일3") ;
+//        adapter.addItem("녹음파일4") ;
+//        adapter.addItem("녹음파일5") ;
         // 두 번째 아이템 추가.
 //        adapter.addItem(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_36dp),
 //                "Circle", "Account Circle Black 36dp") ;

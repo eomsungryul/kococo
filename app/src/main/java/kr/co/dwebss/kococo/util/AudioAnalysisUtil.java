@@ -1,86 +1,47 @@
-package kr.co.dwebss.kococo.fragment;
+package kr.co.dwebss.kococo.util;
 
-import android.Manifest;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
-import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-import android.os.Bundle;
-import android.os.CountDownTimer;
-import android.os.Handler;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
-import kr.co.dwebss.kococo.R;
-import kr.co.dwebss.kococo.activity.ResultActivity;
+import kr.co.dwebss.kococo.fragment.RecodeFragment;
 import kr.co.dwebss.kococo.http.ApiService;
-import kr.co.dwebss.kococo.util.AudioCalculator;
-import kr.co.dwebss.kococo.util.MediaPlayerUtility;
-import kr.co.dwebss.kococo.util.WaveFormatConverter;
+import kr.co.dwebss.kococo.model.StartEnd;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
+/*
+ * 오디오 분석 모듈 코골이
+ *
+ * */
+public class AudioAnalysisUtil {
 
-//        1. 마이크를 킨다.
-//        2. 녹음 분석을 시작한다.
-//        3. 마이크에서 오는 소리를 분석한다.
-//        3-1. 마이크의 소리가 평균데시벨보다 높을 시 녹음을 시작한다.
-//        3-2 마이크의 소리가 평균데시벨로 왔을경우 녹음을 중지하고
-//        3-3 녹음파일코골이가 발생했는지 체크해서 녹음된 파일의 코골이 유무를 결정한다.
-//        3-4 이갈이, 무호흡이 발생하면 녹음된 구간을 저장한다.
-//        4. 분석종료시  마이크를 끈다.
-//        5. 녹음파일 데이터를 기기에 저장한다.
-//        6. 녹음분석 데이터를 서버에 보낸다.
-public class RecodeFragment extends Fragment  {
-
-    Boolean recodeFlag = false;
-    private String LOG_TAG = "Audio_Recording";
-    private static AudioRecord record;
+    private String LOG_TAG = "AudioAnalysisUtil";
 
     //오디오 품질 고정값
     private int sampleRate = 44100;
     private int channelConfiguration = AudioFormat.CHANNEL_CONFIGURATION_MONO;
     private int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
 
-    private int requestCodeP = 0;
-
-    private static final int REQUEST_MICROPHONE = 3;
-    private static final int REQUEST_EXTERNAL_STORAGE = 2;
-    private static final int REQUEST_CAMERA = 1;
-
     //녹음 관련
-    private String LOG_TAG2 = "Audio_Recording2";
+    private String LOG_TAG2 = "AudioAnalysisUtil2";
     int state = 0;
     private boolean mShouldContinue = true;
     private AudioCalculator audioCalculator;
@@ -88,199 +49,25 @@ public class RecodeFragment extends Fragment  {
     static List<StartEnd> snoringTermList;
     public static List<StartEnd> osaTermList;
     static List<StartEnd> grindingTermList;
+    byte[] audioData = new byte[frameByteSize];
 
     boolean isRecording = false;
     ByteArrayOutputStream baos;
-    //재생할때 필요한
-    MediaPlayer mediaPlayer;
-    Boolean testFlag = false;
-
-    byte[] audioData = new byte[frameByteSize];
+    private static AudioRecord record;
 
     Retrofit retrofit;
     ApiService apiService;
 
-
-    //request 데이터 모음
     JsonObject recordData;
     String userAppId;
     String recordStartDt;
     String recordEndDt;
     SimpleDateFormat dayTimeDefalt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
-    public RecodeFragment() {
-        // Required empty public constructor
-    }
+    Boolean recodeFlag = false;
+    AudioAnalysisThread  aat;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
-        View v = inflater.inflate(R.layout.fragment_recode, container, false);
-        Button recodeBtn = (Button) v.findViewById(R.id.recodeBtn) ;
-        recodeFlag = false;
-        recodeBtn.setText("녹음 시작");
-
-
-        retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();
-        apiService = retrofit.create(ApiService.class);
-
-
-
-        String path = getContext().getFilesDir().getAbsolutePath();
-        //path 부분엔 파일 경로를 지정해주세요.
-        File files = new File(path+"/appId.txt");
-        //get app Id
-        StringBuffer buffer = new StringBuffer();
-        String data = null;
-        FileInputStream fis = null;
-        try {
-            fis = getContext().openFileInput("appId.txt");
-            BufferedReader iReader = new BufferedReader(new InputStreamReader((fis)));
-            userAppId = iReader.readLine();
-            iReader.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Toast.makeText(getActivity(), "userAppId :  "+userAppId, Toast.LENGTH_SHORT).show();
-
-
-        //xml 내에서 onclick으로 가능하다. 하지만 그건 activity 내에서만 가능하고 프래그먼트에서는 onclickListener()로 해야함
-        recodeBtn.setOnClickListener(new Button.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if( recodeFlag == false){
-                    String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.RECORD_AUDIO};
-
-                    int permissionReadStorage = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE);
-                    int permissionWriteStorage = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
-                    int permissionAudio = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.RECORD_AUDIO);
-                    if(permissionReadStorage == PackageManager.PERMISSION_DENIED || permissionWriteStorage == PackageManager.PERMISSION_DENIED||permissionAudio == PackageManager.PERMISSION_DENIED) {
-                        Toast.makeText(getActivity(), " permission x", Toast.LENGTH_SHORT).show();
-                        requestPermissions(permissions, REQUEST_EXTERNAL_STORAGE);
-                        return;
-                    } else {
-                        //녹음 시작 클릭
-//                        Toast.makeText(getActivity(), "permission 승인", Toast.LENGTH_SHORT).show();
-                        Log.e(LOG_TAG, "permission 승인");
-                        recodeBtn.setText("녹음 종료");
-                        recodeFlag = true;
-                        recordStartDt= dayTimeDefalt.format(new Date(System.currentTimeMillis()));
-                        start();
-                    }
-                }else{
-                    Toast.makeText(getActivity(), "분석중입니다 잠시만 기다려주세요...", Toast.LENGTH_LONG).show();
-                    recordEndDt= dayTimeDefalt.format(new Date(System.currentTimeMillis()));
-                    recodeFlag = false;
-                    stop(v);
-                    recodeBtn.setText("녹음 시작");
-
-                    Handler delayHandler = new Handler();
-                    delayHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            // TODO
-                            RequestBody requestData = RequestBody.create(MediaType.parse("application/json"), new Gson().toJson(recordData));
-                            System.out.println(" ========================requestData: "+requestData.toString());
-                            //POST /api/record를 호출한다.
-                            apiService.addRecord(requestData).enqueue(new Callback<JsonObject>() {
-                                @Override
-                                public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                                    System.out.println(" ========================response: "+response.body().toString());
-                                    //창 띄우기
-//                                    startActivity(new Intent(getActivity(), ResultActivity.class));
-                                    Intent intent = new Intent(getActivity(), ResultActivity.class);
-                                    intent.putExtra("responseData",response.body().toString()); /*송신*/
-                                    startActivity(intent);
-                                }
-                                @Override
-                                public void onFailure(Call<JsonObject> call, Throwable t) {
-                                    System.out.println(" ========================Throwable: "+ t);
-
-                                }
-                            });
-                        }
-                    }, 3000);
-
-                }
-            }
-        });
-
-
-
-        Button testBtn = (Button) v.findViewById(R.id.testBtn) ;
-        testBtn.setText("테스트");
-        //xml 내에서 onclick으로 가능하다. 하지만 그건 activity 내에서만 가능하고 프래그먼트에서는 onclickListener()로 해야함
-        testBtn.setOnClickListener(new Button.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                if( testFlag == false){
-//                    testBtn.setText("종료");
-//                    testFlag = true;
-//                    mediaPlayer = MediaPlayer.create(getActivity(), R.raw.queen);
-//                    //구간 재생
-//                    mediaPlayer.seekTo(15000);
-//                    mediaPlayer.getCurrentPosition();
-//                    mediaPlayer.start();
-//                    int endTime =21000;
-//                    //카운트 다운
-//                    new CountDownTimer(endTime, 100) {
-//                        public void onTick(long millisUntilFinished) {
-//
-//                            if(MediaPlayerUtility.getTime(mediaPlayer)>=endTime){
-//                                mediaPlayer.stop();
-//                                // 초기화
-//                                mediaPlayer.reset();
-//                                testFlag = false;
-//                                testBtn.setText("시작");
-//                            }
-//                        }
-//                        public void onFinish() {
-//                            testBtn.setText("시작2");
-//                        }
-//                    }.start();
-//                }else{
-//                    testFlag = false;
-//                    testBtn.setText("시작");
-//                    // 정지버튼
-//                    mediaPlayer.stop();
-//                    // 초기화
-//                    mediaPlayer.reset();
-//                }
-                String testDt = "{\"userAppId\":\"7dc9e960-b0db-4c1c-81b5-2c8f2ce7ca4f\",\"recordId\":86,\"recordStartD\":\"2019-05-29\",\"recordStartDt\":\"2019-05-29T16:10:31\",\"recordEndD\":\"2019-05-29\",\"recordEndDt\":\"2019-05-29T16:10:54\",\"consultingYn\":\"N\",\"consultingReplyYn\":\"N\",\"analysisList\":[{\"analysisId\":63,\"analysisStartD\":\"2019-05-29T16:10:34\",\"analysisStartDt\":\"2019-05-29T16:10:34\",\"analysisEndD\":\"2019-05-29T16:10:54\",\"analysisEndDt\":\"2019-05-29T16:10:54\",\"analysisFileNm\":\"event-20191029_0410-29_0410_1559113854925.wav\",\"analysisFileAppPath\":\"/data/user/0/kr.co.dwebss.kococo/files/rec_data/23\",\"analysisServerUploadYn\":\"N\",\"claimYn\":\"N\",\"analysisDetailsList\":[{\"analysisDetailsId\":65,\"termTypeCd\":200102,\"termStartDt\":\"2019-05-29T16:10:36\",\"termEndDt\":\"2019-05-29T16:10:40\"}],\"_links\":{\"record\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86\"}}}],\"_links\":{\"self\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86\"},\"record\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86\"},\"admin\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86/admin\"},\"user\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86/user\"}}}";
-                Intent intent = new Intent(getActivity(), ResultActivity.class);
-                intent.putExtra("responseData",testDt); /*송신*/
-                startActivity(intent);
-
-
-            }
-        });
-        return v;
-    }
-
-    // MediaPlayer는 시스템 리소스를 잡아먹는다.
-    // MediaPlayer는 필요이상으로 사용하지 않도록 주의해야 한다.
-    //Fragment에서는 onDestoryView , activity에서는 onDestory
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        // MediaPlayer 해지
-        if (mediaPlayer != null) {
-            mediaPlayer.release();
-            mediaPlayer = null;
-        }
-    }
-
-
-
-    public void start() {
+    public void start(View v) {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO);
         //int bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT);
         int recBufSize = AudioRecord.getMinBufferSize(sampleRate, channelConfiguration, audioEncoding);;
@@ -298,7 +85,7 @@ public class RecodeFragment extends Fragment  {
             return;
         }
         String permission = "android.permission.RECORD_AUDIO";
-        int result  = getActivity().checkCallingOrSelfPermission(permission);
+        int result  = v.getContext().checkCallingOrSelfPermission(permission);
         record.startRecording();
         int recordingState = record.getRecordingState();
         Log.e(RecodeFragment.class.getSimpleName(), "RecordingState() after startRecording() = " + String.valueOf(recordingState));
@@ -308,69 +95,31 @@ public class RecodeFragment extends Fragment  {
         }
         Log.v(LOG_TAG, "Recording has started");
         mShouldContinue = true;
-
-        Audio_Recording();
+        recodeFlag = true;
+        recordStartDt= dayTimeDefalt.format(new Date(System.currentTimeMillis()));
+//        Audio_Recording(v);
         state = 1;
 //        Toast.makeText(getActivity(), "Started Recording", Toast.LENGTH_SHORT).show();
+
+        aat= new AudioAnalysisThread();
+        aat.start();
     }
 
-    public void stop(View v) {
+    public JsonObject stop(View v) {
         state = 0;
         mShouldContinue = false;
+        recodeFlag = false;
+        recordEndDt= dayTimeDefalt.format(new Date(System.currentTimeMillis()));
+        //녹음을 정지한다.
         record.stop();
         record.release();
         record = null;
-//        Toast.makeText(getActivity(), "stopped Recording", Toast.LENGTH_SHORT).show();
+
+        System.out.println(" ================JsonObject stop(View v)=======response: "+recordData);
+        return recordData;
     }
 
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case REQUEST_CAMERA:
-                for (int i = 0; i < permissions.length; i++) {
-                    String permission = permissions[i];
-                    int grantResult = grantResults[i];
-                    if (permission.equals(Manifest.permission.CAMERA)) {
-                        if(grantResult == PackageManager.PERMISSION_GRANTED) {
-                            Toast.makeText(getActivity(), "camera permission 승인", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(getActivity(), "camera permission denied", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-                break;
-            case REQUEST_EXTERNAL_STORAGE:
-                for (int i = 0; i < permissions.length; i++) {
-                    String permission = permissions[i];
-                    int grantResult = grantResults[i];
-                    if (permission.equals(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                        if(grantResult == PackageManager.PERMISSION_GRANTED) {
-                            Toast.makeText(getActivity(), "read/write storage permission 승인", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(getActivity(), "read/write storage permission denied", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-                break;
-            case REQUEST_MICROPHONE:
-                for (int i = 0; i < permissions.length; i++) {
-                    String permission = permissions[i];
-                    int grantResult = grantResults[i];
-                    if (permission.equals(Manifest.permission.RECORD_AUDIO)) {
-                        if(grantResult == PackageManager.PERMISSION_GRANTED) {
-                            Toast.makeText(getActivity(), "audio permission 승인", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(getActivity(), "audio permission denied", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-                break;
-        }
-    }
-
-    void Audio_Recording() {
+    public void Audio_Recording(View v) {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -379,8 +128,8 @@ public class RecodeFragment extends Fragment  {
                 byte[] frameBytes = new byte[frameByteSize];
                 audioCalculator = new AudioCalculator();
 
-                SleepCheck.checkTerm = 0;
-                SleepCheck.checkTermSecond = 0;
+                SleepCheckUtil.checkTerm = 0;
+                SleepCheckUtil.checkTermSecond = 0;
                 int osaCnt = 0;
                 boolean grindingStart = false;
                 boolean grindingContinue = false;
@@ -390,9 +139,9 @@ public class RecodeFragment extends Fragment  {
                 int osaRecordingExit = 0;
                 int osaRecordingContinueCnt = 0;
                 double osaStartTimes = 0.0;
-                SleepCheck.grindingContinueAmpCnt = 0;
-                SleepCheck.grindingContinueAmpOppCnt = 0;
-                SleepCheck.grindingRepeatAmpCnt = 0;
+                SleepCheckUtil.grindingContinueAmpCnt = 0;
+                SleepCheckUtil.grindingContinueAmpOppCnt = 0;
+                SleepCheckUtil.grindingRepeatAmpCnt = 0;
                 @SuppressWarnings("unused")
                 long recordStartingTIme = 0L;
                 snoringTermList = new ArrayList<StartEnd>();
@@ -420,7 +169,7 @@ public class RecodeFragment extends Fragment  {
 
                         times = (((double) (frameBytes.length / (44100d * 16 * 1))) * 8) * i;
                         i++;
-                        SleepCheck.curTermSecond = (int) Math.floor(times);
+                        SleepCheckUtil.curTermSecond = (int) Math.floor(times);
 
                         final String amp = String.valueOf(amplitude + "Amp");
                         final String db = String.valueOf(decibel + "db");
@@ -433,7 +182,7 @@ public class RecodeFragment extends Fragment  {
                         // -10db에 안걸릴 수도 잇으니까, 현재 녹음 상태의 평균 데시벨값을 지속적으로 갱신하면서 평균 데시벨보다 높은 소리가 발생했는지 체크
                         // 한다.
                         // 평균 데시벨 체크는 3초 동안한다.
-                        if (decibel > SleepCheck.NOISE_DB_INIT_VALUE && isRecording == false
+                        if (decibel > SleepCheckUtil.NOISE_DB_INIT_VALUE && isRecording == false
                                 && Math.floor((double) (audioData.length / (44100d * 16 * 1)) * 8) != Math.floor(times) //사운드 파일 테스트용
                         ) {
                             Log.v(LOG_TAG2,("녹음 시작! "));
@@ -441,12 +190,10 @@ public class RecodeFragment extends Fragment  {
                             recordStartingTIme = System.currentTimeMillis();
                             baos = new ByteArrayOutputStream();
                             isRecording = true;
-                            snoringTermList = new ArrayList<StartEnd>();
-                            grindingTermList = new ArrayList<StartEnd>();
-                            osaTermList = new ArrayList<StartEnd>();
-                        } else if (isRecording == true && (SleepCheck.noiseCheck(decibel)==0 || recodeFlag==false) ) {
+                        } else if (isRecording == true && (SleepCheckUtil.noiseCheck(decibel)==0 || recodeFlag==false) ) {
                             Log.v(LOG_TAG2,("녹음 종료! "));
                             Log.v(LOG_TAG2,(String.format("%.2f", times)+"s "));
+
                             SimpleDateFormat dayTime = new SimpleDateFormat("yyyymmdd_hhmm");
                             String fileName = dayTime.format(new Date(recordStartingTIme));
                             dayTime = new SimpleDateFormat("dd_hhmm");
@@ -454,9 +201,9 @@ public class RecodeFragment extends Fragment  {
                             fileName += "-" + dayTime.format(new Date(time));
                             byte[] waveData = baos.toByteArray();
 
-                            //TODO 녹음된 파일이 저장되는 시점
+                            //녹음된 파일이 저장되는 시점
                             WaveFormatConverter wfc = new WaveFormatConverter(44100, (short)1, waveData, 0, waveData.length-1);
-                            String filePath = wfc.saveLongTermWave(fileName, getContext());
+                            String filePath = wfc.saveLongTermWave(fileName, v.getContext());
 
                             Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
                             Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (waveData.length / (44100d * 16 * 1))) * 8));
@@ -473,27 +220,23 @@ public class RecodeFragment extends Fragment  {
                             for(StartEnd se : snoringTermList) {
                                 ansd = new JsonObject();
                                 ansd.addProperty("termTypeCd",200101);
-                                ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
-                                ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+                                ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.getStart()*1000))));
+                                ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.getEnd()*1000))));
                                 ansDList.add(ansd);
                             }
                             for(StartEnd se : grindingTermList) {
-                                if(se.end!=0){
-                                    ansd = new JsonObject();
-                                    ansd.addProperty("termTypeCd",200102);
-                                    ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
-                                    ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
-                                    ansDList.add(ansd);
-                                }
+                                ansd = new JsonObject();
+                                ansd.addProperty("termTypeCd",200102);
+                                ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.getStart()*1000))));
+                                ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.getEnd()*1000))));
+                                ansDList.add(ansd);
                             }
                             for(StartEnd se : osaTermList) {
-                                if(se.end!=0){
-                                    ansd = new JsonObject();
-                                    ansd.addProperty("termTypeCd",200103);
-                                    ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
-                                    ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
-                                    ansDList.add(ansd);
-                                }
+                                ansd = new JsonObject();
+                                ansd.addProperty("termTypeCd",200103);
+                                ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.getStart()*1000))));
+                                ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.getEnd()*1000))));
+                                ansDList.add(ansd);
                             }
                             ans.add("analysisDetailsList", ansDList);
                             ansList.add(ans);
@@ -527,13 +270,27 @@ public class RecodeFragment extends Fragment  {
                             } ]
                             }
                             */
+
                             recordData = new JsonObject();
                             recordData.addProperty("userAppId",userAppId);
                             recordData.addProperty("recordStartDt",recordStartDt);
                             recordData.addProperty("recordEndDt",recordEndDt);
                             recordData.add("analysisList", ansList);
 
-                            System.out.println(" ========================recordData: "+recordData.toString());
+//                            System.out.println(" ========================recordData: "+recordData.toString());
+//                            RequestBody requestData = RequestBody.create(MediaType.parse("application/json"), new Gson().toJson(recordData));
+//                            //POST /api/record를 호출한다.
+//                            apiService.addRecord(requestData).enqueue(new Callback<RequestBody>() {
+//                                @Override
+//                                public void onResponse(Call<RequestBody> call, Response<RequestBody> response) {
+//                                    System.out.println(" ========================response: "+response.body().toString());
+//                                }
+//
+//                                @Override
+//                                public void onFailure(Call<RequestBody> call, Throwable t) {
+//
+//                                }
+//                            });
 
 							/*
 							System.out.println("analysisStartDt: "+dayTimeT.format(new Date(recordStartingTIme)));
@@ -567,47 +324,46 @@ public class RecodeFragment extends Fragment  {
 
                         // 녹음이 끝나고 나면 코골이가 발생했는지를 체크해서 녹음된 파일의 코골이 유무를 결정한다. X
                         // 코골이 여부를 체크한다.
-                        int snoreChecked = SleepCheck.snoringCheck(decibel, frequency, sefrequency);
-                        // 주파수가 발견되면, 100초 단위로 기록한다.
+                        int snoreChecked = SleepCheckUtil.snoringCheck(decibel, frequency, sefrequency);
                         if(snoreChecked==1) {
                             if(snoringTermList.size()>0) {
-                                double beforeTime = snoringTermList.get(snoringTermList.size()-1).start;
+                                double beforeTime = snoringTermList.get(snoringTermList.size()-1).getStart();
                                 if(Math.floor(beforeTime)+100<Math.floor(times)) {
                                     snoringTermList.add(new StartEnd());
-                                    snoringTermList.get(snoringTermList.size()-1).start=times;
-                                    snoringTermList.get(snoringTermList.size()-1).end=times;
+                                    snoringTermList.get(snoringTermList.size()-1).setStart(times);
+                                    snoringTermList.get(snoringTermList.size()-1).setEnd(times);
                                 }
                             }else {
                                 snoringTermList.add(new StartEnd());
-                                snoringTermList.get(0).start=times;
-                                snoringTermList.get(0).end=times;
+                                snoringTermList.get(0).setStart(times);
+                                snoringTermList.get(0).setEnd(times);
                             }
                         }
                         // 이갈이는 기존 로직대로 체크해서, 어디 구간에서 발생했는지 체크한다.
-                        SleepCheck.grindingCheck(times, decibel, sefamplitude, frequency, sefrequency);
+                        SleepCheckUtil.grindingCheck(times, decibel, sefamplitude, frequency, sefrequency);
                         // 이갈이 신호가 발생하고, 이갈이 체크 상태가 아니면 이갈이 체크를 시작한다.
-                        if (SleepCheck.grindingRepeatAmpCnt == 1 && grindingStart == false) {
+                        if (SleepCheckUtil.grindingRepeatAmpCnt == 1 && grindingStart == false) {
 							/*
 							System.out.print("이갈이 체크를 시작한다.");
 							Log.v(LOG_TAG2,(String.format("%.2f", times) + "~" + String.format("%.2f", times + 1)
-									+ "s " + SleepCheck.grindingContinueAmpCnt + " "
-									+ SleepCheck.grindingContinueAmpOppCnt + " " + SleepCheck.grindingRepeatAmpCnt);
+									+ "s " + SleepCheckUtil.grindingContinueAmpCnt + " "
+									+ SleepCheckUtil.grindingContinueAmpOppCnt + " " + SleepCheckUtil.grindingRepeatAmpCnt);
 							*/
                             grindingTermList.add(new StartEnd());
-                            grindingTermList.get(grindingTermList.size()-1).start=times;
+                            grindingTermList.get(grindingTermList.size()-1).setStart(times);
                             grindingStart = true;
                             grindingContinue = false;
                             // 이갈이 체크 중에 1초간격으로 유효 카운트가 연속적으로 발생했으면 계속 체크한다.
-                        } else if (SleepCheck.curTermSecond - SleepCheck.checkTermSecond == 1
-                                && SleepCheck.grindingRepeatAmpCnt >= 3 && grindingStart == true) {
+                        } else if (SleepCheckUtil.curTermSecond - SleepCheckUtil.checkTermSecond == 1
+                                && SleepCheckUtil.grindingRepeatAmpCnt >= 3 && grindingStart == true) {
                             if (((double) (audioData.length / (44100d * 16 * 1))) * 8 < times + 1) {
 								/*
 								System.out.print("이갈이 종료.");
 								Log.v(LOG_TAG2,(String.format("%.2f", times) + "~" + String.format("%.2f", times + 1)
-										+ "s " + SleepCheck.grindingContinueAmpCnt + " "
-										+ SleepCheck.grindingContinueAmpOppCnt + " " + SleepCheck.grindingRepeatAmpCnt);
+										+ "s " + SleepCheckUtil.grindingContinueAmpCnt + " "
+										+ SleepCheckUtil.grindingContinueAmpOppCnt + " " + SleepCheckUtil.grindingRepeatAmpCnt);
 								*/
-                                grindingTermList.get(grindingTermList.size()-1).end=times;
+                                grindingTermList.get(grindingTermList.size()-1).setEnd(times);
                                 grindingStart = false;
                                 grindingContinue = false;
                                 grindingRecordingContinueCnt = 0;
@@ -615,22 +371,22 @@ public class RecodeFragment extends Fragment  {
 							/*
 							System.out.print("이갈이 중.");
 							Log.v(LOG_TAG2,(String.format("%.2f", times) + "~" + String.format("%.2f", times + 1)
-									+ "s " + SleepCheck.grindingContinueAmpCnt + " "
-									+ SleepCheck.grindingContinueAmpOppCnt + " " + SleepCheck.grindingRepeatAmpCnt);
+									+ "s " + SleepCheckUtil.grindingContinueAmpCnt + " "
+									+ SleepCheckUtil.grindingContinueAmpOppCnt + " " + SleepCheckUtil.grindingRepeatAmpCnt);
 							*/
                             grindingRecordingContinueCnt = 0;
                             grindingContinue = true;
                             // 이갈이 체크 중에 1초간격으로 유효 카운트가 연속적으로 발생하지 않으면 체크를 취소한다.
-                        } else if (SleepCheck.curTermSecond - SleepCheck.checkTermSecond == 1
-                                && SleepCheck.grindingRepeatAmpCnt == 0 && grindingStart == true
+                        } else if (SleepCheckUtil.curTermSecond - SleepCheckUtil.checkTermSecond == 1
+                                && SleepCheckUtil.grindingRepeatAmpCnt == 0 && grindingStart == true
                                 && grindingContinue == false) {
                             // 1초 단위 발생하는 이갈이도 잡기위해 유예 카운트를 넣는다. 1초만 한번더 체크함.
-                            if (grindingRecordingContinueCnt >= SleepCheck.GRINDING_RECORDING_CONTINUE_CNT) {
+                            if (grindingRecordingContinueCnt >= SleepCheckUtil.GRINDING_RECORDING_CONTINUE_CNT) {
 								/*
 								System.out.print("이갈이 아님, 체크 취소.");
 								Log.v(LOG_TAG2,(String.format("%.2f", times) + "~" + String.format("%.2f", times + 1)
-										+ "s " + SleepCheck.grindingContinueAmpCnt + " "
-										+ SleepCheck.grindingContinueAmpOppCnt + " " + SleepCheck.grindingRepeatAmpCnt);
+										+ "s " + SleepCheckUtil.grindingContinueAmpCnt + " "
+										+ SleepCheckUtil.grindingContinueAmpOppCnt + " " + SleepCheckUtil.grindingRepeatAmpCnt);
 								*/
                                 grindingTermList.remove(grindingTermList.size()-1);
                                 grindingStart = false;
@@ -639,25 +395,25 @@ public class RecodeFragment extends Fragment  {
 								/*
 								System.out.print("이갈이 체크를 취소하지 않고 진행한다.(1초 유예)");
 								Log.v(LOG_TAG2,(String.format("%.2f", times) + "~" + String.format("%.2f", times + 1)
-										+ "s " + SleepCheck.grindingContinueAmpCnt + " "
-										+ SleepCheck.grindingContinueAmpOppCnt + " " + SleepCheck.grindingRepeatAmpCnt);
+										+ "s " + SleepCheckUtil.grindingContinueAmpCnt + " "
+										+ SleepCheckUtil.grindingContinueAmpOppCnt + " " + SleepCheckUtil.grindingRepeatAmpCnt);
 								*/
                                 grindingRecordingContinueCnt++;
                             }
                             // 이갈이 체크 중에 1초간격으로 유효카운트가 더이상 발생하지 않으나 이전에 발생했더라면 현재 체크하는 이갈이는 유효함.
-                        } else if (SleepCheck.curTermSecond - SleepCheck.checkTermSecond == 1
-                                && SleepCheck.grindingRepeatAmpCnt == 0 && grindingContinue == true) {
+                        } else if (SleepCheckUtil.curTermSecond - SleepCheckUtil.checkTermSecond == 1
+                                && SleepCheckUtil.grindingRepeatAmpCnt == 0 && grindingContinue == true) {
 							/*
 							System.out.print("이갈이 종료.");
 							Log.v(LOG_TAG2,(String.format("%.2f", times) + "~" + String.format("%.2f", times + 1)
-									+ "s " + SleepCheck.grindingContinueAmpCnt + " "
-									+ SleepCheck.grindingContinueAmpOppCnt + " " + SleepCheck.grindingRepeatAmpCnt);
+									+ "s " + SleepCheckUtil.grindingContinueAmpCnt + " "
+									+ SleepCheckUtil.grindingContinueAmpOppCnt + " " + SleepCheckUtil.grindingRepeatAmpCnt);
 							*/
-                            grindingTermList.get(grindingTermList.size()-1).end=times;
+                            grindingTermList.get(grindingTermList.size()-1).setEnd(times);
                             grindingStart = false;
                             grindingContinue = false;
                             grindingRecordingContinueCnt = 0;
-                        } else if (SleepCheck.curTermSecond - SleepCheck.checkTermSecond == 1) {
+                        } else if (SleepCheckUtil.curTermSecond - SleepCheckUtil.checkTermSecond == 1) {
                             if (grindingStart) {
 								/*
 								Log.v(LOG_TAG2,(String.format("%.2f", times) + "s 이갈이 중 " + grindingStart + " "
@@ -666,7 +422,7 @@ public class RecodeFragment extends Fragment  {
                             }
                         }
                         // 무호흡도 기존 로직대로 체크해서, 어디 구간에서 발생했는지 체크한다.
-                        osaCnt = SleepCheck.OSACheck(times, decibel, sefamplitude, frequency, sefrequency);
+                        osaCnt = SleepCheckUtil.OSACheck(times, decibel, sefamplitude, frequency, sefrequency);
                         osaRecordingContinueCnt += osaCnt;
                         // 무호흡 카운트가 발생하고, 체크 상태가 아니면 체크를 시작한다.
                         if (osaRecordingExit > 0) {
@@ -675,8 +431,8 @@ public class RecodeFragment extends Fragment  {
                         if (osaCnt > 0 && osaStart == false) {
 							/*
 							System.out.print("무호흡 체크를 시작한다.");
-							Log.v(LOG_TAG2,(String.format("%.2f", times) + "s~" + SleepCheck.isOSATerm + " "
-									+ SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
+							Log.v(LOG_TAG2,(String.format("%.2f", times) + "s~" + SleepCheckUtil.isOSATerm + " "
+									+ SleepCheckUtil.isBreathTerm + " " + SleepCheckUtil.isOSATermCnt);
 							*/
                             osaStart = true;
                             osaContinue = false;
@@ -688,8 +444,8 @@ public class RecodeFragment extends Fragment  {
 								/*
 								System.out.print("무호흡 체크 취소. " + osaRecordingContinueCnt + ", ");
 								Log.v(LOG_TAG2,(String.format("%.2f", times) + "~"
-										+ String.format("%.2f", times + 0.01) + "s " + SleepCheck.isOSATerm + " "
-										+ SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
+										+ String.format("%.2f", times + 0.01) + "s " + SleepCheckUtil.isOSATerm + " "
+										+ SleepCheckUtil.isBreathTerm + " " + SleepCheckUtil.isOSATermCnt);
 								*/
                                 osaStart = false;
                                 osaRecordingContinueCnt = 0;
@@ -699,9 +455,9 @@ public class RecodeFragment extends Fragment  {
 									System.out.print("무호흡 끝.");
 									Log.v(LOG_TAG2,(
 											String.format("%.2f", times) + "~" + String.format("%.2f", times + 1) + "s "
-													+ SleepCheck.grindingContinueAmpCnt + " "
-													+ SleepCheck.grindingContinueAmpOppCnt + " "
-													+ SleepCheck.grindingRepeatAmpCnt);
+													+ SleepCheckUtil.grindingContinueAmpCnt + " "
+													+ SleepCheckUtil.grindingContinueAmpOppCnt + " "
+													+ SleepCheckUtil.grindingRepeatAmpCnt);
 									*/
                                     osaStart = false;
                                     osaRecordingContinueCnt = 0;
@@ -710,21 +466,21 @@ public class RecodeFragment extends Fragment  {
 								/*
 								System.out.print("무호흡 중.");
 								Log.v(LOG_TAG2,(String.format("%.2f", times) + "~"
-										+ String.format("%.2f", times + 0.01) + "s " + SleepCheck.isOSATerm + " "
-										+ SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
+										+ String.format("%.2f", times + 0.01) + "s " + SleepCheckUtil.isOSATerm + " "
+										+ SleepCheckUtil.isBreathTerm + " " + SleepCheckUtil.isOSATermCnt);
 								*/
                             }
                             // 무호흡 녹음 중 5초 이 후에 소리가 발생하면, 다음 소리가 발생한 구간까지 체크한다.
                         } else if (times - osaStartTimes > 5 && osaStart == true) {
-                            if (SleepCheck.isBreathTerm == true) { // 숨쉬는 구간이 되었으면, 체크 계속 플래그를 업데이트
+                            if (SleepCheckUtil.isBreathTerm == true) { // 숨쉬는 구간이 되었으면, 체크 계속 플래그를 업데이트
                                 if (((double) (audioData.length / (44100d * 16 * 1))) * 8 < times + 1) {
 									/*
 									System.out.print("무호흡 끝.");
 									Log.v(LOG_TAG2,(
 											String.format("%.2f", times) + "~" + String.format("%.2f", times + 1) + "s "
-													+ SleepCheck.grindingContinueAmpCnt + " "
-													+ SleepCheck.grindingContinueAmpOppCnt + " "
-													+ SleepCheck.grindingRepeatAmpCnt);
+													+ SleepCheckUtil.grindingContinueAmpCnt + " "
+													+ SleepCheckUtil.grindingContinueAmpOppCnt + " "
+													+ SleepCheckUtil.grindingRepeatAmpCnt);
 									*/
                                     osaStart = false;
                                     osaRecordingContinueCnt = 0;
@@ -733,16 +489,16 @@ public class RecodeFragment extends Fragment  {
 								/*
 								System.out.print("무호흡 중.2 ");
 								Log.v(LOG_TAG2,(String.format("%.2f", times) + "~"
-										+ String.format("%.2f", times + 0.01) + "s " + SleepCheck.isOSATerm + " "
-										+ SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
+										+ String.format("%.2f", times + 0.01) + "s " + SleepCheckUtil.isOSATerm + " "
+										+ SleepCheckUtil.isBreathTerm + " " + SleepCheckUtil.isOSATermCnt);
 								*/
                             } else {
                                 if (osaContinue == true && osaRecordingExit == 1) {
 									/*
 									System.out.print("무호흡 끝.");
 									Log.v(LOG_TAG2,(String.format("%.2f", times) + "~"
-											+ String.format("%.2f", times + 0.01) + "s " + SleepCheck.isOSATerm + " "
-											+ SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
+											+ String.format("%.2f", times + 0.01) + "s " + SleepCheckUtil.isOSATerm + " "
+											+ SleepCheckUtil.isBreathTerm + " " + SleepCheckUtil.isOSATermCnt);
 									*/
                                     osaStart = false;
                                     osaRecordingContinueCnt = 0;
@@ -757,19 +513,19 @@ public class RecodeFragment extends Fragment  {
 								/*
 								System.out.print("무호흡 중");
 								Log.v(LOG_TAG2,(String.format("%.2f", times) + "~"
-										+ String.format("%.2f", times + 0.01) + "s " + SleepCheck.isOSATerm + " "
-										+ SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
+										+ String.format("%.2f", times + 0.01) + "s " + SleepCheckUtil.isOSATerm + " "
+										+ SleepCheckUtil.isBreathTerm + " " + SleepCheckUtil.isOSATermCnt);
 								*/
                             }
                         }
-                        SleepCheck.curTermTime = times;
-                        SleepCheck.curTermDb = decibel;
-                        SleepCheck.curTermAmp = amplitude;
-                        SleepCheck.curTermHz = frequency;
-                        SleepCheck.curTermSecondHz = sefrequency;
+                        SleepCheckUtil.curTermTime = times;
+                        SleepCheckUtil.curTermDb = decibel;
+                        SleepCheckUtil.curTermAmp = amplitude;
+                        SleepCheckUtil.curTermHz = frequency;
+                        SleepCheckUtil.curTermSecondHz = sefrequency;
 
-                        SleepCheck.checkTerm++;
-                        SleepCheck.checkTermSecond = (int) Math.floor(times);
+                        SleepCheckUtil.checkTerm++;
+                        SleepCheckUtil.checkTermSecond = (int) Math.floor(times);
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -778,11 +534,10 @@ public class RecodeFragment extends Fragment  {
 //                        e.printStackTrace();
 //                    }
                 }
-
                 //Log.v(LOG_TAG2,("audio length(s): " + ((double) (audioData.length / (44100d * 16 * 1))) * 8));
                 Log.v(LOG_TAG2,("audio length(s): " + String.format("%.2f", times)));
 
-                Log.v(LOG_TAG2,( "코골이 여부 " + SleepCheck.snoringContinue));
+                Log.v(LOG_TAG2,( "코골이 여부 " + SleepCheckUtil.snoringContinue));
                 Log.v(LOG_TAG2,( "이갈이 " + grindingTermList.size()+"회 발생 "));
                 Log.v(LOG_TAG2,( "이갈이 구간=========="));
                 for(StartEnd se : grindingTermList) {
@@ -795,21 +550,18 @@ public class RecodeFragment extends Fragment  {
                     Log.v(LOG_TAG2,(se.getTerm()));
                 }
                 Log.v(LOG_TAG2,( "=================="));
-
                 Log.v(LOG_TAG, String.format("Recording  has stopped. Samples read: %d", shortsRead));
+
+
+
+
+
             }
         }).start();
     }
-}
 
-class StartEnd {
-    double start;
-    double end;
-    public String getTerm() {
-        return String.format("%.0f", start)+"~"+String.format("%.0f", end);
-    }
-    public String getTermForRequest(int termCd, long recordStartingTIme) {
-        SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        return "termTypeCd: "+termCd +", termStartDt: "+dayTime.format(new Date((long) (recordStartingTIme+this.start*1000)))+", termEndDt"+dayTime.format(new Date((long) (recordStartingTIme+this.end*1000)));
-    }
+
+
+
+
 }

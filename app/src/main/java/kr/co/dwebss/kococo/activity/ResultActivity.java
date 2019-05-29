@@ -17,7 +17,10 @@ package kr.co.dwebss.kococo.activity;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -39,53 +42,60 @@ import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
-import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.adapter.RecordListAdapter;
-import kr.co.dwebss.kococo.model.RecodeData;
-import kr.co.dwebss.kococo.model.Section;
+import kr.co.dwebss.kococo.model.RecordData;
+import kr.co.dwebss.kococo.util.MediaPlayerUtility;
 
 public class ResultActivity extends AppCompatActivity implements OnSeekBarChangeListener {
 
     private static final String TAG = "ResultActivity";
     private BarChart chart;
 
-    private Section resultListSection;
     private RecyclerView resultListRv;
     private ListView recordLv ;
     JsonObject responseData;
+
+    Date recordStartD;
+    Date recordEndD;
+
+    //재생할때 필요한
+    MediaPlayer mediaPlayer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
         //세로모드에서 가로모드로 전환 시 onCreate함수가 다시 호출
-
         setContentView(R.layout.activity_result);
-
-        //데이터 수신
-        Intent intent = getIntent();
-        if(getIntent().hasExtra("responseData"))
-        responseData = new JsonParser().parse(getIntent().getStringExtra("responseData")).getAsJsonObject();
-
-        System.out.println("=============레알 되라===================="+responseData);
 
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         float density = metrics.density;
 
-        initializeData();
-
+//        initializeData();
         super.onCreate(savedInstanceState);
-//        getSupportActionBar().setElevation(0);
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
+        //데이터 수신
+        Intent intent = getIntent();
+        if(getIntent().hasExtra("responseData")) responseData = new JsonParser().parse(getIntent().getStringExtra("responseData")).getAsJsonObject();
+
+
+//        System.out.println("=============레알 되라===================="+responseData);
+
+        //        responseData.getAsJsonArray("e");
+
+        //뒤로가기 버튼
         ImageButton bt = (ImageButton) findViewById(R.id.previousButton);
         bt.setOnClickListener(new Button.OnClickListener() {
             @Override
@@ -93,26 +103,75 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                 ResultActivity.super.onBackPressed();
             }
         });
+
+        //상단 헤더 날짜 텍스트 날짜가 넘어가면 시작~종료 아니면 그냥 시작 날짜로 보여준다.
         TextView dateTxtHeader = (TextView) findViewById(R.id.date_txt_header);
         Date from = new Date();
+        SimpleDateFormat stringtoDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         SimpleDateFormat transFormat = new SimpleDateFormat("yyyy년 MM월 dd일");
-        String dateVal = transFormat.format(from);
-        dateTxtHeader.setText(dateVal);
+        try {
+            recordStartD =  stringtoDateFormat.parse(responseData.get("recordStartD").toString().replace("\"",""));
+            recordEndD =  stringtoDateFormat.parse(responseData.get("recordEndD").toString().replace("\"",""));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
 
-        // Adapter 생성
+//        String recordStartD =  responseData.get("recordStartD").toString().replace("\"","");
+//        String recordEndD =  responseData.get("recordEndD").toString().replace("\"","");
+        if(recordStartD.equals(recordEndD)){
+            dateTxtHeader.setText(transFormat.format(recordStartD));
+        }else{
+            dateTxtHeader.setText(transFormat.format(recordStartD)+"~"+transFormat.format(recordEndD));
+        }
+
+
+
+        // 하단에 녹음 검출리스트 파일 리스트  Adapter 생성
         RecordListAdapter adapter = new RecordListAdapter() ;
         //listView 생성
         ListView listview = (ListView) findViewById(R.id.recordListview);
         listview.setAdapter(adapter);
-        // 첫 번째 아이템 추가.
+        // 녹음 검출리스트 추가.
+
         for(int i=0; i<10; i++){
-            adapter.addItem("녹음파일"+i) ;
+//            adapter.addItem("녹음파일"+i) ;
         }
-        // 두 번째 아이템 추가.
-//        adapter.addItem(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_36dp),
-//                "Circle", "Account Circle Black 36dp") ;
 
+       JsonArray analysisList = responseData.getAsJsonArray("analysisList");
 
+        if(analysisList.size()>0){
+            for(int i=0; i<analysisList.size(); i++){
+                JsonObject analysisObj = (JsonObject) analysisList.get(i);
+                analysisObj.get("analysisStartDt");
+                RecordData recordData = new RecordData();
+                recordData.setAnalysisFileNm(analysisObj.get("analysisFileNm").toString().replace("\"",""));
+                recordData.setAnalysisFileAppPath(analysisObj.get("analysisFileAppPath").toString().replace("\"",""));
+                recordData.setAnalysisId(analysisObj.get("analysisId").getAsInt());
+                recordData.setAnalysisStartDt(analysisObj.get("analysisStartDt").toString().replace("\"",""));
+                recordData.setAnalysisEndDt(analysisObj.get("analysisEndDt").toString().replace("\"",""));
+                JsonArray analysisDetailsList = analysisObj.getAsJsonArray("analysisDetailsList");
+                if(analysisDetailsList.size()>0){
+                    for(int j=0; j<analysisDetailsList.size(); j++){
+                        JsonObject analysisDetailsObj = (JsonObject) analysisDetailsList.get(i);
+                        int termTypeCd =  analysisDetailsObj.get("termTypeCd").getAsInt();
+                        if(termTypeCd==200101){
+                            recordData.setTitle("코골이"+(i+j+1));
+                        }else if(termTypeCd==200102){
+                            recordData.setTitle("이갈이"+(i+j+1));
+                        }else{
+                            recordData.setTitle("무호흡"+(i+j+1));
+                        }
+
+                        recordData.setTermStartDt(analysisDetailsObj.get("termStartDt").toString().replace("\"",""));
+                        recordData.setTermEndDt(analysisDetailsObj.get("termEndDt").toString().replace("\"",""));
+                        recordData.setTermTypeCd(termTypeCd);
+                        adapter.addItem(recordData) ;
+                    }
+                }
+//                System.out.println("=============레알 analysisStartDt=========="+analysisObj.get("analysisStartDt"));
+            }
+
+        }
         //차트 시작
         chart = findViewById(R.id.chart1);
         chart.getDescription().setEnabled(false);
@@ -157,6 +216,34 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
         chart.setFitBars(true);
         chart.invalidate();
 
+    }
+
+    public void play(int startTime, int endTime,String filePath){
+        mediaPlayer = MediaPlayer.create(this, Uri.parse(filePath));
+        //구간 재생
+        mediaPlayer.seekTo(startTime);
+        mediaPlayer.getCurrentPosition();
+        mediaPlayer.start();
+        //카운트 다운
+        new CountDownTimer(endTime, 100) {
+            public void onTick(long millisUntilFinished) {
+                if(MediaPlayerUtility.getTime(mediaPlayer)>=endTime){
+                    mediaPlayer.stop();
+                    // 초기화
+                    mediaPlayer.reset();
+//                    testFlag = false;
+//                    testBtn.setText("시작");
+                }
+            }
+            public void onFinish() {
+//                testBtn.setText("시작2");
+            }
+        }.start();
+    }
+
+    public void stopPlayer(){
+        mediaPlayer.stop();
+        mediaPlayer.reset();
     }
 
     //getSupportActionBar 사용하려면 추가해야함
@@ -213,14 +300,12 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {}
-
-
-    //녹음 리스트 더미 데이터
-    private void initializeData() {
-        ArrayList<RecodeData> resultList = new ArrayList<RecodeData>();
-        for(int i=0; i<10; i++){
-            resultList.add(new RecodeData("녹음 파일"+i,"i"));
-        }
-//        resultListSection = new Section(resultList, "recodes", false);
-    }
+//    //녹음 리스트 더미 데이터
+//    private void initializeData() {
+//        ArrayList<Record> resultList = new ArrayList<Record>();
+//        for(int i=0; i<10; i++){
+//            resultList.add(new Record("녹음 파일"+i,"i"));
+//        }
+////        resultListSection = new Section(resultList, "recodes", false);
+//    }
 }

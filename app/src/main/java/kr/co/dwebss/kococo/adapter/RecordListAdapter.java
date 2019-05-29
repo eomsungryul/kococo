@@ -17,6 +17,10 @@ package kr.co.dwebss.kococo.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.CountDownTimer;
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,18 +30,24 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
-
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.activity.ReportActivity;
-import kr.co.dwebss.kococo.model.RecodeData;
+import kr.co.dwebss.kococo.model.RecordData;
+import kr.co.dwebss.kococo.util.MediaPlayerUtility;
 
 public class RecordListAdapter extends BaseAdapter {
+
     // Adapter에 추가된 데이터를 저장하기 위한 ArrayList
-    private ArrayList<RecodeData> listViewItemList = new ArrayList<RecodeData>() ;
+    private ArrayList<RecordData> listViewItemList = new ArrayList<RecordData>() ;
     Boolean playBtnFlag = false;
+
+    //재생할때 필요한
+    MediaPlayer mediaPlayer;
 
     // ListViewAdapter의 생성자
     public RecordListAdapter() {
@@ -67,11 +77,11 @@ public class RecordListAdapter extends BaseAdapter {
 //        TextView descTextView = (TextView) convertView.findViewById(R.id.textView2) ;
 
         // Data Set(listViewItemList)에서 position에 위치한 데이터 참조 획득
-        RecodeData listViewItem = listViewItemList.get(position);
+        RecordData listViewItem = listViewItemList.get(position);
 
         // 아이템 내 각 위젯에 데이터 반영
 //        iconImageView.setImageDrawable(listViewItem.getIcon());
-        titleTextView.setText(listViewItem.getRowName());
+        titleTextView.setText(listViewItem.getTitle());
 //        descTextView.setText(listViewItem.getDesc());
 
         playBtnFlag = false;
@@ -80,14 +90,38 @@ public class RecordListAdapter extends BaseAdapter {
         playBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, "ㅎㅇ : "+position+" : "+getItem(position), Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "ㅎㅇ : "+position+" : "+listViewItem.getAnalysisFileAppPath(), Toast.LENGTH_SHORT).show();
                 //재생버튼 누를 시 정지버튼으로 변경하는 메소드
                 if(!playBtnFlag){
+                    //재생일 시에
                     playBtn.setImageResource(R.drawable.baseline_pause_white_48dp);
                     playBtnFlag = true;
+                    SimpleDateFormat stringtoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+                    long startTerm = 0L;
+                    long endTerm = 0L;
+                    try {
+                        Date analysisStartDt =  stringtoDateFormat.parse(listViewItem.getAnalysisStartDt().toString());
+
+                        Date termStartDt =  stringtoDateFormat.parse(listViewItem.getTermStartDt().toString());
+                        Date termEndDt =  stringtoDateFormat.parse(listViewItem.getTermEndDt().toString());
+                        startTerm = termStartDt.getTime()-analysisStartDt.getTime();
+                        endTerm = termEndDt.getTime()-termStartDt.getTime();
+                        System.out.println("================끝나자:"+listViewItem.getTermStartDt().toString());
+                        System.out.println("================끝나자:"+listViewItem.getTermStartDt().toString());
+                        System.out.println("================끝나자:"+analysisStartDt);
+                        System.out.println("================끝나자:"+termEndDt);
+                        System.out.println("================끝나자:"+termStartDt);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println("================끝나자:"+startTerm);
+                    System.out.println("================끝나자:"+endTerm);
+                    play((int)startTerm,(int)endTerm,listViewItem.getAnalysisFileAppPath()+listViewItem.getAnalysisFileNm(),context);
+
                 }else{
                     playBtn.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
                     playBtnFlag = false;
+                    stopPlayer();
                 }
             }
         });
@@ -100,7 +134,7 @@ public class RecordListAdapter extends BaseAdapter {
                 //intent (Context,class)
                 Intent i = new Intent(context, ReportActivity.class);
                 //intent에 값을 넣어야 해당 값을 신고하기 페이지에서 가져올수있다.
-                i.putExtra("testData",getItem(position).toString());
+                i.putExtra("testData", listViewItem);
                 //신고하기 창 열기
                 v.getContext().startActivity(i);
             }
@@ -118,14 +152,50 @@ public class RecordListAdapter extends BaseAdapter {
     // 지정한 위치(position)에 있는 데이터 리턴 : 필수 구현
     @Override
     public Object getItem(int position) {
-        return listViewItemList.get(position).getRowName();
+        return listViewItemList.get(position);
     }
 
     // 아이템 데이터 추가를 위한 함수. 개발자가 원하는대로 작성 가능.
     public void addItem(
-//            Drawable icon, String title,
-            String name) {
-        RecodeData item = new RecodeData(name,"1");
-        listViewItemList.add(item);
+    //            Drawable icon, String title,
+    RecordData date) {
+        listViewItemList.add(date);
     }
+
+    public void play(int startTime, int endTime , String filePath, Context context){
+        mediaPlayer = MediaPlayer.create(context, Uri.parse("/data/data/kr.co.dwebss.kococo/files/rec_data/23/snoring-20191029_0410-29_0410_1559113854914.wav"));
+//        mediaPlayer = MediaPlayer.create(context, R.raw.queen);
+        //구간 재생
+        System.out.println("====야이씨 : "+startTime);
+        System.out.println("====야이씨 : "+endTime);
+        System.out.println("====야이씨 : "+filePath);
+
+        mediaPlayer.seekTo(startTime);
+        mediaPlayer.getCurrentPosition();
+        mediaPlayer.start();
+        //카운트 다운
+        new CountDownTimer(endTime, 100) {
+            public void onTick(long millisUntilFinished) {
+                if(MediaPlayerUtility.getTime(mediaPlayer)>=endTime){
+                    mediaPlayer.stop();
+                    // 초기화
+                    mediaPlayer.reset();
+//                    testFlag = false;
+//                    testBtn.setText("시작");
+                }
+            }
+            public void onFinish() {
+//                testBtn.setText("시작2");
+            }
+        }.start();
+    }
+///data/user/0/kr.co.dwebss.kococo/files/rec_data/23event-20191029_0410-29_0410_1559113854925.wav
+
+    public void stopPlayer(){
+        mediaPlayer.stop();
+        mediaPlayer.reset();
+    }
+
+
+
 }
