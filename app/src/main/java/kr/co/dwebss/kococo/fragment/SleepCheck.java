@@ -32,15 +32,15 @@ public class SleepCheck {
 	static int snoringCheckCnt = 0;
 	static int snoringContinue = 0;
 	static int snoringContinueOpp = 0;
-	
+
 	static int checkTermSecond = 0;
 	static int curTermSecond = 0;
 
 	static int GRINDING_RECORDING_CONTINUE_CNT = 1;
-	
+
 	static int decibelSum = 0;
 	static int decibelSumCnt = 0;
-	
+
 	static int EXCEPTION_DB_FOR_AVR_DB = -10;
 	static int AVR_DB_CHECK_TERM = 300;
 	static int AVR_DB_INIT_VALUE = -100;
@@ -94,7 +94,7 @@ public class SleepCheck {
 			noiseChkCnt++;
 			return 101;
 		}
-		
+
 	}
 
 	static int snoringCheck(double decibel, double frequency, double sefrequency) {
@@ -118,13 +118,13 @@ public class SleepCheck {
 			if (grindingRepeatOnceAmpCnt <= 15 && grindingRepeatOnceAmpCnt>0) {
 				grindingContinueAmpCnt++;
 			}
-			grindingContinueAmpOppCnt++;	
+			grindingContinueAmpOppCnt++;
 			grindingRepeatOnceAmpCnt = 0;
 		}
 
 		if (curTermSecond - checkTermSecond == 1) {
 			if(grindingContinueAmpCnt >= 3
-					&& grindingContinueAmpCnt <=15 
+					&& grindingContinueAmpCnt <=15
 					&& grindingContinueAmpOppCnt >= 60
 					) {
 				grindingRepeatAmpCnt++;

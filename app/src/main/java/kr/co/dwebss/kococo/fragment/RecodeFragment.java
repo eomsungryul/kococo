@@ -7,10 +7,9 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.ParcelFileDescriptor;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -21,37 +20,26 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import kr.co.dwebss.kococo.R;
-import kr.co.dwebss.kococo.activity.MainActivity;
 import kr.co.dwebss.kococo.activity.ResultActivity;
-import kr.co.dwebss.kococo.fragment.recorder.Analysis;
-import kr.co.dwebss.kococo.fragment.recorder.AnalysisDetails;
 import kr.co.dwebss.kococo.http.ApiService;
-import kr.co.dwebss.kococo.model.ApiCode;
 import kr.co.dwebss.kococo.util.AudioCalculator;
 import kr.co.dwebss.kococo.util.MediaPlayerUtility;
 import kr.co.dwebss.kococo.util.WaveFormatConverter;
@@ -64,6 +52,16 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 
+//        1. 마이크를 킨다.
+//        2. 녹음 분석을 시작한다.
+//        3. 마이크에서 오는 소리를 분석한다.
+//        3-1. 마이크의 소리가 평균데시벨보다 높을 시 녹음을 시작한다.
+//        3-2 마이크의 소리가 평균데시벨로 왔을경우 녹음을 중지하고
+//        3-3 녹음파일코골이가 발생했는지 체크해서 녹음된 파일의 코골이 유무를 결정한다.
+//        3-4 이갈이, 무호흡이 발생하면 녹음된 구간을 저장한다.
+//        4. 분석종료시  마이크를 끈다.
+//        5. 녹음파일 데이터를 기기에 저장한다.
+//        6. 녹음분석 데이터를 서버에 보낸다.
 public class RecodeFragment extends Fragment  {
 
     Boolean recodeFlag = false;
@@ -170,7 +168,7 @@ public class RecodeFragment extends Fragment  {
                         return;
                     } else {
                         //녹음 시작 클릭
-                        Toast.makeText(getActivity(), "permission 승인", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(getActivity(), "permission 승인", Toast.LENGTH_SHORT).show();
                         Log.e(LOG_TAG, "permission 승인");
                         recodeBtn.setText("녹음 종료");
                         recodeFlag = true;
@@ -178,24 +176,47 @@ public class RecodeFragment extends Fragment  {
                         start();
                     }
                 }else{
-                    //창 띄우기
-                    startActivity(new Intent(getActivity(), ResultActivity.class));
+                    Toast.makeText(getActivity(), "분석중입니다 잠시만 기다려주세요...", Toast.LENGTH_LONG).show();
                     recordEndDt= dayTimeDefalt.format(new Date(System.currentTimeMillis()));
                     recodeFlag = false;
                     stop(v);
                     recodeBtn.setText("녹음 시작");
+
+                    Handler delayHandler = new Handler();
+                    delayHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            // TODO
+                            RequestBody requestData = RequestBody.create(MediaType.parse("application/json"), new Gson().toJson(recordData));
+                            System.out.println(" ========================requestData: "+requestData.toString());
+                            //POST /api/record를 호출한다.
+                            apiService.addRecord(requestData).enqueue(new Callback<JsonObject>() {
+                                @Override
+                                public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                                    System.out.println(" ========================response: "+response.body().toString());
+                                    //창 띄우기
+//                                    startActivity(new Intent(getActivity(), ResultActivity.class));
+                                    Intent intent = new Intent(getActivity(), ResultActivity.class);
+                                    intent.putExtra("responseData",response.body().toString()); /*송신*/
+                                    startActivity(intent);
+                                }
+                                @Override
+                                public void onFailure(Call<JsonObject> call, Throwable t) {
+                                    System.out.println(" ========================Throwable: "+ t);
+
+                                }
+                            });
+                        }
+                    }, 3000);
+
                 }
             }
         });
-        // Inflate the layout for this
-
 
 
 
         Button testBtn = (Button) v.findViewById(R.id.testBtn) ;
-
         testBtn.setText("시작");
-
         //xml 내에서 onclick으로 가능하다. 하지만 그건 activity 내에서만 가능하고 프래그먼트에서는 onclickListener()로 해야함
         testBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
@@ -235,17 +256,8 @@ public class RecodeFragment extends Fragment  {
                 }
             }
         });
-        // Inflate the layout for this
-
-
         return v;
-
-
-//        java.lang.IllegalStateException: Could not find method recordClick(View) in a parent or ancestor Context for android:onClick attribute defined on view class android.support.v7.widget.AppCompatButton with id recodeBtn
-
     }
-
-
 
     // MediaPlayer는 시스템 리소스를 잡아먹는다.
     // MediaPlayer는 필요이상으로 사용하지 않도록 주의해야 한다.
@@ -511,21 +523,6 @@ public class RecodeFragment extends Fragment  {
                             recordData.add("analysisList", ansList);
 
                             System.out.println(" ========================recordData: "+recordData.toString());
-                            RequestBody requestData = RequestBody.create(MediaType.parse("application/json"), new Gson().toJson(recordData));
-                            //POST /api/record를 호출한다.
-                            apiService.addRecord(requestData).enqueue(new Callback<RequestBody>() {
-                                @Override
-                                public void onResponse(Call<RequestBody> call, Response<RequestBody> response) {
-                                    Toast.makeText(getActivity(), "sucess"+response,
-                                            Toast.LENGTH_SHORT).show();
-                                    System.out.println(" ========================response: "+response.body().toString());
-                                }
-
-                                @Override
-                                public void onFailure(Call<RequestBody> call, Throwable t) {
-
-                                }
-                            });
 
 							/*
 							System.out.println("analysisStartDt: "+dayTimeT.format(new Date(recordStartingTIme)));
@@ -542,130 +539,6 @@ public class RecodeFragment extends Fragment  {
 							for(StartEnd se : osaTermList) {
 								System.out.println(se.getTermForRequest(200103, recordStartingTIme));
 							}
-							*/
-                            Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 끝====="));
-                            recordStartingTIme = 0;
-                            isRecording = false;
-                        }
-                        else if(isRecording == true && Math.floor((double) (audioData.length / (44100d * 16 * 1)) * 8) == Math.floor(times)){
-                            Log.v(LOG_TAG2,("녹음 종료!(사운드 파일 테스트용) "));
-                            Log.v(LOG_TAG2,(String.format("%.2f", times)+"s "));
-                            SimpleDateFormat dayTime = new SimpleDateFormat("yyyymmdd_hhmm");
-                            String fileName = dayTime.format(new Date(recordStartingTIme));
-                            dayTime = new SimpleDateFormat("dd_hhmm");
-                            long time = System.currentTimeMillis();
-                            fileName += "-" + dayTime.format(new Date(time));
-                            byte[] waveData = baos.toByteArray();
-
-                            WaveFormatConverter wfc = new WaveFormatConverter(44100, (short)1, waveData, 0, waveData.length);
-                            String filePath = wfc.saveLongTermWave(fileName,getContext());
-                            SimpleDateFormat dayTimeT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-                            Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
-                            Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (waveData.length / (44100d * 16 * 1))) * 8));
-
-                            JsonObject ans = new JsonObject();
-                            //ans.setAnalysisStartDt(LocalDateTime.ofInstant(Instant.ofEpochMilli(recordStartingTIme), ZoneId.systemDefault()));
-                            //ans.setAnalysisEndDt(LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()));
-                            ans.addProperty("analysisStartDt",dayTimeDefalt.format(new Date(recordStartingTIme)));
-                            ans.addProperty("analysisEndDt",dayTimeDefalt.format(new Date(time)));
-                            ans.addProperty("analysisFileAppPath",filePath);
-                            ans.addProperty("analysisFileNm","event-"+fileName+"_"+System.currentTimeMillis()+".wav");
-                            JsonArray ansDList = new JsonArray();
-                            JsonObject ansd = new JsonObject();
-                            for(StartEnd se : snoringTermList) {
-                                ansd = new JsonObject();
-                                ansd.addProperty("termTypeCd",200101);
-                                ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
-                                ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
-                                ansDList.add(ansd);
-                            }
-                            for(StartEnd se : grindingTermList) {
-                                ansd = new JsonObject();
-                                ansd.addProperty("termTypeCd",200102);
-                                ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
-                                ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
-                                ansDList.add(ansd);
-                            }
-                            for(StartEnd se : osaTermList) {
-                                ansd = new JsonObject();
-                                ansd.addProperty("termTypeCd",200103);
-                                ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
-                                ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
-                                ansDList.add(ansd);
-                            }
-                            ans.add("analysisDetailsList", ansDList);
-                            ansList.add(ans);
-                            //여기까지 AnswerList를 계속 생성한다.
-                            //녹음 중단 했을 떄 AnswerList를 Record의 AnswerList필드에 담는다.
-                            //Record의 recordStartDt, recordEndDt에 녹음 시작시간과 녹음 종료 시간을, userAppId에는 사용자 앱 ID를 입력 해서 VO를 완성한다.
-                            //최종 완료 vo 형태
-                            /*
-                            {
-                                "userAppId" : "c0362dd4-97f4-488c-b31c-12cb23b534cf",
-                                    "recordStartDt" : "2019-05-24T12:00:16.614",
-                                    "recordEndDt" : "2019-05-24T20:00:16.614",
-                                    "analysisList" : [ {
-                                "analysisStartDt" : "2019-05-24T12:00:16.613",
-                                        "analysisEndDt" : "2019-05-24T15:00:16.613",
-                                        "analysisFileNm" : "2019-05-24T12:00:16.613_testFileNm.wav",
-                                        "analysisFileAppPath" : "/rec_data/",
-                                        "analysisDetailsList" : [ {
-                                    "termTypeCd" : 200101,
-                                            "termStartDt" : "2019-05-24T12:00:26.612",
-                                            "termEndDt" : "2019-05-24T12:02:20.613"
-                                }, {
-                                    "termTypeCd" : 200102,
-                                            "termStartDt" : "2019-05-24T12:08:48.613",
-                                            "termEndDt" : "2019-05-24T13:33:48.613"
-                                }, {
-                                    "termTypeCd" : 200103,
-                                            "termStartDt" : "2019-05-24T14:21:10.613",
-                                            "termEndDt" : "2019-05-24T15:22:40.613"
-                                } ]
-                            } ]
-                            }
-                            */
-                            //POST /api/record를 호출한다.
-                            recordData = new JsonObject();
-                            recordData.addProperty("userAppId",userAppId);
-                            recordData.addProperty("recordStartDt",recordStartDt);
-                            recordData.addProperty("recordEndDt",recordEndDt);
-                            recordData.add("analysisList", ansList);
-
-//                            System.out.println(" ========================recordData: "+recordData.toString());
-                            RequestBody requestData = RequestBody.create(MediaType.parse("application/json"), new Gson().toJson(recordData));
-                            //POST /api/record를 호출한다.
-                            apiService.addRecord(requestData).enqueue(new Callback<RequestBody>() {
-                                @Override
-                                public void onResponse(Call<RequestBody> call, Response<RequestBody> response) {
-                                    Toast.makeText(getActivity(), "sucess"+response,
-                                            Toast.LENGTH_SHORT).show();
-//                                    System.out.println(" ========================response: "+response.body().toString());
-                                }
-
-                                @Override
-                                public void onFailure(Call<RequestBody> call, Throwable t) {
-
-                                }
-                            });
-
-
-
-							/*
-                            System.out.println("analysisStartDt: "+dayTimeT.format(new Date(recordStartingTIme)));
-                            System.out.println("analysisEndDt: "+dayTimeT.format(new Date(time)));
-                            System.out.println("analysisFileNm: "+"event-"+fileName+"_"+System.currentTimeMillis()+".wav");
-                            System.out.println("analysisFileAppPath: raw/raw_convert/");
-                            System.out.println("analysisDetailsList 시작, 리스트, 길이: "+snoringTermList.size()+ grindingTermList.size()+osaTermList.size());
-                            for(StartEnd se : snoringTermList) {
-                                System.out.println(se.getTermForRequest(200101, recordStartingTIme));
-                            }
-                            for(StartEnd se : grindingTermList) {
-                                System.out.println(se.getTermForRequest(200102, recordStartingTIme));
-                            }
-                            for(StartEnd se : osaTermList) {
-                                System.out.println(se.getTermForRequest(200103, recordStartingTIme));
-                            }
 							*/
                             Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 끝====="));
                             recordStartingTIme = 0;
@@ -915,9 +788,7 @@ public class RecodeFragment extends Fragment  {
             }
         }).start();
     }
-
 }
-
 
 class StartEnd {
     double start;

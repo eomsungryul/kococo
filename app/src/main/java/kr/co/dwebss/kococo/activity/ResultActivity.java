@@ -15,6 +15,7 @@
  */
 package kr.co.dwebss.kococo.activity;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
@@ -38,6 +39,9 @@ import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -57,13 +61,20 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
     private Section resultListSection;
     private RecyclerView resultListRv;
     private ListView recordLv ;
-
+    JsonObject responseData;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
         //세로모드에서 가로모드로 전환 시 onCreate함수가 다시 호출
 
         setContentView(R.layout.activity_result);
+
+        //데이터 수신
+        Intent intent = getIntent();
+        if(getIntent().hasExtra("responseData"))
+        responseData = new JsonParser().parse(getIntent().getStringExtra("responseData")).getAsJsonObject();
+
+        System.out.println("=============레알 되라===================="+responseData);
 
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         float density = metrics.density;

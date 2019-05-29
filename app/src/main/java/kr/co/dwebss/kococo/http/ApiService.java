@@ -44,7 +44,7 @@ public interface ApiService {
             "Content-Type: application/json"
     })
     @POST("kococo/api/record")
-    Call<RequestBody> addRecord(@Body RequestBody data);
+    Call<JsonObject> addRecord(@Body RequestBody data);
 //    Call<JSONObject> addRecord(@Body JSONObject data);
 //    Call<JsonObject> addRecord(JsonObject data);
 

@@ -133,17 +133,15 @@ public class MainActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             boolean updated = task.getResult();
                             Log.d(TAG, "Config params updated: " + updated);
-                            Toast.makeText(MainActivity.this, "Fetch and activate succeeded",
-                                    Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(MainActivity.this, "Fetch and activate succeeded",Toast.LENGTH_SHORT).show();
 
                         } else {
-                            Toast.makeText(MainActivity.this, "Fetch failed",
-                                    Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(MainActivity.this, "Fetch failed",Toast.LENGTH_SHORT).show();
                         }
                         //여기서 함 설정 가져옴!
 
                         String welcomeMessage = mFirebaseRemoteConfig.getString(WELCOME_MESSAGE_KEY);
-                        Toast.makeText(MainActivity.this, welcomeMessage,Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(MainActivity.this, welcomeMessage,Toast.LENGTH_SHORT).show();
                     }
                 });
         // [END fetch_config_with_callback]
@@ -175,8 +173,7 @@ public class MainActivity extends AppCompatActivity {
         apiService.getApiCode().enqueue(new Callback<ApiCode>() {
             @Override
             public void onResponse(Call<ApiCode> call, Response<ApiCode> response) {
-                Toast.makeText(MainActivity.this, "sucess"+response,
-                        Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "sucess"+response,Toast.LENGTH_SHORT).show();
 
                 System.out.println(" ========================response: "+response.body().toString());
 
@@ -258,11 +255,11 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Toast.makeText(MainActivity.this, "파일이 있네유" +data,Toast.LENGTH_SHORT).show();
+//            Toast.makeText(MainActivity.this, "파일이 있네유" +data,Toast.LENGTH_SHORT).show();
 
         } else {
             //파일이 없을시
-            Toast.makeText(MainActivity.this, "파일이 읍네요",Toast.LENGTH_SHORT).show();
+//            Toast.makeText(MainActivity.this, "파일이 읍네요",Toast.LENGTH_SHORT).show();
             //저장하기
             apiService.getAppid().enqueue(new Callback<JsonObject>() {
                 @Override
