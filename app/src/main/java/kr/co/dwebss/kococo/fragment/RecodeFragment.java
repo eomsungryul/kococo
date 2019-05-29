@@ -421,6 +421,7 @@ public class RecodeFragment extends Fragment  {
                         times = (((double) (frameBytes.length / (44100d * 16 * 1))) * 8) * i;
                         i++;
                         SleepCheck.curTermSecond = (int) Math.floor(times);
+                        SleepCheck.GrindingCheckTermSecond = times;
 
                         final String amp = String.valueOf(amplitude + "Amp");
                         final String db = String.valueOf(decibel + "db");
@@ -428,7 +429,10 @@ public class RecodeFragment extends Fragment  {
                         final String sehz = String.valueOf(sefrequency + "Hz(2th)");
                         final String seamp = String.valueOf(sefamplitude + "Amp(2th)");
 
-                        System.out.println(String.format("%.2f", times)+"s "+hz +" "+db+" "+amp+" "+sehz+" "+seamp);
+                        if (i < 100) {
+                            continue;
+                        }
+                        //System.out.println(String.format("%.2f", times)+"s "+hz +" "+db+" "+amp+" "+sehz+" "+seamp);
                         // 소리의 발생은 특정 db 이상으로한다. 데시벨은 -31.5~0 으로 수치화 하고 있음.
                         // -10db에 안걸릴 수도 잇으니까, 현재 녹음 상태의 평균 데시벨값을 지속적으로 갱신하면서 평균 데시벨보다 높은 소리가 발생했는지 체크
                         // 한다.
@@ -447,10 +451,11 @@ public class RecodeFragment extends Fragment  {
                         } else if (isRecording == true && (SleepCheck.noiseCheck(decibel)==0 || recodeFlag==false) ) {
                             Log.v(LOG_TAG2,("녹음 종료! "));
                             Log.v(LOG_TAG2,(String.format("%.2f", times)+"s "));
-                            SimpleDateFormat dayTime = new SimpleDateFormat("yyyymmdd_hhmm");
+                            SimpleDateFormat dayTime = new SimpleDateFormat("yyyymmdd_HHmm");
                             String fileName = dayTime.format(new Date(recordStartingTIme));
-                            dayTime = new SimpleDateFormat("dd_hhmm");
-                            long time = System.currentTimeMillis();
+                            dayTime = new SimpleDateFormat("dd_HHmm");
+                            //long time = System.currentTimeMillis();
+                            long time = recordStartingTIme+(long)times*1000;
                             fileName += "-" + dayTime.format(new Date(time));
                             byte[] waveData = baos.toByteArray();
 
@@ -586,19 +591,20 @@ public class RecodeFragment extends Fragment  {
                         // 이갈이는 기존 로직대로 체크해서, 어디 구간에서 발생했는지 체크한다.
                         SleepCheck.grindingCheck(times, decibel, sefamplitude, frequency, sefrequency);
                         // 이갈이 신호가 발생하고, 이갈이 체크 상태가 아니면 이갈이 체크를 시작한다.
-                        if (SleepCheck.grindingRepeatAmpCnt == 1 && grindingStart == false) {
+                        if (SleepCheck.grindingRepeatAmpCnt == 2 && grindingStart == false) {
 							/*
 							System.out.print("이갈이 체크를 시작한다.");
 							Log.v(LOG_TAG2,(String.format("%.2f", times) + "~" + String.format("%.2f", times + 1)
 									+ "s " + SleepCheck.grindingContinueAmpCnt + " "
 									+ SleepCheck.grindingContinueAmpOppCnt + " " + SleepCheck.grindingRepeatAmpCnt);
 							*/
+                            SleepCheck.GrindingCheckStartTermSecond = times;
                             grindingTermList.add(new StartEnd());
-                            grindingTermList.get(grindingTermList.size()-1).start=times;
+                            grindingTermList.get(grindingTermList.size()-1).start=times-2;
                             grindingStart = true;
                             grindingContinue = false;
                             // 이갈이 체크 중에 1초간격으로 유효 카운트가 연속적으로 발생했으면 계속 체크한다.
-                        } else if (SleepCheck.curTermSecond - SleepCheck.checkTermSecond == 1
+                        } else if (Math.floor((SleepCheck.GrindingCheckTermSecond - SleepCheck.GrindingCheckStartTermSecond)*100) == 101
                                 && SleepCheck.grindingRepeatAmpCnt >= 3 && grindingStart == true) {
                             if (((double) (audioData.length / (44100d * 16 * 1))) * 8 < times + 1) {
 								/*
@@ -607,6 +613,7 @@ public class RecodeFragment extends Fragment  {
 										+ "s " + SleepCheck.grindingContinueAmpCnt + " "
 										+ SleepCheck.grindingContinueAmpOppCnt + " " + SleepCheck.grindingRepeatAmpCnt);
 								*/
+                                SleepCheck.grindingRepeatAmpCnt = 0;
                                 grindingTermList.get(grindingTermList.size()-1).end=times;
                                 grindingStart = false;
                                 grindingContinue = false;
@@ -621,7 +628,7 @@ public class RecodeFragment extends Fragment  {
                             grindingRecordingContinueCnt = 0;
                             grindingContinue = true;
                             // 이갈이 체크 중에 1초간격으로 유효 카운트가 연속적으로 발생하지 않으면 체크를 취소한다.
-                        } else if (SleepCheck.curTermSecond - SleepCheck.checkTermSecond == 1
+                        } else if (Math.floor((SleepCheck.GrindingCheckTermSecond - SleepCheck.GrindingCheckStartTermSecond)*100) == 101
                                 && SleepCheck.grindingRepeatAmpCnt == 0 && grindingStart == true
                                 && grindingContinue == false) {
                             // 1초 단위 발생하는 이갈이도 잡기위해 유예 카운트를 넣는다. 1초만 한번더 체크함.
@@ -632,6 +639,7 @@ public class RecodeFragment extends Fragment  {
 										+ "s " + SleepCheck.grindingContinueAmpCnt + " "
 										+ SleepCheck.grindingContinueAmpOppCnt + " " + SleepCheck.grindingRepeatAmpCnt);
 								*/
+                                SleepCheck.grindingRepeatAmpCnt = 0;
                                 grindingTermList.remove(grindingTermList.size()-1);
                                 grindingStart = false;
                                 grindingRecordingContinueCnt = 0;
@@ -645,7 +653,7 @@ public class RecodeFragment extends Fragment  {
                                 grindingRecordingContinueCnt++;
                             }
                             // 이갈이 체크 중에 1초간격으로 유효카운트가 더이상 발생하지 않으나 이전에 발생했더라면 현재 체크하는 이갈이는 유효함.
-                        } else if (SleepCheck.curTermSecond - SleepCheck.checkTermSecond == 1
+                        } else if (Math.floor((SleepCheck.GrindingCheckTermSecond - SleepCheck.GrindingCheckStartTermSecond)*100) == 101
                                 && SleepCheck.grindingRepeatAmpCnt == 0 && grindingContinue == true) {
 							/*
 							System.out.print("이갈이 종료.");
@@ -653,6 +661,7 @@ public class RecodeFragment extends Fragment  {
 									+ "s " + SleepCheck.grindingContinueAmpCnt + " "
 									+ SleepCheck.grindingContinueAmpOppCnt + " " + SleepCheck.grindingRepeatAmpCnt);
 							*/
+                            SleepCheck.grindingRepeatAmpCnt = 0;
                             grindingTermList.get(grindingTermList.size()-1).end=times;
                             grindingStart = false;
                             grindingContinue = false;
@@ -780,7 +789,7 @@ public class RecodeFragment extends Fragment  {
                 }
 
                 //Log.v(LOG_TAG2,("audio length(s): " + ((double) (audioData.length / (44100d * 16 * 1))) * 8));
-                Log.v(LOG_TAG2,("audio length(s): " + String.format("%.2f", times)));
+                Log.v(LOG_TAG2,("녹음시작-종료(s): " + String.format("%.2f", times)));
 
                 Log.v(LOG_TAG2,( "코골이 여부 " + SleepCheck.snoringContinue));
                 Log.v(LOG_TAG2,( "이갈이 " + grindingTermList.size()+"회 발생 "));
