@@ -18,6 +18,8 @@ package kr.co.dwebss.kococo.activity;
 import android.Manifest;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
@@ -280,9 +282,10 @@ public class MainActivity extends AppCompatActivity {
                         out.close();
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
                     }
+//                    catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
                 }
                 @Override
                 public void onFailure(Call<JsonObject> call, Throwable t) {
