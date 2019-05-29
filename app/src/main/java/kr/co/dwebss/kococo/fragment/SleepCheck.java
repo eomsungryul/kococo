@@ -51,6 +51,10 @@ public class SleepCheck {
 	static int noiseNoneChkSum = 0;
 	static int noiseChkCnt = 0;
 
+	static double GrindingCheckTermSecond = 0;
+	static double GrindingCheckStartTermSecond = 0;
+	static double GrindingCheckStartTermDecibel = 0;
+
 	static double getAvrDB(double decibel) {
 		double avrDB = -AVR_DB_INIT_VALUE;
 		if (decibelSumCnt >= AVR_DB_CHECK_TERM || decibelSumCnt == 0) {
@@ -113,23 +117,43 @@ public class SleepCheck {
 	static int grindingCheck(double times, double decibel, int amplitude, double frequency, double sefrequency) {
 		if (decibel > grindChkDb
 				){
-			grindingRepeatOnceAmpCnt++;
+			if(grindingRepeatOnceAmpCnt==0) {
+				GrindingCheckStartTermDecibel = decibel;
+			}else {
+				GrindingCheckStartTermDecibel = (GrindingCheckStartTermDecibel+decibel) / grindingRepeatOnceAmpCnt;
+			}
+			if(grindingRepeatOnceAmpCnt>=2) {
+				if(decibel > grindingRepeatOnceAmpCnt) {
+					grindingContinueAmpOppCnt++;
+				}else {
+					grindingRepeatOnceAmpCnt++;
+				}
+			}else {
+				grindingRepeatOnceAmpCnt++;
+			}
 		} else {
-			if (grindingRepeatOnceAmpCnt <= 15 && grindingRepeatOnceAmpCnt>0) {
+			if (grindingRepeatOnceAmpCnt <= 4 && grindingRepeatOnceAmpCnt>=2) {
+				if(grindingContinueAmpCnt == 0) {
+					GrindingCheckStartTermSecond = times;
+				}
 				grindingContinueAmpCnt++;
+				//System.out.println(String.format("%.2f", times) + "s " + frequency + " " + decibel + " " + amplitude + " " + sefrequency + " " +grindingContinueAmpCnt);
 			}
 			grindingContinueAmpOppCnt++;
 			grindingRepeatOnceAmpCnt = 0;
 		}
 
-		if (curTermSecond - checkTermSecond == 1) {
+		if (Math.floor((GrindingCheckTermSecond - GrindingCheckStartTermSecond)*100) == 101) {
+			//System.out.println(curTermSecond + "~"+checkTermSecond+"s, grindingContinueAmpCnt:"+grindingContinueAmpCnt+", grindingContinueAmpOppCnt:"+grindingContinueAmpOppCnt+", grindingRepeatAmpCnt:"+grindingRepeatAmpCnt);
 			if(grindingContinueAmpCnt >= 3
 					&& grindingContinueAmpCnt <=15
-					&& grindingContinueAmpOppCnt >= 60
-					) {
+					&& grindingContinueAmpOppCnt >= 50
+			) {
 				grindingRepeatAmpCnt++;
+				//System.out.println(curTermSecond + " "+checkTermSecond+" "+grindingContinueAmpCnt+" "+grindingContinueAmpOppCnt+" "+grindingRepeatAmpCnt);
 			}else {
 				grindingRepeatAmpCnt = 0;
+				//System.out.println("여기8");
 			}
 			grindingContinueAmpCnt = 0;
 			grindingContinueAmpOppCnt = 0;
