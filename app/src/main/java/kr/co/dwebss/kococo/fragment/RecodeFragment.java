@@ -425,6 +425,9 @@ public class RecodeFragment extends Fragment  {
                             recordStartingTIme = System.currentTimeMillis();
                             baos = new ByteArrayOutputStream();
                             isRecording = true;
+                            snoringTermList = new ArrayList<StartEnd>();
+                            grindingTermList = new ArrayList<StartEnd>();
+                            osaTermList = new ArrayList<StartEnd>();
                         } else if (isRecording == true && (SleepCheck.noiseCheck(decibel)==0 || recodeFlag==false) ) {
                             Log.v(LOG_TAG2,("녹음 종료! "));
                             Log.v(LOG_TAG2,(String.format("%.2f", times)+"s "));
@@ -684,6 +687,7 @@ public class RecodeFragment extends Fragment  {
                         // 녹음이 끝나고 나면 코골이가 발생했는지를 체크해서 녹음된 파일의 코골이 유무를 결정한다. X
                         // 코골이 여부를 체크한다.
                         int snoreChecked = SleepCheck.snoringCheck(decibel, frequency, sefrequency);
+                        // 주파수가 발견되면, 100초 단위로 기록한다.
                         if(snoreChecked==1) {
                             if(snoringTermList.size()>0) {
                                 double beforeTime = snoringTermList.get(snoringTermList.size()-1).start;
