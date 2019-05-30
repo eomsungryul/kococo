@@ -8,8 +8,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import kr.co.dwebss.kococo.fragment.RecodeFragment;
-
 
 public class WaveFormatConverter {
 
@@ -28,7 +26,9 @@ public class WaveFormatConverter {
 
 
 	int folderCnt;
+	public WaveFormatConverter(){
 
+	}
 	public WaveFormatConverter(int sampleRate, short nChannels, byte[] data, int start, int end)
 	{
 		nSamples=end-start+1;
@@ -94,13 +94,15 @@ public class WaveFormatConverter {
 	// ------------------------------------------------------------
 
 
-	public String[] saveLongTermMp3(String fileName, Context x) {
+	public String[] saveLongTermMp3(String fileName, Context x, byte[] waveData) {
 //		File myDir = new File(Environment.getExternalStorageDirectory(), "rec_data/");
-
-		System.out.println(x.getFilesDir().getAbsolutePath()+"/rec_data/"+ "----------------------save rec_data/rec_data/rec_data/rec_data/rec_data/rec_data/");
-		subDirList(x.getFilesDir().getAbsolutePath()+"/rec_data/");
+		//Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+		String savePath = x.getFilesDir().getAbsolutePath(); // 이경로는 adb pull 이 안됨.
+		savePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath(); //테스트하려고 임시로 쓴 경로
+		System.out.println(savePath+"/rec_data/"+ "----------------------save rec_data/rec_data/rec_data/rec_data/rec_data/rec_data/");
+		subDirList(savePath+"/rec_data/");
 		folderCnt++;
-		File myDir = new File(x.getFilesDir().getAbsolutePath(), "rec_data/"+folderCnt+"/");
+		File myDir = new File(savePath, "rec_data/"+folderCnt+"/");
 		if(!myDir.exists()){
 			myDir.mkdirs();
 		}
@@ -112,7 +114,7 @@ public class WaveFormatConverter {
 
 			File path=new File(myDir,filename);
 			FileOutputStream outFile = new FileOutputStream(path);
-			outFile.write(output);
+			outFile.write(waveData,0,waveData.length);
 			outFile.close();
 //			filename = path.getAbsolutePath();
 		} catch (FileNotFoundException e) {

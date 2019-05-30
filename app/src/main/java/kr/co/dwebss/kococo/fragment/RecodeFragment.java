@@ -7,9 +7,7 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -35,14 +33,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.activity.ResultActivity;
 import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.util.AudioCalculator;
-import kr.co.dwebss.kococo.util.MediaPlayerUtility;
 import kr.co.dwebss.kococo.util.SimpleLame;
 import kr.co.dwebss.kococo.util.WaveFormatConverter;
 import okhttp3.MediaType;
@@ -420,395 +415,455 @@ public class RecodeFragment extends Fragment  {
                     shortsRead += numberOfShort;
                     frameBytes = shortToByte(audioData,numberOfShort);
 
-                    try {
-                        audioCalculator.setBytes(frameBytes);
-                        // 소리가 발생하면 녹음을 시작하고, 1분이상 소리가 발생하지 않으면 녹음을 하지 않는다.
-                        int amplitude = audioCalculator.getAmplitude();
-                        double decibel = audioCalculator.getDecibel();
-                        double frequency = audioCalculator.getFrequency();
-                        double sefrequency = audioCalculator.getFrequencySecondMax();
-                        int sefamplitude = audioCalculator.getAmplitudeNth(audioCalculator.getFreqSecondN());
+                    audioCalculator.setBytes(frameBytes);
+                    // 소리가 발생하면 녹음을 시작하고, 1분이상 소리가 발생하지 않으면 녹음을 하지 않는다.
+                    int amplitude = audioCalculator.getAmplitude();
+                    double decibel = audioCalculator.getDecibel();
+                    double frequency = audioCalculator.getFrequency();
+                    double sefrequency = audioCalculator.getFrequencySecondMax();
+                    int sefamplitude = audioCalculator.getAmplitudeNth(audioCalculator.getFreqSecondN());
 
-                        times = (((double) (frameBytes.length / (44100d * 16 * 1))) * 8) * i;
-                        i++;
-                        SleepCheck.curTermSecond = (int) Math.floor(times);
-                        SleepCheck.GrindingCheckTermSecond = times;
+                    times = (((double) (frameBytes.length / (44100d * 16 * 1))) * 8) * i;
+                    i++;
+                    SleepCheck.curTermSecond = (int) Math.floor(times);
+                    SleepCheck.GrindingCheckTermSecond = times;
 
-                        final String amp = String.valueOf(amplitude + "Amp");
-                        final String db = String.valueOf(decibel + "db");
-                        final String hz = String.valueOf(frequency + "Hz");
-                        final String sehz = String.valueOf(sefrequency + "Hz(2th)");
-                        final String seamp = String.valueOf(sefamplitude + "Amp(2th)");
-                        SleepCheck.setAvrDB(decibel);
-                        //실제로는 3초 이후 분석한다.
-                        if (i < 300) {
-                            continue;
+                    final String amp = String.valueOf(amplitude + "Amp");
+                    final String db = String.valueOf(decibel + "db");
+                    final String hz = String.valueOf(frequency + "Hz");
+                    final String sehz = String.valueOf(sefrequency + "Hz(2th)");
+                    final String seamp = String.valueOf(sefamplitude + "Amp(2th)");
+                    SleepCheck.setAvrDB(decibel);
+                    //실제로는 3초 이후 분석한다.
+                    if (i < 300) {
+                        continue;
+                    }
+                    //System.out.println(String.format("%.2f", times)+"s "+hz +" "+db+" "+amp+" "+sehz+" "+seamp);
+                    // 소리의 발생은 특정 db 이상으로한다. 데시벨은 -31.5~0 으로 수치화 하고 있음.
+                    // -10db에 안걸릴 수도 잇으니까, 현재 녹음 상태의 평균 데시벨값을 지속적으로 갱신하면서 평균 데시벨보다 높은 소리가 발생했는지 체크
+                    // 한다.
+                    // 평균 데시벨 체크는 3초 동안한다.
+                    if (decibel > SleepCheck.getAvrDB() && isRecording == false
+                            && Math.floor((double) (audioData.length / (44100d * 16 * 1)) * 8) != Math.floor(times) //사운드 파일 테스트용
+                    ) {
+                        Log.v(LOG_TAG2,("녹음 시작! "));
+                        Log.v(LOG_TAG2,(String.format("%.2f", times)+"s~"));
+                        recordStartingTIme = System.currentTimeMillis();
+                        baos = new ByteArrayOutputStream();
+                        isRecording = true;
+                        snoringTermList = new ArrayList<StartEnd>();
+                        grindingTermList = new ArrayList<StartEnd>();
+                        osaTermList = new ArrayList<StartEnd>();
+                    } else if (isRecording == true && (SleepCheck.noiseCheck(decibel)==0 || recodeFlag==false) ) {
+                        Log.v(LOG_TAG2,("녹음 종료! "));
+                        Log.v(LOG_TAG2,(String.format("%.2f", times)+"s "));
+                        SimpleDateFormat dayTime = new SimpleDateFormat("yyyymmdd_HHmm");
+                        String fileName = dayTime.format(new Date(recordStartingTIme));
+                        dayTime = new SimpleDateFormat("dd_HHmm");
+                        //long time = System.currentTimeMillis();
+                        long time = recordStartingTIme+(long)times*1000;
+                        fileName += "-" + dayTime.format(new Date(time));
+                        byte[] waveData = baos.toByteArray();
+
+                        //TODO 녹음된 파일이 저장되는 시점
+                        //WaveFormatConverter wfc = new WaveFormatConverter(44100, (short)1, waveData, 0, waveData.length-1);
+                        WaveFormatConverter wfc = new WaveFormatConverter();
+                        //String[] fileInfo = wfc.saveLongTermWave(fileName, getContext());
+                        String[] fileInfo = wfc.saveLongTermMp3(fileName, getContext(), waveData);
+
+                        Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
+                        Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (waveData.length / (44100d * 16 * 1))) * 8));
+
+                        JsonObject ans = new JsonObject();
+                        //ans.setAnalysisStartDt(LocalDateTime.ofInstant(Instant.ofEpochMilli(recordStartingTIme), ZoneId.systemDefault()));
+                        //ans.setAnalysisEndDt(LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()));
+                        ans.addProperty("analysisStartDt",dayTimeDefalt.format(new Date(recordStartingTIme)));
+                        ans.addProperty("analysisEndDt",dayTimeDefalt.format(new Date(time)));
+                        ans.addProperty("analysisFileAppPath",fileInfo[0]);
+                        ans.addProperty("analysisFileNm",fileInfo[1]);
+                        JsonArray ansDList = new JsonArray();
+                        JsonObject ansd = new JsonObject();
+                        for(StartEnd se : snoringTermList) {
+                            ansd = new JsonObject();
+                            ansd.addProperty("termTypeCd",200101);
+                            ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
+                            ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+                            ansDList.add(ansd);
                         }
-                        //System.out.println(String.format("%.2f", times)+"s "+hz +" "+db+" "+amp+" "+sehz+" "+seamp);
-                        // 소리의 발생은 특정 db 이상으로한다. 데시벨은 -31.5~0 으로 수치화 하고 있음.
-                        // -10db에 안걸릴 수도 잇으니까, 현재 녹음 상태의 평균 데시벨값을 지속적으로 갱신하면서 평균 데시벨보다 높은 소리가 발생했는지 체크
-                        // 한다.
-                        // 평균 데시벨 체크는 3초 동안한다.
-                        if (decibel > SleepCheck.getAvrDB() && isRecording == false
-                                && Math.floor((double) (audioData.length / (44100d * 16 * 1)) * 8) != Math.floor(times) //사운드 파일 테스트용
-                        ) {
-                            Log.v(LOG_TAG2,("녹음 시작! "));
-                            Log.v(LOG_TAG2,(String.format("%.2f", times)+"s~"));
-                            recordStartingTIme = System.currentTimeMillis();
-                            baos = new ByteArrayOutputStream();
-                            isRecording = true;
-                            snoringTermList = new ArrayList<StartEnd>();
-                            grindingTermList = new ArrayList<StartEnd>();
-                            osaTermList = new ArrayList<StartEnd>();
-                        } else if (isRecording == true && (SleepCheck.noiseCheck(decibel)==0 || recodeFlag==false) ) {
-                            Log.v(LOG_TAG2,("녹음 종료! "));
-                            Log.v(LOG_TAG2,(String.format("%.2f", times)+"s "));
-                            SimpleDateFormat dayTime = new SimpleDateFormat("yyyymmdd_HHmm");
-                            String fileName = dayTime.format(new Date(recordStartingTIme));
-                            dayTime = new SimpleDateFormat("dd_HHmm");
-                            //long time = System.currentTimeMillis();
-                            long time = recordStartingTIme+(long)times*1000;
-                            fileName += "-" + dayTime.format(new Date(time));
-                            byte[] waveData = baos.toByteArray();
-
-                            //TODO 녹음된 파일이 저장되는 시점
-                            WaveFormatConverter wfc = new WaveFormatConverter(44100, (short)1, waveData, 0, waveData.length-1);
-                            //String[] fileInfo = wfc.saveLongTermWave(fileName, getContext());
-                            String[] fileInfo = wfc.saveLongTermMp3(fileName, getContext());
-
-                            Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
-                            Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (waveData.length / (44100d * 16 * 1))) * 8));
-
-                            JsonObject ans = new JsonObject();
-                            //ans.setAnalysisStartDt(LocalDateTime.ofInstant(Instant.ofEpochMilli(recordStartingTIme), ZoneId.systemDefault()));
-                            //ans.setAnalysisEndDt(LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()));
-                            ans.addProperty("analysisStartDt",dayTimeDefalt.format(new Date(recordStartingTIme)));
-                            ans.addProperty("analysisEndDt",dayTimeDefalt.format(new Date(time)));
-                            ans.addProperty("analysisFileAppPath",fileInfo[0]);
-                            ans.addProperty("analysisFileNm",fileInfo[1]);
-                            JsonArray ansDList = new JsonArray();
-                            JsonObject ansd = new JsonObject();
-                            for(StartEnd se : snoringTermList) {
+                        for(StartEnd se : grindingTermList) {
+                            if(se.end!=0){
                                 ansd = new JsonObject();
-                                ansd.addProperty("termTypeCd",200101);
+                                ansd.addProperty("termTypeCd",200102);
                                 ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
                                 ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
                                 ansDList.add(ansd);
                             }
-                            for(StartEnd se : grindingTermList) {
-                                if(se.end!=0){
-                                    ansd = new JsonObject();
-                                    ansd.addProperty("termTypeCd",200102);
-                                    ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
-                                    ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
-                                    ansDList.add(ansd);
-                                }
+                        }
+                        for(StartEnd se : osaTermList) {
+                            if(se.end!=0){
+                                ansd = new JsonObject();
+                                ansd.addProperty("termTypeCd",200103);
+                                ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
+                                ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+                                ansDList.add(ansd);
                             }
-                            for(StartEnd se : osaTermList) {
-                                if(se.end!=0){
-                                    ansd = new JsonObject();
-                                    ansd.addProperty("termTypeCd",200103);
-                                    ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
-                                    ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
-                                    ansDList.add(ansd);
-                                }
-                            }
-                            ans.add("analysisDetailsList", ansDList);
-                            ansList.add(ans);
-                            //여기까지 AnswerList를 계속 생성한다.
-                            //녹음 중단 했을 떄 AnswerList를 Record의 AnswerList필드에 담는다.
-                            //Record의 recordStartDt, recordEndDt에 녹음 시작시간과 녹음 종료 시간을, userAppId에는 사용자 앱 ID를 입력 해서 VO를 완성한다.
-                            //최종 완료 vo 형태
-                            /*
-                            {
-                                "userAppId" : "c0362dd4-97f4-488c-b31c-12cb23b534cf",
-                                    "recordStartDt" : "2019-05-24T12:00:16.614",
-                                    "recordEndDt" : "2019-05-24T20:00:16.614",
-                                    "analysisList" : [ {
-                                "analysisStartDt" : "2019-05-24T12:00:16.613",
-                                        "analysisEndDt" : "2019-05-24T15:00:16.613",
-                                        "analysisFileNm" : "2019-05-24T12:00:16.613_testFileNm.wav",
-                                        "analysisFileAppPath" : "/rec_data/",
-                                        "analysisDetailsList" : [ {
-                                    "termTypeCd" : 200101,
-                                            "termStartDt" : "2019-05-24T12:00:26.612",
-                                            "termEndDt" : "2019-05-24T12:02:20.613"
-                                }, {
-                                    "termTypeCd" : 200102,
-                                            "termStartDt" : "2019-05-24T12:08:48.613",
-                                            "termEndDt" : "2019-05-24T13:33:48.613"
-                                }, {
-                                    "termTypeCd" : 200103,
-                                            "termStartDt" : "2019-05-24T14:21:10.613",
-                                            "termEndDt" : "2019-05-24T15:22:40.613"
-                                } ]
+                        }
+                        ans.add("analysisDetailsList", ansDList);
+                        ansList.add(ans);
+                        //여기까지 AnswerList를 계속 생성한다.
+                        //녹음 중단 했을 떄 AnswerList를 Record의 AnswerList필드에 담는다.
+                        //Record의 recordStartDt, recordEndDt에 녹음 시작시간과 녹음 종료 시간을, userAppId에는 사용자 앱 ID를 입력 해서 VO를 완성한다.
+                        //최종 완료 vo 형태
+                        /*
+                        {
+                            "userAppId" : "c0362dd4-97f4-488c-b31c-12cb23b534cf",
+                                "recordStartDt" : "2019-05-24T12:00:16.614",
+                                "recordEndDt" : "2019-05-24T20:00:16.614",
+                                "analysisList" : [ {
+                            "analysisStartDt" : "2019-05-24T12:00:16.613",
+                                    "analysisEndDt" : "2019-05-24T15:00:16.613",
+                                    "analysisFileNm" : "2019-05-24T12:00:16.613_testFileNm.wav",
+                                    "analysisFileAppPath" : "/rec_data/",
+                                    "analysisDetailsList" : [ {
+                                "termTypeCd" : 200101,
+                                        "termStartDt" : "2019-05-24T12:00:26.612",
+                                        "termEndDt" : "2019-05-24T12:02:20.613"
+                            }, {
+                                "termTypeCd" : 200102,
+                                        "termStartDt" : "2019-05-24T12:08:48.613",
+                                        "termEndDt" : "2019-05-24T13:33:48.613"
+                            }, {
+                                "termTypeCd" : 200103,
+                                        "termStartDt" : "2019-05-24T14:21:10.613",
+                                        "termEndDt" : "2019-05-24T15:22:40.613"
                             } ]
-                            }
-                            */
-                            recordData = new JsonObject();
-                            recordData.addProperty("userAppId",userAppId);
-                            recordData.addProperty("recordStartDt",recordStartDt);
-                            recordData.addProperty("recordEndDt",recordEndDt);
-                            recordData.add("analysisList", ansList);
-
-                            System.out.println(" ========================recordData: "+recordData.toString());
-
-							/*
-							System.out.println("analysisStartDt: "+dayTimeT.format(new Date(recordStartingTIme)));
-							System.out.println("analysisEndDt: "+dayTimeT.format(new Date(time)));
-							System.out.println("analysisFileNm: "+"event-"+fileName+"_"+System.currentTimeMillis()+".wav");
-							System.out.println("analysisFileAppPath: raw/raw_convert/");
-							System.out.println("analysisDetailsList 시작, 리스트, 길이: "+snoringTermList.size()+ grindingTermList.size()+osaTermList.size());
-							for(StartEnd se : snoringTermList) {
-								System.out.println(se.getTermForRequest(200101, recordStartingTIme));
-							}
-							for(StartEnd se : grindingTermList) {
-								System.out.println(se.getTermForRequest(200102, recordStartingTIme));
-							}
-							for(StartEnd se : osaTermList) {
-								System.out.println(se.getTermForRequest(200103, recordStartingTIme));
-							}
-							*/
-                            Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 끝====="));
-                            recordStartingTIme = 0;
-                            isRecording = false;
+                        } ]
                         }
+                        */
+                        recordData = new JsonObject();
+                        recordData.addProperty("userAppId",userAppId);
+                        recordData.addProperty("recordStartDt",recordStartDt);
+                        recordData.addProperty("recordEndDt",recordEndDt);
+                        recordData.add("analysisList", ansList);
 
-                        if (i == 1 || isRecording == false) {
-                            continue;
+                        System.out.println(" ========================recordData: "+recordData.toString());
+
+                        /*
+                        System.out.println("analysisStartDt: "+dayTimeT.format(new Date(recordStartingTIme)));
+                        System.out.println("analysisEndDt: "+dayTimeT.format(new Date(time)));
+                        System.out.println("analysisFileNm: "+"event-"+fileName+"_"+System.currentTimeMillis()+".wav");
+                        System.out.println("analysisFileAppPath: raw/raw_convert/");
+                        System.out.println("analysisDetailsList 시작, 리스트, 길이: "+snoringTermList.size()+ grindingTermList.size()+osaTermList.size());
+                        for(StartEnd se : snoringTermList) {
+                            System.out.println(se.getTermForRequest(200101, recordStartingTIme));
                         }
-                        //baos.write(frameBytes);
-                        int encResult = SimpleLame.encode(audioData,
-                                audioData, numberOfShort, mp3buffer);
-                        if (encResult != 0) {
-                            baos.write(mp3buffer);
+                        for(StartEnd se : grindingTermList) {
+                            System.out.println(se.getTermForRequest(200102, recordStartingTIme));
                         }
+                        for(StartEnd se : osaTermList) {
+                            System.out.println(se.getTermForRequest(200103, recordStartingTIme));
+                        }
+                        */
+                        Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 끝====="));
+                        recordStartingTIme = 0;
+                        isRecording = false;
+                    }
+
+                    if (i == 1 || isRecording == false) {
+                        continue;
+                    }
+                    //baos.write(frameBytes);
+                    int encResult = SimpleLame.encode(audioData, audioData, numberOfShort, mp3buffer);
+                    if (encResult != 0) {
+                        baos.write(mp3buffer, 0, encResult);
+                    }
 						/*
 						System.out.print("녹음 중! ");
 						Log.v(LOG_TAG2,(String.format("%.2f", times)+"s ");
 						*/
 
-                        // 녹음이 끝나고 나면 코골이가 발생했는지를 체크해서 녹음된 파일의 코골이 유무를 결정한다. X
-                        // 코골이 여부를 체크한다.
-                        int snoreChecked = SleepCheck.snoringCheck(decibel, frequency, sefrequency);
-                        //snorChecked = 1이면 0.01초에 해당하는 주파수만 탐지됨
-                        //snorChecked = 2는 1분동안 코골이가 탐지된 상태
-                        if(snoreChecked==2) {
-                            if(SleepCheck.isSnoringStart == true) {
-                                //코골이로 탐지해서 분석을 진행하고 있는 중
-                            }else {
-                                snoringTermList.add(new StartEnd());
-                                snoringTermList.get(snoringTermList.size()-1).start=times;
-                                SleepCheck.isSnoringStart = true;
-                            }
-                        }else if(snoreChecked == 3) {
-                            if(SleepCheck.isSnoringStart == true) {
-                                snoringTermList.get(snoringTermList.size()-1).end=times;
-                                SleepCheck.isSnoringStart = false;
-                            }else {
-                                //코골이로 미탐지, 처리할 내용 없음.
-                            }
+                    // 녹음이 끝나고 나면 코골이가 발생했는지를 체크해서 녹음된 파일의 코골이 유무를 결정한다. X
+                    // 코골이 여부를 체크한다.
+                    int snoreChecked = SleepCheck.snoringCheck(decibel, frequency, sefrequency);
+                    //snorChecked = 1이면 0.01초에 해당하는 주파수만 탐지됨
+                    //snorChecked = 2는 1분동안 코골이가 탐지된 상태
+                    if(snoreChecked==2) {
+                        if(SleepCheck.isSnoringStart == true) {
+                            //코골이로 탐지해서 분석을 진행하고 있는 중
                         }else {
-                            //0일 때는 아직 분석하고 1분이 안된 상태, 즉 각 1분이 안된 때마다 이곳을 탄다.
+                            snoringTermList.add(new StartEnd());
+                            snoringTermList.get(snoringTermList.size()-1).start=times;
+                            SleepCheck.isSnoringStart = true;
                         }
-                        // 이갈이는 기존 로직대로 체크해서, 어디 구간에서 발생했는지 체크한다.
-                        SleepCheck.grindingCheck(times, decibel, sefamplitude, frequency, sefrequency);
-                        // 이갈이 신호가 발생하고, 이갈이 체크 상태가 아니면 이갈이 체크를 시작한다.
-                        if (SleepCheck.grindingRepeatAmpCnt == 2 && grindingStart == false) {
-							/*
-							System.out.print("이갈이 체크를 시작한다.");
-							Log.v(LOG_TAG2,(String.format("%.2f", times) + "~" + String.format("%.2f", times + 1)
-									+ "s " + SleepCheck.grindingContinueAmpCnt + " "
-									+ SleepCheck.grindingContinueAmpOppCnt + " " + SleepCheck.grindingRepeatAmpCnt);
-							*/
-                            SleepCheck.GrindingCheckStartTermSecond = times;
-                            grindingTermList.add(new StartEnd());
-                            grindingTermList.get(grindingTermList.size()-1).start=times-2;
-                            grindingStart = true;
-                            grindingContinue = false;
-                            // 이갈이 체크 중에 1초간격으로 유효 카운트가 연속적으로 발생했으면 계속 체크한다.
-                        } else if (Math.floor((SleepCheck.GrindingCheckTermSecond - SleepCheck.GrindingCheckStartTermSecond)*100) == 101
-                                && SleepCheck.grindingRepeatAmpCnt >= 3 && grindingStart == true) {
-                            if (((double) (audioData.length / (44100d * 16 * 1))) * 8 < times + 1) {
-								/*
-								System.out.print("이갈이 종료.");
-								Log.v(LOG_TAG2,(String.format("%.2f", times) + "~" + String.format("%.2f", times + 1)
-										+ "s " + SleepCheck.grindingContinueAmpCnt + " "
-										+ SleepCheck.grindingContinueAmpOppCnt + " " + SleepCheck.grindingRepeatAmpCnt);
-								*/
-                                SleepCheck.grindingRepeatAmpCnt = 0;
-                                grindingTermList.get(grindingTermList.size()-1).end=times;
-                                grindingStart = false;
-                                grindingContinue = false;
-                                grindingRecordingContinueCnt = 0;
-                            }
-							/*
-							System.out.print("이갈이 중.");
-							Log.v(LOG_TAG2,(String.format("%.2f", times) + "~" + String.format("%.2f", times + 1)
-									+ "s " + SleepCheck.grindingContinueAmpCnt + " "
-									+ SleepCheck.grindingContinueAmpOppCnt + " " + SleepCheck.grindingRepeatAmpCnt);
-							*/
-                            grindingRecordingContinueCnt = 0;
-                            grindingContinue = true;
-                            // 이갈이 체크 중에 1초간격으로 유효 카운트가 연속적으로 발생하지 않으면 체크를 취소한다.
-                        } else if (Math.floor((SleepCheck.GrindingCheckTermSecond - SleepCheck.GrindingCheckStartTermSecond)*100) == 101
-                                && SleepCheck.grindingRepeatAmpCnt == 0 && grindingStart == true
-                                && grindingContinue == false) {
-                            // 1초 단위 발생하는 이갈이도 잡기위해 유예 카운트를 넣는다. 1초만 한번더 체크함.
-                            if (grindingRecordingContinueCnt >= SleepCheck.GRINDING_RECORDING_CONTINUE_CNT) {
-								/*
-								System.out.print("이갈이 아님, 체크 취소.");
-								Log.v(LOG_TAG2,(String.format("%.2f", times) + "~" + String.format("%.2f", times + 1)
-										+ "s " + SleepCheck.grindingContinueAmpCnt + " "
-										+ SleepCheck.grindingContinueAmpOppCnt + " " + SleepCheck.grindingRepeatAmpCnt);
-								*/
-                                SleepCheck.grindingRepeatAmpCnt = 0;
-                                grindingTermList.remove(grindingTermList.size()-1);
-                                grindingStart = false;
-                                grindingRecordingContinueCnt = 0;
-                            } else {
-								/*
-								System.out.print("이갈이 체크를 취소하지 않고 진행한다.(1초 유예)");
-								Log.v(LOG_TAG2,(String.format("%.2f", times) + "~" + String.format("%.2f", times + 1)
-										+ "s " + SleepCheck.grindingContinueAmpCnt + " "
-										+ SleepCheck.grindingContinueAmpOppCnt + " " + SleepCheck.grindingRepeatAmpCnt);
-								*/
-                                grindingRecordingContinueCnt++;
-                            }
-                            // 이갈이 체크 중에 1초간격으로 유효카운트가 더이상 발생하지 않으나 이전에 발생했더라면 현재 체크하는 이갈이는 유효함.
-                        } else if (Math.floor((SleepCheck.GrindingCheckTermSecond - SleepCheck.GrindingCheckStartTermSecond)*100) == 101
-                                && SleepCheck.grindingRepeatAmpCnt == 0 && grindingContinue == true) {
-							/*
-							System.out.print("이갈이 종료.");
-							Log.v(LOG_TAG2,(String.format("%.2f", times) + "~" + String.format("%.2f", times + 1)
-									+ "s " + SleepCheck.grindingContinueAmpCnt + " "
-									+ SleepCheck.grindingContinueAmpOppCnt + " " + SleepCheck.grindingRepeatAmpCnt);
-							*/
+                    }else if(snoreChecked == 3) {
+                        if(SleepCheck.isSnoringStart == true) {
+                            snoringTermList.get(snoringTermList.size()-1).end=times;
+                            SleepCheck.isSnoringStart = false;
+                        }else {
+                            //코골이로 미탐지, 처리할 내용 없음.
+                        }
+                    }else {
+                        //0일 때는 아직 분석하고 1분이 안된 상태, 즉 각 1분이 안된 때마다 이곳을 탄다.
+                    }
+                    // 이갈이는 기존 로직대로 체크해서, 어디 구간에서 발생했는지 체크한다.
+                    SleepCheck.grindingCheck(times, decibel, sefamplitude, frequency, sefrequency);
+                    // 이갈이 신호가 발생하고, 이갈이 체크 상태가 아니면 이갈이 체크를 시작한다.
+                    if (SleepCheck.grindingRepeatAmpCnt == 2 && grindingStart == false) {
+                        /*
+                        System.out.print("이갈이 체크를 시작한다.");
+                        Log.v(LOG_TAG2,(String.format("%.2f", times) + "~" + String.format("%.2f", times + 1)
+                                + "s " + SleepCheck.grindingContinueAmpCnt + " "
+                                + SleepCheck.grindingContinueAmpOppCnt + " " + SleepCheck.grindingRepeatAmpCnt);
+                        */
+                        SleepCheck.GrindingCheckStartTermSecond = times;
+                        grindingTermList.add(new StartEnd());
+                        grindingTermList.get(grindingTermList.size()-1).start=times-2;
+                        grindingStart = true;
+                        grindingContinue = false;
+                        // 이갈이 체크 중에 1초간격으로 유효 카운트가 연속적으로 발생했으면 계속 체크한다.
+                    } else if (Math.floor((SleepCheck.GrindingCheckTermSecond - SleepCheck.GrindingCheckStartTermSecond)*100) == 101
+                            && SleepCheck.grindingRepeatAmpCnt >= 3 && grindingStart == true) {
+                        if (((double) (audioData.length / (44100d * 16 * 1))) * 8 < times + 1) {
+                            /*
+                            System.out.print("이갈이 종료.");
+                            Log.v(LOG_TAG2,(String.format("%.2f", times) + "~" + String.format("%.2f", times + 1)
+                                    + "s " + SleepCheck.grindingContinueAmpCnt + " "
+                                    + SleepCheck.grindingContinueAmpOppCnt + " " + SleepCheck.grindingRepeatAmpCnt);
+                            */
                             SleepCheck.grindingRepeatAmpCnt = 0;
                             grindingTermList.get(grindingTermList.size()-1).end=times;
                             grindingStart = false;
                             grindingContinue = false;
                             grindingRecordingContinueCnt = 0;
-                        } else if (SleepCheck.curTermSecond - SleepCheck.checkTermSecond == 1) {
-                            if (grindingStart) {
-								/*
-								Log.v(LOG_TAG2,(String.format("%.2f", times) + "s 이갈이 중 " + grindingStart + " "
-										+ grindingContinue + " " + grindingRecordingContinueCnt);
-								*/
-                            }
                         }
-                        // 무호흡도 기존 로직대로 체크해서, 어디 구간에서 발생했는지 체크한다.
-                        osaCnt = SleepCheck.OSACheck(times, decibel, sefamplitude, frequency, sefrequency);
-                        osaRecordingContinueCnt += osaCnt;
-                        // 무호흡 카운트가 발생하고, 체크 상태가 아니면 체크를 시작한다.
-                        if (osaRecordingExit > 0) {
-                            osaRecordingExit--;
+                        /*
+                        System.out.print("이갈이 중.");
+                        Log.v(LOG_TAG2,(String.format("%.2f", times) + "~" + String.format("%.2f", times + 1)
+                                + "s " + SleepCheck.grindingContinueAmpCnt + " "
+                                + SleepCheck.grindingContinueAmpOppCnt + " " + SleepCheck.grindingRepeatAmpCnt);
+                        */
+                        grindingRecordingContinueCnt = 0;
+                        grindingContinue = true;
+                        // 이갈이 체크 중에 1초간격으로 유효 카운트가 연속적으로 발생하지 않으면 체크를 취소한다.
+                    } else if (Math.floor((SleepCheck.GrindingCheckTermSecond - SleepCheck.GrindingCheckStartTermSecond)*100) == 101
+                            && SleepCheck.grindingRepeatAmpCnt == 0 && grindingStart == true
+                            && grindingContinue == false) {
+                        // 1초 단위 발생하는 이갈이도 잡기위해 유예 카운트를 넣는다. 1초만 한번더 체크함.
+                        if (grindingRecordingContinueCnt >= SleepCheck.GRINDING_RECORDING_CONTINUE_CNT) {
+                            /*
+                            System.out.print("이갈이 아님, 체크 취소.");
+                            Log.v(LOG_TAG2,(String.format("%.2f", times) + "~" + String.format("%.2f", times + 1)
+                                    + "s " + SleepCheck.grindingContinueAmpCnt + " "
+                                    + SleepCheck.grindingContinueAmpOppCnt + " " + SleepCheck.grindingRepeatAmpCnt);
+                            */
+                            SleepCheck.grindingRepeatAmpCnt = 0;
+                            grindingTermList.remove(grindingTermList.size()-1);
+                            grindingStart = false;
+                            grindingRecordingContinueCnt = 0;
+                        } else {
+                            /*
+                            System.out.print("이갈이 체크를 취소하지 않고 진행한다.(1초 유예)");
+                            Log.v(LOG_TAG2,(String.format("%.2f", times) + "~" + String.format("%.2f", times + 1)
+                                    + "s " + SleepCheck.grindingContinueAmpCnt + " "
+                                    + SleepCheck.grindingContinueAmpOppCnt + " " + SleepCheck.grindingRepeatAmpCnt);
+                            */
+                            grindingRecordingContinueCnt++;
                         }
-                        if (osaCnt > 0 && osaStart == false) {
-							/*
-							System.out.print("무호흡 체크를 시작한다.");
-							Log.v(LOG_TAG2,(String.format("%.2f", times) + "s~" + SleepCheck.isOSATerm + " "
-									+ SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
-							*/
-                            osaStart = true;
-                            osaContinue = false;
-                            osaRecordingExit = 0;
-                            osaStartTimes = times;
-                        } else if (times - osaStartTimes < 5 && osaStart == true) {
-                            // 무호흡 녹음 중 5초 이내에 호흡이 발생하면, 무호흡이 아닌 것으로 본다.
-                            if (osaRecordingContinueCnt < 5) {
-								/*
-								System.out.print("무호흡 체크 취소. " + osaRecordingContinueCnt + ", ");
-								Log.v(LOG_TAG2,(String.format("%.2f", times) + "~"
-										+ String.format("%.2f", times + 0.01) + "s " + SleepCheck.isOSATerm + " "
-										+ SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
-								*/
+                        // 이갈이 체크 중에 1초간격으로 유효카운트가 더이상 발생하지 않으나 이전에 발생했더라면 현재 체크하는 이갈이는 유효함.
+                    } else if (Math.floor((SleepCheck.GrindingCheckTermSecond - SleepCheck.GrindingCheckStartTermSecond)*100) == 101
+                            && SleepCheck.grindingRepeatAmpCnt == 0 && grindingContinue == true) {
+                        /*
+                        System.out.print("이갈이 종료.");
+                        Log.v(LOG_TAG2,(String.format("%.2f", times) + "~" + String.format("%.2f", times + 1)
+                                + "s " + SleepCheck.grindingContinueAmpCnt + " "
+                                + SleepCheck.grindingContinueAmpOppCnt + " " + SleepCheck.grindingRepeatAmpCnt);
+                        */
+                        SleepCheck.grindingRepeatAmpCnt = 0;
+                        grindingTermList.get(grindingTermList.size()-1).end=times;
+                        grindingStart = false;
+                        grindingContinue = false;
+                        grindingRecordingContinueCnt = 0;
+                    } else if (SleepCheck.curTermSecond - SleepCheck.checkTermSecond == 1) {
+                        if (grindingStart) {
+                            /*
+                            Log.v(LOG_TAG2,(String.format("%.2f", times) + "s 이갈이 중 " + grindingStart + " "
+                                    + grindingContinue + " " + grindingRecordingContinueCnt);
+                            */
+                        }
+                    }
+                    // 무호흡도 기존 로직대로 체크해서, 어디 구간에서 발생했는지 체크한다.
+                    osaCnt = SleepCheck.OSACheck(times, decibel, sefamplitude, frequency, sefrequency);
+                    osaRecordingContinueCnt += osaCnt;
+                    // 무호흡 카운트가 발생하고, 체크 상태가 아니면 체크를 시작한다.
+                    if (osaRecordingExit > 0) {
+                        osaRecordingExit--;
+                    }
+                    if (osaCnt > 0 && osaStart == false) {
+                        /*
+                        System.out.print("무호흡 체크를 시작한다.");
+                        Log.v(LOG_TAG2,(String.format("%.2f", times) + "s~" + SleepCheck.isOSATerm + " "
+                                + SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
+                        */
+                        osaStart = true;
+                        osaContinue = false;
+                        osaRecordingExit = 0;
+                        osaStartTimes = times;
+                    } else if (times - osaStartTimes < 5 && osaStart == true) {
+                        // 무호흡 녹음 중 5초 이내에 호흡이 발생하면, 무호흡이 아닌 것으로 본다.
+                        if (osaRecordingContinueCnt < 5) {
+                            /*
+                            System.out.print("무호흡 체크 취소. " + osaRecordingContinueCnt + ", ");
+                            Log.v(LOG_TAG2,(String.format("%.2f", times) + "~"
+                                    + String.format("%.2f", times + 0.01) + "s " + SleepCheck.isOSATerm + " "
+                                    + SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
+                            */
+                            osaStart = false;
+                            osaRecordingContinueCnt = 0;
+                        } else {
+                            if (((double) (audioData.length / (44100d * 16 * 1))) * 8 < times + 1) {
+                                /*
+                                System.out.print("무호흡 끝.");
+                                Log.v(LOG_TAG2,(
+                                        String.format("%.2f", times) + "~" + String.format("%.2f", times + 1) + "s "
+                                                + SleepCheck.grindingContinueAmpCnt + " "
+                                                + SleepCheck.grindingContinueAmpOppCnt + " "
+                                                + SleepCheck.grindingRepeatAmpCnt);
+                                */
                                 osaStart = false;
                                 osaRecordingContinueCnt = 0;
-                            } else {
-                                if (((double) (audioData.length / (44100d * 16 * 1))) * 8 < times + 1) {
-									/*
-									System.out.print("무호흡 끝.");
-									Log.v(LOG_TAG2,(
-											String.format("%.2f", times) + "~" + String.format("%.2f", times + 1) + "s "
-													+ SleepCheck.grindingContinueAmpCnt + " "
-													+ SleepCheck.grindingContinueAmpOppCnt + " "
-													+ SleepCheck.grindingRepeatAmpCnt);
-									*/
-                                    osaStart = false;
-                                    osaRecordingContinueCnt = 0;
-                                }
-                                osaContinue = true;
-								/*
-								System.out.print("무호흡 중.");
-								Log.v(LOG_TAG2,(String.format("%.2f", times) + "~"
-										+ String.format("%.2f", times + 0.01) + "s " + SleepCheck.isOSATerm + " "
-										+ SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
-								*/
                             }
-                            // 무호흡 녹음 중 5초 이 후에 소리가 발생하면, 다음 소리가 발생한 구간까지 체크한다.
-                        } else if (times - osaStartTimes > 5 && osaStart == true) {
-                            if (SleepCheck.isBreathTerm == true) { // 숨쉬는 구간이 되었으면, 체크 계속 플래그를 업데이트
-                                if (((double) (audioData.length / (44100d * 16 * 1))) * 8 < times + 1) {
-									/*
-									System.out.print("무호흡 끝.");
-									Log.v(LOG_TAG2,(
-											String.format("%.2f", times) + "~" + String.format("%.2f", times + 1) + "s "
-													+ SleepCheck.grindingContinueAmpCnt + " "
-													+ SleepCheck.grindingContinueAmpOppCnt + " "
-													+ SleepCheck.grindingRepeatAmpCnt);
-									*/
-                                    osaStart = false;
-                                    osaRecordingContinueCnt = 0;
-                                }
-                                osaContinue = true;
-								/*
-								System.out.print("무호흡 중.2 ");
-								Log.v(LOG_TAG2,(String.format("%.2f", times) + "~"
-										+ String.format("%.2f", times + 0.01) + "s " + SleepCheck.isOSATerm + " "
-										+ SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
-								*/
-                            } else {
-                                if (osaContinue == true && osaRecordingExit == 1) {
-									/*
-									System.out.print("무호흡 끝.");
-									Log.v(LOG_TAG2,(String.format("%.2f", times) + "~"
-											+ String.format("%.2f", times + 0.01) + "s " + SleepCheck.isOSATerm + " "
-											+ SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
-									*/
-                                    osaStart = false;
-                                    osaRecordingContinueCnt = 0;
-                                }
-                                if (osaCnt > 0) {
-                                    osaRecordingExit = 1000;
-                                }
-                                osaCnt = 0;
-                            }
-                        } else {
-                            if (osaStart) {
-								/*
-								System.out.print("무호흡 중");
-								Log.v(LOG_TAG2,(String.format("%.2f", times) + "~"
-										+ String.format("%.2f", times + 0.01) + "s " + SleepCheck.isOSATerm + " "
-										+ SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
-								*/
-                            }
+                            osaContinue = true;
+                            /*
+                            System.out.print("무호흡 중.");
+                            Log.v(LOG_TAG2,(String.format("%.2f", times) + "~"
+                                    + String.format("%.2f", times + 0.01) + "s " + SleepCheck.isOSATerm + " "
+                                    + SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
+                            */
                         }
-                        SleepCheck.curTermTime = times;
-                        SleepCheck.curTermDb = decibel;
-                        SleepCheck.curTermAmp = amplitude;
-                        SleepCheck.curTermHz = frequency;
-                        SleepCheck.curTermSecondHz = sefrequency;
-
-                        SleepCheck.checkTerm++;
-                        SleepCheck.checkTermSecond = (int) Math.floor(times);
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        // 무호흡 녹음 중 5초 이 후에 소리가 발생하면, 다음 소리가 발생한 구간까지 체크한다.
+                    } else if (times - osaStartTimes > 5 && osaStart == true) {
+                        if (SleepCheck.isBreathTerm == true) { // 숨쉬는 구간이 되었으면, 체크 계속 플래그를 업데이트
+                            if (((double) (audioData.length / (44100d * 16 * 1))) * 8 < times + 1) {
+                                /*
+                                System.out.print("무호흡 끝.");
+                                Log.v(LOG_TAG2,(
+                                        String.format("%.2f", times) + "~" + String.format("%.2f", times + 1) + "s "
+                                                + SleepCheck.grindingContinueAmpCnt + " "
+                                                + SleepCheck.grindingContinueAmpOppCnt + " "
+                                                + SleepCheck.grindingRepeatAmpCnt);
+                                */
+                                osaStart = false;
+                                osaRecordingContinueCnt = 0;
+                            }
+                            osaContinue = true;
+                            /*
+                            System.out.print("무호흡 중.2 ");
+                            Log.v(LOG_TAG2,(String.format("%.2f", times) + "~"
+                                    + String.format("%.2f", times + 0.01) + "s " + SleepCheck.isOSATerm + " "
+                                    + SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
+                            */
+                        } else {
+                            if (osaContinue == true && osaRecordingExit == 1) {
+                                /*
+                                System.out.print("무호흡 끝.");
+                                Log.v(LOG_TAG2,(String.format("%.2f", times) + "~"
+                                        + String.format("%.2f", times + 0.01) + "s " + SleepCheck.isOSATerm + " "
+                                        + SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
+                                */
+                                osaStart = false;
+                                osaRecordingContinueCnt = 0;
+                            }
+                            if (osaCnt > 0) {
+                                osaRecordingExit = 1000;
+                            }
+                            osaCnt = 0;
+                        }
+                    } else {
+                        if (osaStart) {
+                            /*
+                            System.out.print("무호흡 중");
+                            Log.v(LOG_TAG2,(String.format("%.2f", times) + "~"
+                                    + String.format("%.2f", times + 0.01) + "s " + SleepCheck.isOSATerm + " "
+                                    + SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
+                            */
+                        }
                     }
-//                    catch (JSONException e) {
+                    SleepCheck.curTermTime = times;
+                    SleepCheck.curTermDb = decibel;
+                    SleepCheck.curTermAmp = amplitude;
+                    SleepCheck.curTermHz = frequency;
+                    SleepCheck.curTermSecondHz = sefrequency;
+
+                    SleepCheck.checkTerm++;
+                    SleepCheck.checkTermSecond = (int) Math.floor(times);
+
+                    //                    catch (JSONException e) {
 //                        e.printStackTrace();
 //                    }
+                }
+                if (isRecording == true && recodeFlag==false) {
+                    Log.v(LOG_TAG2,("녹음 종료! "));
+                    Log.v(LOG_TAG2,(String.format("%.2f", times)+"s "));
+                    SimpleDateFormat dayTime = new SimpleDateFormat("yyyyMMdd_HHmm");
+                    String fileName = dayTime.format(new Date(recordStartingTIme));
+                    dayTime = new SimpleDateFormat("dd_HHmm");
+                    //long time = System.currentTimeMillis();
+                    long time = recordStartingTIme+(long)times*1000;
+                    fileName += "-" + dayTime.format(new Date(time));
+                    byte[] waveData = baos.toByteArray();
+
+                    //TODO 녹음된 파일이 저장되는 시점
+                    //WaveFormatConverter wfc = new WaveFormatConverter(44100, (short)1, waveData, 0, waveData.length-1);
+                    WaveFormatConverter wfc = new WaveFormatConverter();
+                    String[] fileInfo = wfc.saveLongTermMp3(fileName, getContext(), waveData);
+
+                    Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
+                    Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (waveData.length / (44100d * 16 * 1))) * 8));
+
+                    JsonObject ans = new JsonObject();
+                    ans.addProperty("analysisStartDt",dayTimeDefalt.format(new Date(recordStartingTIme)));
+                    ans.addProperty("analysisEndDt",dayTimeDefalt.format(new Date(time)));
+                    ans.addProperty("analysisFileAppPath",fileInfo[0]);
+                    ans.addProperty("analysisFileNm",fileInfo[1]);
+                    JsonArray ansDList = new JsonArray();
+                    JsonObject ansd = new JsonObject();
+                    for(StartEnd se : snoringTermList) {
+                        ansd = new JsonObject();
+                        ansd.addProperty("termTypeCd",200101);
+                        ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
+                        ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+                        ansDList.add(ansd);
+                    }
+                    for(StartEnd se : grindingTermList) {
+                        if(se.end!=0){
+                            ansd = new JsonObject();
+                            ansd.addProperty("termTypeCd",200102);
+                            ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
+                            ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+                            ansDList.add(ansd);
+                        }
+                    }
+                    for(StartEnd se : osaTermList) {
+                        if(se.end!=0){
+                            ansd = new JsonObject();
+                            ansd.addProperty("termTypeCd",200103);
+                            ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
+                            ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+                            ansDList.add(ansd);
+                        }
+                    }
+                    ans.add("analysisDetailsList", ansDList);
+                    ansList.add(ans);
+                    recordData = new JsonObject();
+                    recordData.addProperty("userAppId",userAppId);
+                    recordData.addProperty("recordStartDt",recordStartDt);
+                    recordData.addProperty("recordEndDt",recordEndDt);
+                    recordData.add("analysisList", ansList);
+
+                    System.out.println(" ========================recordData: "+recordData.toString());
+
+                    Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 끝====="));
+                    isRecording = false;
                 }
 
                 //Log.v(LOG_TAG2,("audio length(s): " + ((double) (audioData.length / (44100d * 16 * 1))) * 8));
