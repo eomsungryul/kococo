@@ -55,6 +55,9 @@ public class SleepCheck {
 	static double GrindingCheckStartTermSecond = 0;
 	static double GrindingCheckStartTermDecibel = 0;
 
+	static boolean isSnoringStart = false;
+
+	/*
 	static double getAvrDB(double decibel) {
 		double avrDB = -AVR_DB_INIT_VALUE;
 		if (decibelSumCnt >= AVR_DB_CHECK_TERM || decibelSumCnt == 0) {
@@ -82,15 +85,46 @@ public class SleepCheck {
 		}
 		return avrDB;
 	}
+*/
 
+
+	static double getAvrDB() {
+		double avrDB = -AVR_DB_INIT_VALUE;
+		if (decibelSum != 0 && decibelSumCnt != 0) {
+			avrDB = decibelSum / decibelSumCnt;
+		}
+		//System.out.print(decibelSum+" "+decibelSumCnt+" "+avrDB+" ");
+		return avrDB;
+	}
+
+	static double setAvrDB(double decibel) {
+		//10분마다 평균 데시벨을 다시 계산한다.
+		if (decibelSumCnt >= AVR_DB_CHECK_TERM) {
+			decibelSum = 0;
+			decibelSumCnt = 0;
+		}
+		double avrDB = -AVR_DB_INIT_VALUE;
+		decibelSum += decibel;
+		decibelSumCnt ++;
+		if (decibelSum != 0 && decibelSumCnt != 0) {
+			avrDB = decibelSum / decibelSumCnt;
+		}
+		return avrDB;
+	}
 	static int noiseCheck(double decibel) {
-		if(noiseChkCnt>=100) {
+		//1분동안 소리가 발생하지 않았는지 체크한다.
+		//0.01초 단위임으로, 600번 해야 60초임.
+		//1분이 되었으면, 데시벨보다 높은 소리가 발생하지 않은 경우
+		if(noiseChkCnt>=600) {
 			int tmpN = noiseChkCnt;
 			noiseChkSum = 0;
 			noiseNoneChkSum = 0;
 			return tmpN;
 		}else {
-			if(decibel > NOISE_DB_INIT_VALUE) {
+			//아직 1분이 안되었으면 계속 소리 체크를 한다.
+			//소리 체크는 1분동안 평균 데시벨보다 높은 데시벨의 소리가 발생했는지를 체크한다.
+			//리턴이 0이면 녹음 종료하게 되어있음.
+			if(decibel > getAvrDB()) {
 				noiseChkSum++;
 			}else {
 				noiseNoneChkSum++;
@@ -103,13 +137,22 @@ public class SleepCheck {
 
 	static int snoringCheck(double decibel, double frequency, double sefrequency) {
 		if (
-				decibel > getAvrDB() &&
+				//decibel > getAvrDB() &&
 				frequency >= 150 && frequency <= 250 && sefrequency >= 950 && sefrequency < 1050
 		) {
 			snoringContinue++;
-			return 1;
 		} else {
 			snoringContinueOpp++;
+		}
+		if(snoringContinue+snoringContinueOpp>6000) {
+			//1분동안 주파수 탐지 횟수가 1~2번 혹은 10~15(앞은 무호흡, 뒤는 일본 코골이)인 경우 코골이를 했다고 판단.
+			if((snoringContinue <= 2 && snoringContinue >=1 )|| (snoringContinue >= 10 && snoringContinue <= 15)) {
+				return 2;
+			}else {
+				snoringContinue = 0;
+				snoringContinueOpp = 0;
+				return 3;
+			}
 		}
 		return 0;
 	}
