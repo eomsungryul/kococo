@@ -15,6 +15,9 @@
  */
 package kr.co.dwebss.kococo.activity;
 
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.media.MediaPlayer;
@@ -80,8 +83,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
     Long kococoTerm =0L;
     double sleepScore;
 
-    //재생할때 필요한
-    MediaPlayer mediaPlayer;
+    RecordData recordData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +96,13 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
 //        initializeData();
         super.onCreate(savedInstanceState);
+
+        //녹음 기록 갱신
+//        FragmentManager fragmentManager = getFragmentManager();
+//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//        Fragment fragment = fragmentManager.findFragmentById(R.id.diaryFr);
+//        fragmentTransaction.remove(fragment);
+//        fragmentTransaction.commit();
 
 
         //데이터 수신
@@ -138,30 +147,25 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 //        String recordEndD =  responseData.get("recordEndD").toString().replace("\"","");
         if(recordStartD.equals(recordEndD)){
             dateTxtHeader.setText(transFormat.format(recordStartD));
+
         }else{
             dateTxtHeader.setText(transFormat.format(recordStartD)+"~"+transFormat.format(recordEndD));
         }
-
-
 
         // 하단에 녹음 검출리스트 파일 리스트  Adapter 생성
         RecordListAdapter adapter = new RecordListAdapter() ;
         //listView 생성
         ListView listview = (ListView) findViewById(R.id.recordListview);
         listview.setAdapter(adapter);
+
         // 녹음 검출리스트 추가.
-
-        for(int i=0; i<10; i++){
-//            adapter.addItem("녹음파일"+i) ;
-        }
-
        JsonArray analysisList = responseData.getAsJsonArray("analysisList");
 
         if(analysisList.size()>0){
             for(int i=0; i<analysisList.size(); i++){
                 JsonObject analysisObj = (JsonObject) analysisList.get(i);
                 analysisObj.get("analysisStartDt");
-                RecordData recordData = new RecordData();
+                recordData = new RecordData();
                 recordData.setAnalysisFileNm(analysisObj.get("analysisFileNm").toString().replace("\"",""));
                 recordData.setAnalysisFileAppPath(analysisObj.get("analysisFileAppPath").toString().replace("\"",""));
                 recordData.setAnalysisId(analysisObj.get("analysisId").getAsInt());
@@ -179,7 +183,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                         }else{
                             recordData.setTitle("무호흡"+(i+j+1));
                         }
-
+                        recordData.setAnalysisDetailsId(analysisDetailsObj.get("analysisDetailsId").getAsInt());
                         recordData.setTermStartDt(analysisDetailsObj.get("termStartDt").toString().replace("\"",""));
                         recordData.setTermEndDt(analysisDetailsObj.get("termEndDt").toString().replace("\"",""));
                         recordData.setTermTypeCd(termTypeCd);
@@ -196,6 +200,11 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 //                System.out.println("=============레알 analysisStartDt=========="+analysisObj.get("analysisStartDt"));
             }
         }
+
+        //test용
+//        dateTxtHeader.setText(transFormat.format(recordStartD)+"===="+recordData.getAnalysisId());
+
+
         //점수 구하는법
         //공식은 전체 녹음시간 분의 검출된 시간으로 퍼센트로 구한다.
         sleepScore=100-(((float)kococoTerm/(float)recordTerm)*100);
@@ -203,8 +212,8 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
         scoreTextView.setText(Math.round(sleepScore)+"점");
 
         //시간 HH:mm ~ HH:mm
-        System.out.println("=============레알 kococoTerm=========="+kococoTerm);
-        System.out.println("=============레알 recordTerm=========="+recordTerm);
+//        System.out.println("=============레알 kococoTerm=========="+kococoTerm);
+//        System.out.println("=============레알 recordTerm=========="+recordTerm);
         String recodeText = DateTimeToStringFormat.format(recordStartDT)+"~"+DateTimeToStringFormat.format(recordEndDT);
         TextView recodeTextView = findViewById(R.id.recodeTextView);
         recodeTextView.setText(recodeText);
@@ -254,34 +263,6 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
         chart.setFitBars(true);
         chart.invalidate();
 
-    }
-
-    public void play(int startTime, int endTime,String filePath){
-        mediaPlayer = MediaPlayer.create(this, Uri.parse(filePath));
-        //구간 재생
-        mediaPlayer.seekTo(startTime);
-        mediaPlayer.getCurrentPosition();
-        mediaPlayer.start();
-        //카운트 다운
-        new CountDownTimer(endTime, 100) {
-            public void onTick(long millisUntilFinished) {
-                if(MediaPlayerUtility.getTime(mediaPlayer)>=endTime){
-                    mediaPlayer.stop();
-                    // 초기화
-                    mediaPlayer.reset();
-//                    testFlag = false;
-//                    testBtn.setText("시작");
-                }
-            }
-            public void onFinish() {
-//                testBtn.setText("시작2");
-            }
-        }.start();
-    }
-
-    public void stopPlayer(){
-        mediaPlayer.stop();
-        mediaPlayer.reset();
     }
 
     //getSupportActionBar 사용하려면 추가해야함

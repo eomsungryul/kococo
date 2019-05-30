@@ -21,6 +21,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.CountDownTimer;
 import android.os.Parcelable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +42,8 @@ import kr.co.dwebss.kococo.model.RecordData;
 import kr.co.dwebss.kococo.util.MediaPlayerUtility;
 
 public class RecordListAdapter extends BaseAdapter {
+
+    private String LOG_TAG = "RecordListAdapter";
 
     // Adapter에 추가된 데이터를 저장하기 위한 ArrayList
     private ArrayList<RecordData> listViewItemList = new ArrayList<RecordData>() ;
@@ -88,10 +91,13 @@ public class RecordListAdapter extends BaseAdapter {
         playBtnFlag = false;
         //lisrViews내의 아이콘 버튼 참조 및 onclick추가
         playBtn = (ImageButton) convertView.findViewById(R.id.recordPlay);
+
+        System.out.println("===============이게 왜?0000====filePath = :"+listViewItem.getAnalysisFileAppPath()+"/"+listViewItem.getAnalysisFileNm());
+
         playBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, "ㅎㅇ : "+position+" : "+listViewItem.getAnalysisFileAppPath(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "ㅎㅇ : "+position+" : "+listViewItem.getAnalysisFileAppPath()+"/"+listViewItem.getAnalysisFileNm(), Toast.LENGTH_SHORT).show();
                 //재생버튼 누를 시 정지버튼으로 변경하는 메소드
                 if(!playBtnFlag){
                     //재생일 시에
@@ -106,12 +112,12 @@ public class RecordListAdapter extends BaseAdapter {
                         Date termStartDt =  stringtoDateFormat.parse(listViewItem.getTermStartDt().toString());
                         Date termEndDt =  stringtoDateFormat.parse(listViewItem.getTermEndDt().toString());
                         startTerm = termStartDt.getTime()-analysisStartDt.getTime();
-                        endTerm = termEndDt.getTime()-termStartDt.getTime();
+                        endTerm = termEndDt.getTime()-analysisStartDt.getTime();
 //                        System.out.println("================끝나자:"+listViewItem.getTermStartDt().toString());
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
-                    play((int)startTerm,(int)endTerm,listViewItem.getAnalysisFileAppPath()+listViewItem.getAnalysisFileNm(),context);
+                    play((int)startTerm,(int)endTerm,listViewItem.getAnalysisFileAppPath()+"/"+listViewItem.getAnalysisFileNm(),context);
 
                 }else{
                     playBtn.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
@@ -120,6 +126,9 @@ public class RecordListAdapter extends BaseAdapter {
                 }
             }
         });
+
+        //{"userAppId":"7dc9e960-b0db-4c1c-81b5-2c8f2ce7ca4f","recordId":116,"recordStartD":"2019-05-30","recordStartDt":"2019-05-30T15:13:46","recordEndD":"2019-05-30","recordEndDt":"2019-05-30T15:14:46","consultingYn":"N","consultingReplyYn":"N","analysisList":[{"analysisId":93,"analysisStartD":"2019-05-30T00:00:00","analysisStartDt":"2019-05-30T15:13:50","analysisEndD":"2019-05-30T00:00:00","analysisEndDt":"2019-05-30T15:14:49","analysisFileNm":"snoring-20191330_1513-30_1514_1559196886407.wav","analysisFileAppPath":"/data/user/0/kr.co.dwebss.kococo/files/rec_data/29","analysisServerUploadYn":"N","analysisDetailsList":[{"analysisId":93,"analysisDetailsId":97,"termTypeCd":200102,"termStartDt":"2019-05-30T15:14:37","termEndDt":"2019-05-30T15:14:42","claimYn":"N"}],"_links":{"record":{"href":"http://52.79.88.47:8080/kococo/api/record/116"}}}],"_links":{"self":{"href":"http://52.79.88.47:8080/kococo/api/record/116"},"record":{"href":"http://52.79.88.47:8080/kococo/api/record/116"},"admin":{"href":"http://52.79.88.47:8080/kococo/api/record/116/admin"},"user":{"href":"http://52.79.88.47:8080/kococo/api/record/116/user"},"sleepStatusCd":{"href":"http://52.79.88.47:8080/kococo/api/record/116/sleepStatusCd"}}}
+
 
         //신고하기 버튼
         //신고하기를 클릭 할 시에 데이터를 보낸다!
@@ -160,9 +169,10 @@ public class RecordListAdapter extends BaseAdapter {
     }
 
     public void play(int startTime, int endTime , String filePath, Context context){
-        mediaPlayer = MediaPlayer.create(context, Uri.parse("/data/data/kr.co.dwebss.kococo/files/rec_data/23/snoring-20191029_0410-29_0410_1559113854914.wav"));
-//        mediaPlayer = MediaPlayer.create(context, Uri.parse(filePath));
+//        mediaPlayer = MediaPlayer.create(context, Uri.parse("/data/data/kr.co.dwebss.kococo/files/rec_data/23/snoring-20191029_0410-29_0410_1559113854914.wav"));
 //        mediaPlayer = MediaPlayer.create(context, R.raw.queen);
+        Log.v(LOG_TAG,( "======== play() startTime : " +startTime+" /endTime : "+endTime+"/filePath : "+filePath));
+        mediaPlayer = MediaPlayer.create(context, Uri.parse(filePath));
         //구간 재생
         mediaPlayer.seekTo(startTime);
         mediaPlayer.getCurrentPosition();
@@ -184,7 +194,7 @@ public class RecordListAdapter extends BaseAdapter {
             }
         }.start();
     }
-///data/user/0/kr.co.dwebss.kococo/files/rec_data/23event-20191029_0410-29_0410_1559113854925.wav
+
 
     public void stopPlayer(){
         mediaPlayer.stop();

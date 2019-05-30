@@ -108,25 +108,29 @@ public class DiaryListAdapter extends BaseAdapter {
         diaryRow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                apiService.getRecord(listViewItem.getRecordId()).enqueue(new Callback<JsonObject>() {
-                    @Override
-                    public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                        System.out.println(" ========================response: "+response.body().toString());
-                        //창 띄우기
-                        Intent intent = new Intent(context, ResultActivity.class);
-                        intent.putExtra("responseData",response.body().toString()); /*송신*/
-                        context.startActivity(intent);
-                    }
-                    @Override
-                    public void onFailure(Call<JsonObject> call, Throwable t) {
-                        System.out.println(" ========================Throwable: "+ t);
-
-                    }
-                });
+                getRecord(context,position);
             }
         });
 
         return convertView;
+    }
+
+    private void getRecord(Context context,int position) {
+        Record data = (Record) getItem(position);
+        apiService.getRecord(data.getRecordId()).enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                System.out.println(data.getRecordId()+" ========================response: "+response.body().toString());
+                //창 띄우기
+                Intent intent = new Intent(context, ResultActivity.class);
+                intent.putExtra("responseData",response.body().toString()); /*송신*/
+                context.startActivity(intent);
+            }
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                System.out.println(" ========================Throwable: "+ t);
+            }
+        });
     }
 
     // 지정한 위치(position)에 있는 데이터와 관계된 아이템(row)의 ID를 리턴. : 필수 구현
