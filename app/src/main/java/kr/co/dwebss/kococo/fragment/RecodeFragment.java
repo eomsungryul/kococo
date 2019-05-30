@@ -428,8 +428,9 @@ public class RecodeFragment extends Fragment  {
                         final String hz = String.valueOf(frequency + "Hz");
                         final String sehz = String.valueOf(sefrequency + "Hz(2th)");
                         final String seamp = String.valueOf(sefamplitude + "Amp(2th)");
-
-                        if (i < 100) {
+                        SleepCheck.setAvrDB(decibel);
+                        //실제로는 3초 이후 분석한다.
+                        if (i < 300) {
                             continue;
                         }
                         //System.out.println(String.format("%.2f", times)+"s "+hz +" "+db+" "+amp+" "+sehz+" "+seamp);
@@ -437,7 +438,7 @@ public class RecodeFragment extends Fragment  {
                         // -10db에 안걸릴 수도 잇으니까, 현재 녹음 상태의 평균 데시벨값을 지속적으로 갱신하면서 평균 데시벨보다 높은 소리가 발생했는지 체크
                         // 한다.
                         // 평균 데시벨 체크는 3초 동안한다.
-                        if (decibel > SleepCheck.NOISE_DB_INIT_VALUE && isRecording == false
+                        if (decibel > SleepCheck.getAvrDB() && isRecording == false
                                 && Math.floor((double) (audioData.length / (44100d * 16 * 1)) * 8) != Math.floor(times) //사운드 파일 테스트용
                         ) {
                             Log.v(LOG_TAG2,("녹음 시작! "));
@@ -573,20 +574,25 @@ public class RecodeFragment extends Fragment  {
                         // 녹음이 끝나고 나면 코골이가 발생했는지를 체크해서 녹음된 파일의 코골이 유무를 결정한다. X
                         // 코골이 여부를 체크한다.
                         int snoreChecked = SleepCheck.snoringCheck(decibel, frequency, sefrequency);
-                        // 주파수가 발견되면, 100초 단위로 기록한다.
-                        if(snoreChecked==1) {
-                            if(snoringTermList.size()>0) {
-                                double beforeTime = snoringTermList.get(snoringTermList.size()-1).start;
-                                if(Math.floor(beforeTime)+100<Math.floor(times)) {
-                                    snoringTermList.add(new StartEnd());
-                                    snoringTermList.get(snoringTermList.size()-1).start=times;
-                                    snoringTermList.get(snoringTermList.size()-1).end=times;
-                                }
+                        //snorChecked = 1이면 0.01초에 해당하는 주파수만 탐지됨
+                        //snorChecked = 2는 1분동안 코골이가 탐지된 상태
+                        if(snoreChecked==2) {
+                            if(SleepCheck.isSnoringStart == true) {
+                                //코골이로 탐지해서 분석을 진행하고 있는 중
                             }else {
                                 snoringTermList.add(new StartEnd());
-                                snoringTermList.get(0).start=times;
-                                snoringTermList.get(0).end=times;
+                                snoringTermList.get(snoringTermList.size()-1).start=times;
+                                SleepCheck.isSnoringStart = true;
                             }
+                        }else if(snoreChecked == 3) {
+                            if(SleepCheck.isSnoringStart == true) {
+                                snoringTermList.get(snoringTermList.size()-1).end=times;
+                                SleepCheck.isSnoringStart = false;
+                            }else {
+                                //코골이로 미탐지, 처리할 내용 없음.
+                            }
+                        }else {
+                            //0일 때는 아직 분석하고 1분이 안된 상태, 즉 각 1분이 안된 때마다 이곳을 탄다.
                         }
                         // 이갈이는 기존 로직대로 체크해서, 어디 구간에서 발생했는지 체크한다.
                         SleepCheck.grindingCheck(times, decibel, sefamplitude, frequency, sefrequency);
