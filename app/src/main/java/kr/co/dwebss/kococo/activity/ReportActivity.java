@@ -18,7 +18,9 @@ package kr.co.dwebss.kococo.activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
@@ -30,14 +32,23 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.model.RecordData;
+import kr.co.dwebss.kococo.util.FindAppIdUtil;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -58,6 +69,7 @@ public class ReportActivity extends AppCompatActivity {
     Boolean requestClaimFlag;
     Boolean uploadClaimFileFlag;
 
+    String uploadFirebasePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +83,6 @@ public class ReportActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         TextView test  = findViewById(R.id.declareTxtHeader);
-
         Intent intent = getIntent();
         recordData = (RecordData) intent.getSerializableExtra("testData");
         test.setText(recordData.getTitle()+" 신고하기");
@@ -88,6 +99,11 @@ public class ReportActivity extends AppCompatActivity {
         });
 
         claimContents = (EditText)findViewById(R.id.claimContents);
+        claimContents.setText("recordData : "+recordData.getAnalysisFileAppPath()
+                +"/"+recordData.getAnalysisFileNm()
+                +"/getAnalysisDetailsId :"+recordData.getAnalysisDetailsId()
+                +"/getAnalysisId :"+recordData.getAnalysisId()
+        );
 
 
         Button declareBtn = (Button) findViewById(R.id.declareBtn);
@@ -98,20 +114,8 @@ public class ReportActivity extends AppCompatActivity {
             }
         });
 
-        //firebase 업로드 관련
-        // Create a storage reference from our app
-        FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference storageRef = storage.getReference();
 
-        // Create a reference to "mountains.jpg"
-        StorageReference mountainsRef = storageRef.child("mountains.jpg");
 
-        // Create a reference to 'images/mountains.jpg'
-        StorageReference mountainImagesRef = storageRef.child("images/mountains.jpg");
-
-        // While the file names are the same, the references point to different files
-        mountainsRef.getName().equals(mountainImagesRef.getName());    // true
-        mountainsRef.getPath().equals(mountainImagesRef.getPath());    // false
 
 
     }
@@ -125,30 +129,22 @@ public class ReportActivity extends AppCompatActivity {
         builder.setTitle("제출하기");
         builder.setMessage("제출하시겠습니까?");
         //setView()를 이용하여 view를 넣고 커스텀 할 수 있다.
+
+
+        //예일 경우에는 신고하기를 한다.
+        //1. 파이어베이스에 업로드를 한다.
+        //2. 업로드가 되면 신고하기 제출을 한다.
         builder.setPositiveButton("예",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
 //                        Toast.makeText(getApplicationContext(),"예를 선택했습니다.",Toast.LENGTH_LONG).show();
-                        if(claimContents.getText().length()>0){
-                            Toast.makeText(getApplicationContext(),"내용을 입력해주세요.",Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(),"등록중입니다 잠시만기다려주세요. ",Toast.LENGTH_LONG).show();
+                        if(claimContents.getText().length()==0){
+                            Toast.makeText(getApplicationContext(),"내용을 입력해주세요.",Toast.LENGTH_SHORT).show();
                             return;
                         }else{
                             //firebase 파일 업로드
-                            Boolean uploadFlag = uploadClaimFile();
-                            if(uploadFlag){
-                                //신고 전송
-                                Boolean requstFlag =requestClaim();
-                                if(requstFlag){
-
-                                }else{
-                                    Toast.makeText(getApplicationContext(),"신고하기를 실패하였습니다. ",Toast.LENGTH_LONG).show();
-                                    return;
-                                }
-                            }else{
-                                Toast.makeText(getApplicationContext(),"파일 업로드에 실패하였습니다. ",Toast.LENGTH_LONG).show();
-                                return;
-                            }
-
+                            addClaim();
                         }
                     }
 
@@ -167,17 +163,26 @@ public class ReportActivity extends AppCompatActivity {
     private Boolean requestClaim() {
         requestClaimFlag= false;
         //형태
-//        {
-//            "analysisServerUploadPath" : "/storage/rec_data", //필수
-//                "claimReasonCd" : 100201, //100201-'코골이가아닙니다.', 100202-'기타' 필수임
-//                "claimContents" : "테스트" //필수
-//        }
+        // 아래 값중 값이 하나라도 빠져있으면, 400 bad request 발생
+        //{
+        //  "analysisServerUploadPath" : "/storage/rec_data",
+        //  "analysisDetailsList" : [ {
+        //    "claimReasonCd" : 100101, //100201-'코골이가아닙니다.', 100202-'기타'
+        //    "claimContents" : "테스트"
+        //  } ]
+        //}
         JsonObject requestJson = new JsonObject();
-        requestJson.addProperty("analysisServerUploadPath","");
-        requestJson.addProperty("claimReasonCd",recordData.getTermTypeCd());
-        requestJson.addProperty("claimContents",claimContents.getText().toString());
+        requestJson.addProperty("analysisServerUploadPath",uploadFirebasePath);
+        JsonArray analysisDetailsList = new JsonArray();
+        JsonObject analysisDetailsObj = new JsonObject();
+        analysisDetailsObj.addProperty("claimReasonCd",recordData.getTermTypeCd());
+        analysisDetailsObj.addProperty("claimContents",claimContents.getText().toString());
+        analysisDetailsList.add(analysisDetailsObj);
+        requestJson.add("analysisDetailsList",analysisDetailsList);
         RequestBody requestData = RequestBody.create(MediaType.parse("application/json"), new Gson().toJson(requestJson));
-
+        Toast.makeText(getApplicationContext(),"ddd"+requestData.toString(),Toast.LENGTH_LONG).show();
+                System.out.println(" =============ddd===========Throwable: "+ requestJson.toString());
+                System.out.println(" ============eeee============Throwable: "+ requestData);
         apiService.addClaim(recordData.getAnalysisDetailsId(),requestData).enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
@@ -190,18 +195,58 @@ public class ReportActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {
 //                System.out.println(" ========================Throwable: "+ t);
+                Toast.makeText(getApplicationContext(),"신고하기가 실패되었습니다.",Toast.LENGTH_LONG).show();
             }
         });
         return requestClaimFlag;
+
+
+
     }
 
-    private Boolean uploadClaimFile() {
-        uploadClaimFileFlag= false;
+    private void addClaim() {
         //업로드 파일 시작
+        FindAppIdUtil fau = new FindAppIdUtil();
+        String appId =  fau.getAppid(getApplicationContext());
 
+        //firebase 업로드 관련
+        // 가장 먼저, FirebaseStorage 인스턴스를 생성한다
+        // getInstance() 파라미터에 들어가는 값은 firebase console에서
+        // storage를 추가하면 상단에 gs:// 로 시작하는 스킴을 확인할 수 있다
+        FirebaseStorage storage = FirebaseStorage.getInstance("gs://kococo-2996f.appspot.com/");
 
+        //위에서 생성한 FirebaseStorage 를 참조하는 storage를 생성한다
+        StorageReference storageRef = storage.getReference();
+        // 위의 저장소를 참조하는 images폴더안의 space.jpg 파일명으로 지정하여
+        // 하위 위치를 가리키는 참조를 만든다
+        // 이부분은 firebase 스토리지 쪽에 업로드 되는 경로이다.
+        //그렇기에 폴더 규칙을 재생데이터/앱아이디/일별날짜/파일 이런식으로 작성
+        Date date = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-        return uploadClaimFileFlag;
+        uploadFirebasePath = "rec_data/"+appId+"/"+sdf.format(date)+"/"+recordData.getAnalysisFileNm();
+        StorageReference spaceRef = storageRef.child(uploadFirebasePath);
+
+        //내 실제 경로를 입력한다.
+        Uri file = Uri.fromFile(new File(recordData.getAnalysisFileAppPath()+"/"+recordData.getAnalysisFileNm()));
+        UploadTask uploadTask = spaceRef.putFile(file);
+
+        // 파일 업로드의 성공/실패에 대한 콜백 받아 핸들링 하기 위해 아래와 같이 작성한다
+
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle unsuccessful uploads
+                System.out.println("======================실패"+exception.getMessage());
+                Toast.makeText(getApplicationContext(),"파일 업로드에 실패하였습니다. ",Toast.LENGTH_SHORT).show();
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                //신고 전송
+                requestClaim();
+            }
+        });
     }
 
     @Override

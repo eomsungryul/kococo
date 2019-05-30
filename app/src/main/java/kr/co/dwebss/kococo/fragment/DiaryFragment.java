@@ -2,6 +2,7 @@ package kr.co.dwebss.kococo.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,26 +61,23 @@ public class DiaryFragment extends Fragment {
         retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();
         apiService = retrofit.create(ApiService.class);
 
-        apiService.getRecordList(userAppId).enqueue(new Callback<JsonObject>() {
+        apiService.getRecordList(userAppId,"recordId,desc").enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
 //                System.out.println(" ============야야양============response: "+response);
                 //저장 시에 뒤로가기
 //                Toast.makeText(v.getContext(),response.body().toString(),Toast.LENGTH_LONG).show();
-
                 Gson gson = new Gson();
                 JsonObject jsonObject = response.body();
                 JsonObject resultData = jsonObject.getAsJsonObject("_embedded");
                 JsonArray recordList = resultData.getAsJsonArray("record");
-
                 // Adapter 생성
                 adapter = new DiaryListAdapter() ;
                 //listView 생성
                 ListView listview = (ListView) v.findViewById(R.id.diaryListview);
                 listview.setAdapter(adapter);
                 adapter.addItems(recordList) ;
-
-
+                adapter.notifyDataSetChanged();
             }
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {
@@ -88,25 +86,14 @@ public class DiaryFragment extends Fragment {
             }
         });
 
-
-        // Adapter 생성
-//        adapter = new DiaryListAdapter() ;
-//        //listView 생성
-//        ListView listview = (ListView) v.findViewById(R.id.diaryListview);
-//        listview.setAdapter(adapter);
-        // 첫 번째 아이템 추가.
-//        adapter.addItem("몇월 몇일 맑음") ;
-//        adapter.addItem("녹음파일2") ;
-//        adapter.addItem("녹음파일3") ;
-//        adapter.addItem("녹음파일4") ;
-//        adapter.addItem("녹음파일5") ;
-        // 두 번째 아이템 추가.
-//        adapter.addItem(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_36dp),
-//                "Circle", "Account Circle Black 36dp") ;
-
-//        getRecordList
-
         return v;
+    }
+
+
+    //프래그먼트 초기화 방법
+    private  void refresh(){
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.detach(this).attach(this).commit();
     }
 
 

@@ -55,12 +55,12 @@ public interface ApiService {
             "Accept: application/json",
             "Content-Type: application/json"
     })
-    @PUT("kococo/analysis/{analysisDetailId}")
+    @PUT("kococo/api/claim/analysisDetail/{analysisDetailId}")
     Call<JsonObject> addClaim(@Path("analysisDetailId") Integer analysisDetailId, @Body RequestBody data);
 
     //@Query 를 이용하면 ?key=value 식으로 보내진다.
     @GET("kococo/api/record/search/findByUserAppId")
-    Call<JsonObject> getRecordList(@Query("userAppId") String userAppId);
+    Call<JsonObject> getRecordList(@Query("userAppId") String userAppId,@Query("sort") String sort);
 
     //@Path 를 이용하면 Rest 방식으로 호출 할 수 있다.
     @GET("kococo/api/record/{recordId}")
