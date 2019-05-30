@@ -46,6 +46,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import org.w3c.dom.Text;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -69,6 +71,13 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
     Date recordStartD;
     Date recordEndD;
+    Date recordStartDT;
+    Date recordEndDT;
+    Long recordTerm;
+
+    //검출된 시간 초기화
+    Long kococoTerm =0L;
+    double sleepScore;
 
     //재생할때 필요한
     MediaPlayer mediaPlayer;
@@ -104,14 +113,22 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             }
         });
 
+
         //상단 헤더 날짜 텍스트 날짜가 넘어가면 시작~종료 아니면 그냥 시작 날짜로 보여준다.
         TextView dateTxtHeader = (TextView) findViewById(R.id.date_txt_header);
         Date from = new Date();
         SimpleDateFormat stringtoDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         SimpleDateFormat transFormat = new SimpleDateFormat("yyyy년 MM월 dd일");
+        SimpleDateFormat stringtoDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        SimpleDateFormat DateTimeToStringFormat = new SimpleDateFormat("HH:mm");
         try {
             recordStartD =  stringtoDateFormat.parse(responseData.get("recordStartD").toString().replace("\"",""));
             recordEndD =  stringtoDateFormat.parse(responseData.get("recordEndD").toString().replace("\"",""));
+
+            recordStartDT =  stringtoDateTimeFormat.parse(responseData.get("recordStartDt").toString().replace("\"",""));
+            recordEndDT =  stringtoDateTimeFormat.parse(responseData.get("recordEndDt").toString().replace("\"",""));
+            recordTerm = recordEndDT.getTime()-recordStartDT.getTime();
+
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -166,12 +183,32 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                         recordData.setTermEndDt(analysisDetailsObj.get("termEndDt").toString().replace("\"",""));
                         recordData.setTermTypeCd(termTypeCd);
                         adapter.addItem(recordData) ;
+
+                        try {
+                            kococoTerm += (stringtoDateTimeFormat.parse(recordData.getTermEndDt()).getTime()
+                                    -stringtoDateTimeFormat.parse(recordData.getTermStartDt()).getTime());
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
 //                System.out.println("=============레알 analysisStartDt=========="+analysisObj.get("analysisStartDt"));
             }
-
         }
+        //점수 구하는법
+        //공식은 전체 녹음시간 분의 검출된 시간으로 퍼센트로 구한다.
+        sleepScore=100-(((float)kococoTerm/(float)recordTerm)*100);
+        TextView scoreTextView = findViewById(R.id.scoreTextView);
+        scoreTextView.setText(Math.round(sleepScore)+"점");
+
+        //시간 HH:mm ~ HH:mm
+        System.out.println("=============레알 kococoTerm=========="+kococoTerm);
+        System.out.println("=============레알 recordTerm=========="+recordTerm);
+        String recodeText = DateTimeToStringFormat.format(recordStartDT)+"~"+DateTimeToStringFormat.format(recordEndDT);
+        TextView recodeTextView = findViewById(R.id.recodeTextView);
+        recodeTextView.setText(recodeText);
+
+
         //차트 시작
         chart = findViewById(R.id.chart1);
         chart.getDescription().setEnabled(false);
