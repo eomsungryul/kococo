@@ -2,15 +2,32 @@ apply plugin: 'com.android.application'
 //파이어베이스 추가
 apply plugin: 'com.google.gms.google-services'
 
+import org.apache.tools.ant.taskdefs.condition.Os
+
 //파이어베이스 crashlytics
 apply plugin: 'io.fabric'
+//ndk 추가(mp3 convert jni 사용 위함)
+def getNdkBuildPath() {
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+    def command = properties.getProperty('ndk.dir')
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        command += "\\ndk-build.cmd"
+    } else {
+        command += "/ndk-build"
+
+    }
+    return command
+
+}
 
 android {
     compileSdkVersion 28
     buildToolsVersion "28.0.3"
     defaultConfig {
         applicationId "kr.co.dwebss.kococo"
-        minSdkVersion 25
+        minSdkVersion 23
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -24,6 +41,8 @@ android {
     }
     sourceSets {
         main {
+            jniLibs.srcDir 'src/main/libs'
+            jni.srcDirs = []
             java {
                 srcDir 'src/java'
             }
@@ -34,6 +53,24 @@ android {
                     ]
         }
     }
+    ext {
+        nativeDebuggable = true
+    }
+    task buildNative(type: Exec, description: 'Compile JNI source via NDK') {
+        if (nativeDebuggable) {
+            commandLine getNdkBuildPath(), 'NDK_DEBUG=1', '-C', file('src/main').absolutePath
+        } else {
+            cmmandLine getNdkBuildPath(), '-C', file('src/main').absolutePath
+        }
+    }
+    tasks.withType(JavaCompile) {
+        compileTask -> compileTask.dependsOn buildNative
+    }
+    task cleanNative(type: Exec, description: 'Clean native objs and lib') {
+        commandLine getNdkBuildPath(), '-C', file('src/main').absolutePath, 'clean'
+    }
+    clean.dependsOn 'cleanNative'
+
     compileOptions {
         sourceCompatibility 1.8
         targetCompatibility 1.8
