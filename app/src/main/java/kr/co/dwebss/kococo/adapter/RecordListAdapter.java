@@ -45,6 +45,7 @@ public class RecordListAdapter extends BaseAdapter {
     // Adapter에 추가된 데이터를 저장하기 위한 ArrayList
     private ArrayList<RecordData> listViewItemList = new ArrayList<RecordData>() ;
     Boolean playBtnFlag = false;
+    ImageButton playBtn;
 
     //재생할때 필요한
     MediaPlayer mediaPlayer;
@@ -86,7 +87,7 @@ public class RecordListAdapter extends BaseAdapter {
 
         playBtnFlag = false;
         //lisrViews내의 아이콘 버튼 참조 및 onclick추가
-        ImageButton playBtn = (ImageButton) convertView.findViewById(R.id.recordPlay);
+        playBtn = (ImageButton) convertView.findViewById(R.id.recordPlay);
         playBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -106,16 +107,10 @@ public class RecordListAdapter extends BaseAdapter {
                         Date termEndDt =  stringtoDateFormat.parse(listViewItem.getTermEndDt().toString());
                         startTerm = termStartDt.getTime()-analysisStartDt.getTime();
                         endTerm = termEndDt.getTime()-termStartDt.getTime();
-                        System.out.println("================끝나자:"+listViewItem.getTermStartDt().toString());
-                        System.out.println("================끝나자:"+listViewItem.getTermStartDt().toString());
-                        System.out.println("================끝나자:"+analysisStartDt);
-                        System.out.println("================끝나자:"+termEndDt);
-                        System.out.println("================끝나자:"+termStartDt);
+//                        System.out.println("================끝나자:"+listViewItem.getTermStartDt().toString());
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
-                    System.out.println("================끝나자:"+startTerm);
-                    System.out.println("================끝나자:"+endTerm);
                     play((int)startTerm,(int)endTerm,listViewItem.getAnalysisFileAppPath()+listViewItem.getAnalysisFileNm(),context);
 
                 }else{
@@ -126,6 +121,8 @@ public class RecordListAdapter extends BaseAdapter {
             }
         });
 
+        //신고하기 버튼
+        //신고하기를 클릭 할 시에 데이터를 보낸다!
         ImageButton reportBtn = (ImageButton) convertView.findViewById(R.id.recordReport);
         reportBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
@@ -164,12 +161,9 @@ public class RecordListAdapter extends BaseAdapter {
 
     public void play(int startTime, int endTime , String filePath, Context context){
         mediaPlayer = MediaPlayer.create(context, Uri.parse("/data/data/kr.co.dwebss.kococo/files/rec_data/23/snoring-20191029_0410-29_0410_1559113854914.wav"));
+//        mediaPlayer = MediaPlayer.create(context, Uri.parse(filePath));
 //        mediaPlayer = MediaPlayer.create(context, R.raw.queen);
         //구간 재생
-        System.out.println("====야이씨 : "+startTime);
-        System.out.println("====야이씨 : "+endTime);
-        System.out.println("====야이씨 : "+filePath);
-
         mediaPlayer.seekTo(startTime);
         mediaPlayer.getCurrentPosition();
         mediaPlayer.start();
@@ -185,7 +179,8 @@ public class RecordListAdapter extends BaseAdapter {
                 }
             }
             public void onFinish() {
-//                testBtn.setText("시작2");
+                playBtn.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
+                playBtnFlag = false;
             }
         }.start();
     }
