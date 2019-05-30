@@ -42,8 +42,8 @@ public class SleepCheck {
 	static int decibelSumCnt = 0;
 
 	static int EXCEPTION_DB_FOR_AVR_DB = -10;
-	static int AVR_DB_CHECK_TERM = 300;
-	static int AVR_DB_INIT_VALUE = -100;
+    static int AVR_DB_CHECK_TERM = 6000;
+    static double AVR_DB_INIT_VALUE = -31.5;
 	static int NOISE_DB_INIT_VALUE = -10;
 	static int NOISE_DB_CHECK_TERM = 1*100*60;
 
@@ -55,7 +55,7 @@ public class SleepCheck {
 	static double GrindingCheckStartTermSecond = 0;
 	static double GrindingCheckStartTermDecibel = 0;
 
-	static double MAX_DB = 31.5;
+	static double MAX_DB = -31.5;
 	static boolean isSnoringStart = false;
 
 	/*
@@ -96,13 +96,13 @@ public class SleepCheck {
 		}
 		//System.out.print(decibelSum+" "+decibelSumCnt+" "+avrDB+" ");
 		*/
-		return MAX_DB*2 > AVR_DB_INIT_VALUE ? Math.floor(AVR_DB_INIT_VALUE) : MAX_DB*2;
+		return MAX_DB*2 < AVR_DB_INIT_VALUE ? Math.floor(AVR_DB_INIT_VALUE) : MAX_DB*2;
 	}
 
 	static double setAvrDB(double decibel) {
 		//10분마다 평균 데시벨을 다시 계산한다.
 		if(decibel > MAX_DB) {
-			decibel = MAX_DB;
+			MAX_DB = decibel;
 		}
 		/*
 		if (decibelSumCnt >= AVR_DB_CHECK_TERM) {
@@ -116,7 +116,7 @@ public class SleepCheck {
 			avrDB = decibelSum / decibelSumCnt;
 		}
 		*/
-		return MAX_DB*2 > AVR_DB_INIT_VALUE? Math.floor(AVR_DB_INIT_VALUE) : MAX_DB*2;
+		return MAX_DB*2 < AVR_DB_INIT_VALUE? Math.floor(AVR_DB_INIT_VALUE) : MAX_DB*2;
 	}
 	static int noiseCheck(double decibel) {
 		//1분동안 소리가 발생하지 않았는지 체크한다.
