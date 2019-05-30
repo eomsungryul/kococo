@@ -192,7 +192,7 @@ public class RecodeFragment extends Fragment  {
                         public void run() {
                             // TODO
                             RequestBody requestData = RequestBody.create(MediaType.parse("application/json"), new Gson().toJson(recordData));
-                            System.out.println(" ========================requestData: "+requestData.toString());
+                            System.out.println(" ================ddddd========requestData: "+requestData.toString());
                             //POST /api/record를 호출한다.
                             apiService.addRecord(requestData).enqueue(new Callback<JsonObject>() {
                                 @Override
@@ -861,7 +861,7 @@ public class RecodeFragment extends Fragment  {
                     recordData.addProperty("recordEndDt",recordEndDt);
                     recordData.add("analysisList", ansList);
 
-                    System.out.println(" ========================recordData: "+recordData.toString());
+                    System.out.println(" =============dddd===========recordData: "+recordData.toString());
 
                     Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 끝====="));
                     isRecording = false;
