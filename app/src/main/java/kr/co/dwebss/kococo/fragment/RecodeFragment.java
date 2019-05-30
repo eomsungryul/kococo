@@ -43,6 +43,7 @@ import kr.co.dwebss.kococo.activity.ResultActivity;
 import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.util.AudioCalculator;
 import kr.co.dwebss.kococo.util.MediaPlayerUtility;
+import kr.co.dwebss.kococo.util.SimpleLame;
 import kr.co.dwebss.kococo.util.WaveFormatConverter;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -64,6 +65,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 //        5. 녹음파일 데이터를 기기에 저장한다.
 //        6. 녹음분석 데이터를 서버에 보낸다.
 public class RecodeFragment extends Fragment  {
+
+    static {
+        System.loadLibrary("mp3lame");
+    }
 
     Boolean recodeFlag = false;
     private String LOG_TAG = "Audio_Recording";
@@ -96,7 +101,7 @@ public class RecodeFragment extends Fragment  {
     MediaPlayer mediaPlayer;
     Boolean testFlag = false;
 
-    byte[] audioData = new byte[frameByteSize];
+    short[] audioData = new short[frameByteSize];
 
     Retrofit retrofit;
     ApiService apiService;
@@ -108,6 +113,8 @@ public class RecodeFragment extends Fragment  {
     String recordStartDt;
     String recordEndDt;
     SimpleDateFormat dayTimeDefalt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+    byte[] mp3buffer;
 
     public RecodeFragment() {
         // Required empty public constructor
@@ -284,6 +291,10 @@ public class RecodeFragment extends Fragment  {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO);
         //int bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT);
         int recBufSize = AudioRecord.getMinBufferSize(sampleRate, channelConfiguration, audioEncoding);;
+        /* mp3 저장 jni 사용위한 초기화 시작 */
+        mp3buffer = new byte[(int) (7200 + recBufSize * 2 * 1.25)];
+        SimpleLame.init(sampleRate, 1, sampleRate, 32);
+        /* mp3 저장 jni 사용위한 초기화 끝 */
         /*if (bufferSize == AudioRecord.ERROR || bufferSize == AudioRecord.ERROR_BAD_VALUE) {
             bufferSize = SAMPLE_RATE * 2;
         }*/
@@ -407,7 +418,7 @@ public class RecodeFragment extends Fragment  {
                 while (mShouldContinue) {
                     int numberOfShort = record.read(audioData, 0, audioData.length);
                     shortsRead += numberOfShort;
-                    frameBytes = audioData;
+                    frameBytes = shortToByte(audioData,numberOfShort);
 
                     try {
                         audioCalculator.setBytes(frameBytes);
@@ -462,7 +473,8 @@ public class RecodeFragment extends Fragment  {
 
                             //TODO 녹음된 파일이 저장되는 시점
                             WaveFormatConverter wfc = new WaveFormatConverter(44100, (short)1, waveData, 0, waveData.length-1);
-                            String[] fileInfo = wfc.saveLongTermWave(fileName, getContext());
+                            //String[] fileInfo = wfc.saveLongTermWave(fileName, getContext());
+                            String[] fileInfo = wfc.saveLongTermMp3(fileName, getContext());
 
                             Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
                             Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (waveData.length / (44100d * 16 * 1))) * 8));
@@ -565,7 +577,12 @@ public class RecodeFragment extends Fragment  {
                         if (i == 1 || isRecording == false) {
                             continue;
                         }
-                        baos.write(frameBytes);
+                        //baos.write(frameBytes);
+                        int encResult = SimpleLame.encode(audioData,
+                                audioData, numberOfShort, mp3buffer);
+                        if (encResult != 0) {
+                            baos.write(mp3buffer);
+                        }
 						/*
 						System.out.print("녹음 중! ");
 						Log.v(LOG_TAG2,(String.format("%.2f", times)+"s ");
@@ -814,6 +831,20 @@ public class RecodeFragment extends Fragment  {
                 Log.v(LOG_TAG, String.format("Recording  has stopped. Samples read: %d", shortsRead));
             }
         }).start();
+    }
+
+    private byte[] shortToByte(short[] input, int elements) {
+        int short_index, byte_index;
+        int iterations = elements; //input.length;
+        byte[] buffer = new byte[iterations * 2];
+        short_index = byte_index = 0;
+        for (/*NOP*/; short_index != iterations; /*NOP*/) {
+            buffer[byte_index] = (byte) (input[short_index] & 0x00FF);
+            buffer[byte_index + 1] = (byte) ((input[short_index] & 0xFF00) >> 8);
+            ++short_index;
+            byte_index += 2;
+        }
+        return buffer;
     }
 }
 

@@ -12,6 +12,7 @@ import kr.co.dwebss.kococo.fragment.RecodeFragment;
 
 
 public class WaveFormatConverter {
+
 	private final int LONGINT = 4;
 	private final int SMALLINT = 2;
 	private final int INTEGER = 4;
@@ -92,6 +93,41 @@ public class WaveFormatConverter {
 	}
 	// ------------------------------------------------------------
 
+
+	public String[] saveLongTermMp3(String fileName, Context x) {
+//		File myDir = new File(Environment.getExternalStorageDirectory(), "rec_data/");
+
+		System.out.println(x.getFilesDir().getAbsolutePath()+"/rec_data/"+ "----------------------save rec_data/rec_data/rec_data/rec_data/rec_data/rec_data/");
+		subDirList(x.getFilesDir().getAbsolutePath()+"/rec_data/");
+		folderCnt++;
+		File myDir = new File(x.getFilesDir().getAbsolutePath(), "rec_data/"+folderCnt+"/");
+		if(!myDir.exists()){
+			myDir.mkdirs();
+		}
+
+		System.out.println(fileName+ "----------------------save start");
+		System.out.println(myDir.toString()+ "----------------------save wdawdawdawdawdawdawdadw");
+		String filename = "snoring-"+fileName+"_"+System.currentTimeMillis()+".mp3";
+		try {
+
+			File path=new File(myDir,filename);
+			FileOutputStream outFile = new FileOutputStream(path);
+			outFile.write(output);
+			outFile.close();
+//			filename = path.getAbsolutePath();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			filename = "e1";
+		} catch (IOException e) {
+			filename = "e2";
+			e.printStackTrace();
+		}
+		System.out.println(fileName+ "----------------------save end");
+		String[] fileInfo = new String[2];
+		fileInfo[0] = myDir.toString();
+		fileInfo[1] = filename;
+		return fileInfo;
+	}
 
 
 	public String[] saveLongTermWave(String fileName, Context x) {
