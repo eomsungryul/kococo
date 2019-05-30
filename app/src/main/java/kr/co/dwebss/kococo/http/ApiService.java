@@ -40,6 +40,7 @@ public interface ApiService {
     Call<JsonObject> getAppid();
 
 
+    //녹음 종료시 저장
     //json으로도 받을 수 있는 형태
     @Headers({
             "Accept: application/json",
@@ -48,14 +49,23 @@ public interface ApiService {
     @POST("kococo/api/record")
     Call<JsonObject> addRecord(@Body RequestBody data);
 
-
+    //신고하기 제출
     //json으로도 받을 수 있는 형태
     @Headers({
             "Accept: application/json",
             "Content-Type: application/json"
     })
     @PUT("kococo/analysis/{analysisDetailId}")
-    Call<JsonObject> addClaim(@Path("analysisDetailId") int analysisDetailId, @Body RequestBody data);
+    Call<JsonObject> addClaim(@Path("analysisDetailId") Integer analysisDetailId, @Body RequestBody data);
+
+    //@Query 를 이용하면 ?key=value 식으로 보내진다.
+    @GET("kococo/api/record/search/findByUserAppId")
+    Call<JsonObject> getRecordList(@Query("userAppId") String userAppId);
+
+    //@Path 를 이용하면 Rest 방식으로 호출 할 수 있다.
+    @GET("kococo/api/record/{recordId}")
+    Call<JsonObject> getRecord(@Path("recordId") Integer recordId);
+
 //    Call<JSONObject> addRecord(@Body JSONObject data);
 //    Call<JsonObject> addRecord(JsonObject data);
 
