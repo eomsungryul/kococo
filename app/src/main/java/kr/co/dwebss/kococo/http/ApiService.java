@@ -16,6 +16,8 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface ApiService {
@@ -45,6 +47,15 @@ public interface ApiService {
     })
     @POST("kococo/api/record")
     Call<JsonObject> addRecord(@Body RequestBody data);
+
+
+    //json으로도 받을 수 있는 형태
+    @Headers({
+            "Accept: application/json",
+            "Content-Type: application/json"
+    })
+    @PUT("kococo/analysis/{analysisDetailId}")
+    Call<JsonObject> addClaim(@Path("analysisDetailId") int analysisDetailId, @Body RequestBody data);
 //    Call<JSONObject> addRecord(@Body JSONObject data);
 //    Call<JsonObject> addRecord(JsonObject data);
 

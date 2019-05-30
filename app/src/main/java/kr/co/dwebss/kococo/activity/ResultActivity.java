@@ -69,6 +69,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
     private ListView recordLv ;
     JsonObject responseData;
 
+
     Date recordStartD;
     Date recordEndD;
     Date recordStartDT;
