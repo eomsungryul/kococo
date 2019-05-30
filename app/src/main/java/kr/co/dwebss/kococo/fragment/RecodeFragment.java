@@ -438,7 +438,7 @@ public class RecodeFragment extends Fragment  {
                     if (i < 300) {
                         continue;
                     }
-                    //System.out.println(String.format("%.2f", times)+"s "+hz +" "+db+" "+amp+" "+sehz+" "+seamp);
+                    Log.v(LOG_TAG2,(String.format("%.2f", times)+"s "+hz +" "+db+" "+amp+" "+sehz+" "+seamp+" "+decibel+"vs"+SleepCheck.getAvrDB()));
                     // 소리의 발생은 특정 db 이상으로한다. 데시벨은 -31.5~0 으로 수치화 하고 있음.
                     // -10db에 안걸릴 수도 잇으니까, 현재 녹음 상태의 평균 데시벨값을 지속적으로 갱신하면서 평균 데시벨보다 높은 소리가 발생했는지 체크
                     // 한다.
