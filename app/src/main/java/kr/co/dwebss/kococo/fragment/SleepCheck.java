@@ -55,6 +55,7 @@ public class SleepCheck {
 	static double GrindingCheckStartTermSecond = 0;
 	static double GrindingCheckStartTermDecibel = 0;
 
+	static double MAX_DB = 31.5;
 	static boolean isSnoringStart = false;
 
 	/*
@@ -87,18 +88,23 @@ public class SleepCheck {
 	}
 */
 
-
 	static double getAvrDB() {
+		/*
 		double avrDB = -AVR_DB_INIT_VALUE;
 		if (decibelSum != 0 && decibelSumCnt != 0) {
 			avrDB = decibelSum / decibelSumCnt;
 		}
 		//System.out.print(decibelSum+" "+decibelSumCnt+" "+avrDB+" ");
-		return avrDB;
+		*/
+		return MAX_DB*2 > AVR_DB_INIT_VALUE ? Math.floor(AVR_DB_INIT_VALUE) : MAX_DB*2;
 	}
 
 	static double setAvrDB(double decibel) {
 		//10분마다 평균 데시벨을 다시 계산한다.
+		if(decibel > MAX_DB) {
+			decibel = MAX_DB;
+		}
+		/*
 		if (decibelSumCnt >= AVR_DB_CHECK_TERM) {
 			decibelSum = 0;
 			decibelSumCnt = 0;
@@ -109,7 +115,8 @@ public class SleepCheck {
 		if (decibelSum != 0 && decibelSumCnt != 0) {
 			avrDB = decibelSum / decibelSumCnt;
 		}
-		return avrDB;
+		*/
+		return MAX_DB*2 > AVR_DB_INIT_VALUE? Math.floor(AVR_DB_INIT_VALUE) : MAX_DB*2;
 	}
 	static int noiseCheck(double decibel) {
 		//1분동안 소리가 발생하지 않았는지 체크한다.
