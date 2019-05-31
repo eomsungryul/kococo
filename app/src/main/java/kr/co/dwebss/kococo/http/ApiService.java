@@ -51,10 +51,10 @@ public interface ApiService {
 
     //신고하기 제출
     //json으로도 받을 수 있는 형태
-    @Headers({
-            "Accept: application/json",
-            "Content-Type: application/json"
-    })
+//    @Headers({
+//            "Accept: application/json",
+//            "Content-Type: application/json"
+//    })
     @PUT("kococo/api/claim/analysisDetail/{analysisDetailId}")
     Call<JsonObject> addClaim(@Path("analysisDetailId") Integer analysisDetailId, @Body RequestBody data);
 

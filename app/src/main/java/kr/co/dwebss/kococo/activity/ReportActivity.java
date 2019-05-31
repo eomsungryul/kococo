@@ -179,10 +179,15 @@ public class ReportActivity extends AppCompatActivity {
         analysisDetailsObj.addProperty("claimContents",claimContents.getText().toString());
         analysisDetailsList.add(analysisDetailsObj);
         requestJson.add("analysisDetailsList",analysisDetailsList);
+
         RequestBody requestData = RequestBody.create(MediaType.parse("application/json"), new Gson().toJson(requestJson));
         Toast.makeText(getApplicationContext(),"ddd"+requestData.toString(),Toast.LENGTH_LONG).show();
                 System.out.println(" =============ddd===========Throwable: "+ requestJson.toString());
-                System.out.println(" ============eeee============Throwable: "+ requestData);
+                System.out.println(" ============eeee============Throwable: "+ requestData.toString());
+
+//        {"analysisServerUploadPath":"rec_data/7dc9e960-b0db-4c1c-81b5-2c8f2ce7ca4f/2019-05-30/snoring-20191330_1513-30_1514_1559196886407.wav","analysisDetailsList":[{"claimReasonCd":200102,"claimContents":"recordData : /data/user/0/kr.co.dwebss.kococo/files/rec_data/29/snoring-20191330_1513-30_1514_1559196886407.wav/getAnalysisDetailsId :97/getAnalysisId :93"}]}
+//        {"userAppId":"7dc9e960-b0db-4c1c-81b5-2c8f2ce7ca4f","recordStartDt":"2019-05-30T18:54:48","recordEndDt":"2019-05-30T18:55:09","analysisList":[{"analysisStartDt":"2019-05-30T18:54:56","analysisEndDt":"2019-05-30T18:55:16","analysisFileAppPath":"/storage/emulated/0/Download/rec_data/1","analysisFileNm":"snoring-20190530_1854-30_1855_1559210109319.mp3","analysisDetailsList":[]}]}
+
         apiService.addClaim(recordData.getAnalysisDetailsId(),requestData).enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {

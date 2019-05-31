@@ -1,2 +1,2 @@
 set solib-search-path ./obj/local/x86
-directory C:/Users/yrseo/AndroidSDK/ndk-bundle/build//../toolchains/llvm/prebuilt/windows-x86_64/sysroot jni C:/Users/yrseo/AndroidSDK/ndk-bundle/build//../sources/cxx-stl/system
+directory C:/_app/tools/sdk-tools-windows-3859397/ndk/19.2.5345600/build//../toolchains/llvm/prebuilt/windows-x86_64/sysroot jni C:/_app/tools/sdk-tools-windows-3859397/ndk/19.2.5345600/build//../sources/cxx-stl/system
