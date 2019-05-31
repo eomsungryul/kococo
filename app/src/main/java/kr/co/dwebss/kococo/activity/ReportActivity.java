@@ -38,6 +38,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -180,7 +181,8 @@ public class ReportActivity extends AppCompatActivity {
         analysisDetailsList.add(analysisDetailsObj);
         requestJson.add("analysisDetailsList",analysisDetailsList);
 
-        RequestBody requestData = RequestBody.create(MediaType.parse("application/json"), new Gson().toJson(requestJson));
+        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+        RequestBody requestData = RequestBody.create(MediaType.parse("application/json"), gson.toJson(requestJson));
         Toast.makeText(getApplicationContext(),"ddd"+requestData.toString(),Toast.LENGTH_LONG).show();
                 System.out.println(" =============ddd===========Throwable: "+ requestJson.toString());
                 System.out.println(" ============eeee============Throwable: "+ requestData.toString());

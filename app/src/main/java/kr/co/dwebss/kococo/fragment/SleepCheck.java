@@ -48,7 +48,7 @@ public class SleepCheck {
 	static int EXCEPTION_DB_FOR_AVR_DB = -10;
     static int AVR_DB_CHECK_TERM = 6000;
     static double MAX_DB_CRIT_VALUE = -31.5;
-    static double MIN_DB_CRIT_VALUE = -10;
+	static double MIN_DB_CRIT_VALUE = -20;
 	static int NOISE_DB_INIT_VALUE = -10;
 	static int NOISE_DB_CHECK_TERM = 1*100*60;
 
@@ -110,7 +110,7 @@ public class SleepCheck {
 
     static double setMinDB(double decibel) {
         //10분마다 평균 데시벨을 다시 계산한다.
-        if(Math.abs(decibel) != 0 && decibel < MIN_DB) {
+        if(Math.abs(decibel) != 0 && Math.abs(decibel) != 31.5 && decibel < MIN_DB) {
             MIN_DB = decibel;
         }
 		/*
@@ -141,8 +141,14 @@ public class SleepCheck {
     static double setMaxDB(double decibel) {
         //10분마다 평균 데시벨을 다시 계산한다.
         if(Math.abs(decibel) != 0 && decibel > MAX_DB) {
-            MAX_DB = decibel;
-        }
+			MAX_DB = decibel-1;
+		}
+		if (decibelSumCnt >= AVR_DB_CHECK_TERM) {
+			decibelSumCnt = 0;
+			MAX_DB = -31.5;
+			MIN_DB = 0;
+		}
+		decibelSumCnt ++;
 		/*
 		if (decibelSumCnt >= AVR_DB_CHECK_TERM) {
 			decibelSum = 0;
@@ -204,7 +210,7 @@ public class SleepCheck {
 	}
 
 	static int grindingCheck(double times, double decibel, int amplitude, double frequency, double sefrequency) {
-        if (decibel > getMinDB()*1.1
+        if (decibel > getMinDB()*0.55
         ){
 			if(grindingRepeatOnceAmpCnt==0) {
 				GrindingCheckStartTermDecibel = decibel;
@@ -253,7 +259,7 @@ public class SleepCheck {
 
 	static int OSACheck(double times, double decibel, int amplitude, double frequency, double sefrequency) {
         //System.out.println("OSACheckDb:" +decibel +"vs" + getMinDB());
-        if (decibel > getMinDB()*0.9) {
+        if (decibel > getMinDB()*0.45) {
 
             if (isOSATerm == true) {
                 if (beforeTermWord.equals(BREATH) && isOSATermCnt > 1000) {

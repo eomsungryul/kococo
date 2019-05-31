@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -492,7 +493,7 @@ public class RecodeFragment extends Fragment  {
                             ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
                             ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
                             try {
-                                Gson gson = new Gson();
+                                Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                                 String andRList = gson.toJson(se.getAnalysisRawDataList());
                                 ansd.addProperty("analysisData", andRList);
 
@@ -508,7 +509,7 @@ public class RecodeFragment extends Fragment  {
                                 ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
                                 ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
                                 try {
-                                    Gson gson = new Gson();
+                                    Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                                     String andRList = gson.toJson(se.getAnalysisRawDataList());
                                     ansd.addProperty("analysisData", andRList);
 
@@ -525,7 +526,7 @@ public class RecodeFragment extends Fragment  {
                                 ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
                                 ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
                                 try {
-                                    Gson gson = new Gson();
+                                    Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                                     String andRList = gson.toJson(se.getAnalysisRawDataList());
                                     ansd.addProperty("analysisData", andRList);
 
