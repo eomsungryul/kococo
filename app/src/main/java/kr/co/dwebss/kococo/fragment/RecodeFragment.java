@@ -38,6 +38,7 @@ import java.util.List;
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.activity.ResultActivity;
 import kr.co.dwebss.kococo.http.ApiService;
+import kr.co.dwebss.kococo.model.AnalysisRawData;
 import kr.co.dwebss.kococo.util.AudioCalculator;
 import kr.co.dwebss.kococo.util.SimpleLame;
 import kr.co.dwebss.kococo.util.WaveFormatConverter;
@@ -434,17 +435,18 @@ public class RecodeFragment extends Fragment  {
                     final String hz = String.valueOf(frequency + "Hz");
                     final String sehz = String.valueOf(sefrequency + "Hz(2th)");
                     final String seamp = String.valueOf(sefamplitude + "Amp(2th)");
-                    SleepCheck.setAvrDB(decibel);
+                    SleepCheck.setMaxDB(decibel);
+                    SleepCheck.setMinDB(decibel);
                     //실제로는 3초 이후 분석한다.
                     if (i < 300) {
                         continue;
                     }
-                    Log.v(LOG_TAG2,(String.format("%.2f", times)+"s "+hz +" "+db+" "+amp+" "+sehz+" "+seamp+" "+decibel+"vs"+SleepCheck.getAvrDB()));
+                    Log.v(LOG_TAG2,(String.format("%.2f", times)+"s "+hz +" "+db+" "+amp+" "+sehz+" "+seamp+" "+decibel+"vs"+SleepCheck.getMaxDB())+","+SleepCheck.getMinDB());
                     // 소리의 발생은 특정 db 이상으로한다. 데시벨은 -31.5~0 으로 수치화 하고 있음.
                     // -10db에 안걸릴 수도 잇으니까, 현재 녹음 상태의 평균 데시벨값을 지속적으로 갱신하면서 평균 데시벨보다 높은 소리가 발생했는지 체크
                     // 한다.
                     // 평균 데시벨 체크는 3초 동안한다.
-                    if (decibel > SleepCheck.getAvrDB() && isRecording == false
+                    if (decibel > SleepCheck.getMaxDB() && isRecording == false
                             && Math.floor((double) (audioData.length / (44100d * 16 * 1)) * 8) != Math.floor(times) //사운드 파일 테스트용
                     ) {
                         Log.v(LOG_TAG2,("녹음 시작! "));
@@ -489,6 +491,14 @@ public class RecodeFragment extends Fragment  {
                             ansd.addProperty("termTypeCd",200101);
                             ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
                             ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+                            try {
+                                Gson gson = new Gson();
+                                String andRList = gson.toJson(se.getAnalysisRawDataList());
+                                ansd.addProperty("analysisData", andRList);
+
+                            }catch(NullPointerException e){
+                                e.getMessage();
+                            }
                             ansDList.add(ansd);
                         }
                         for(StartEnd se : grindingTermList) {
@@ -497,6 +507,14 @@ public class RecodeFragment extends Fragment  {
                                 ansd.addProperty("termTypeCd",200102);
                                 ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
                                 ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+                                try {
+                                    Gson gson = new Gson();
+                                    String andRList = gson.toJson(se.getAnalysisRawDataList());
+                                    ansd.addProperty("analysisData", andRList);
+
+                                }catch(NullPointerException e){
+                                    e.getMessage();
+                                }
                                 ansDList.add(ansd);
                             }
                         }
@@ -506,6 +524,14 @@ public class RecodeFragment extends Fragment  {
                                 ansd.addProperty("termTypeCd",200103);
                                 ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
                                 ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+                                try {
+                                    Gson gson = new Gson();
+                                    String andRList = gson.toJson(se.getAnalysisRawDataList());
+                                    ansd.addProperty("analysisData", andRList);
+
+                                }catch(NullPointerException e){
+                                    e.getMessage();
+                                }
                                 ansDList.add(ansd);
                             }
                         }
@@ -594,6 +620,10 @@ public class RecodeFragment extends Fragment  {
                         }else {
                             snoringTermList.add(new StartEnd());
                             snoringTermList.get(snoringTermList.size()-1).start=times;
+                            snoringTermList
+                                    .get(snoringTermList.size() - 1).AnalysisRawDataList = new ArrayList<AnalysisRawData>();
+                            snoringTermList.get(snoringTermList.size() - 1).AnalysisRawDataList.add(new AnalysisRawData(
+                                    times, amplitude, decibel, frequency, sefrequency, sefamplitude));
                             SleepCheck.isSnoringStart = true;
                         }
                     }else if(snoreChecked == 3) {
@@ -605,6 +635,20 @@ public class RecodeFragment extends Fragment  {
                         }
                     }else {
                         //0일 때는 아직 분석하고 1분이 안된 상태, 즉 각 1분이 안된 때마다 이곳을 탄다.
+                    }
+                    if (SleepCheck.isSnoringStart == true) {
+                        try {
+                            String tmpTime =
+                                    String.format("%.0f",
+                                            snoringTermList.get(snoringTermList.size() - 1).AnalysisRawDataList.get(snoringTermList.get(snoringTermList.size() - 1).AnalysisRawDataList.size()-1).getTimes()
+                                    );
+                            if(!tmpTime.equals(String.format("%.0f",times))){
+                                snoringTermList.get(snoringTermList.size() - 1).AnalysisRawDataList.add(new AnalysisRawData(
+                                        times, amplitude, decibel, frequency, sefrequency, sefamplitude));
+                            }
+                        } catch (IndexOutOfBoundsException e) {
+                            System.out.println("293");// log4j로 하면 라인넘버를 남길 수 있다. 여기서는 하드 코딩.
+                        }
                     }
                     // 이갈이는 기존 로직대로 체크해서, 어디 구간에서 발생했는지 체크한다.
                     SleepCheck.grindingCheck(times, decibel, sefamplitude, frequency, sefrequency);
@@ -619,6 +663,8 @@ public class RecodeFragment extends Fragment  {
                         SleepCheck.GrindingCheckStartTermSecond = times;
                         grindingTermList.add(new StartEnd());
                         grindingTermList.get(grindingTermList.size()-1).start=times-2;
+                        grindingTermList.get(grindingTermList.size() - 1).AnalysisRawDataList = new ArrayList<AnalysisRawData>();
+                        grindingTermList.get(grindingTermList.size() - 1).AnalysisRawDataList.add(new AnalysisRawData(times, amplitude, decibel, frequency, sefrequency, sefamplitude));
                         grindingStart = true;
                         grindingContinue = false;
                         // 이갈이 체크 중에 1초간격으로 유효 카운트가 연속적으로 발생했으면 계속 체크한다.
@@ -692,6 +738,23 @@ public class RecodeFragment extends Fragment  {
                             */
                         }
                     }
+
+                    if (grindingStart) {
+                        try {
+
+                            String tmpTime =
+                                    String.format("%.0f",
+                                            grindingTermList.get(grindingTermList.size() - 1).AnalysisRawDataList.get(grindingTermList.get(grindingTermList.size() - 1).AnalysisRawDataList.size()-1).getTimes()
+                                    );
+                            if(!tmpTime.equals(String.format("%.0f",times))){
+                                grindingTermList.get(grindingTermList.size() - 1).AnalysisRawDataList.add(new AnalysisRawData(
+                                        times, amplitude, decibel, frequency, sefrequency, sefamplitude));
+                            }
+                        } catch (IndexOutOfBoundsException e) {
+                            System.out.println("397");// log4j로 하면 라인넘버를 남길 수 있다. 여기서는 하드 코딩.
+                        }
+                    }
+
                     // 무호흡도 기존 로직대로 체크해서, 어디 구간에서 발생했는지 체크한다.
                     osaCnt = SleepCheck.OSACheck(times, decibel, sefamplitude, frequency, sefrequency);
                     osaRecordingContinueCnt += osaCnt;
@@ -720,6 +783,7 @@ public class RecodeFragment extends Fragment  {
                             */
                             osaStart = false;
                             osaRecordingContinueCnt = 0;
+                            osaTermList.remove(osaTermList.size() - 1);
                         } else {
                             if (((double) (audioData.length / (44100d * 16 * 1))) * 8 < times + 1) {
                                 /*
@@ -788,6 +852,26 @@ public class RecodeFragment extends Fragment  {
                                     + SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
                             */
                         }
+                    }
+                    if(SleepCheck.isOSAAnsStart == true) {
+                        try {
+                            String tmpTime =
+                                    String.format("%.0f",
+                                            osaTermList.get(osaTermList.size() - 1).AnalysisRawDataList.get(osaTermList.get(osaTermList.size() - 1).AnalysisRawDataList.size()-1).getTimes()
+                                    );
+                            if(!tmpTime.equals(String.format("%.0f",times))){
+                                osaTermList.get(osaTermList.size() - 1).AnalysisRawDataList.add(
+                                        new AnalysisRawData(times, amplitude, decibel, frequency, sefrequency, sefamplitude));
+                            }
+                        } catch (IndexOutOfBoundsException e) {
+                            //System.out.println("540");// log4j로 하면 라인넘버를 남길 수 있다. 여기서는 하드 코딩.
+                        }
+						/*catch (NullPointerException e1) {
+							System.out.println("NULL="+times);
+							//System.out.println(SleepCheck.isOSATermTimeOccur+" "+);
+						}*/
+                    }else {
+                        //System.out.println(times);
                     }
                     SleepCheck.curTermTime = times;
                     SleepCheck.curTermDb = decibel;
@@ -907,11 +991,26 @@ public class RecodeFragment extends Fragment  {
 class StartEnd {
     double start;
     double end;
+    List<AnalysisRawData> AnalysisRawDataList;
+
     public String getTerm() {
-        return String.format("%.0f", start)+"~"+String.format("%.0f", end);
+        return String.format("%.0f", start) + "~" + String.format("%.0f", end);
     }
+
     public String getTermForRequest(int termCd, long recordStartingTIme) {
         SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        return "termTypeCd: "+termCd +", termStartDt: "+dayTime.format(new Date((long) (recordStartingTIme+this.start*1000)))+", termEndDt"+dayTime.format(new Date((long) (recordStartingTIme+this.end*1000)));
+        return "termTypeCd: " + termCd + ", termStartDt: "
+                + dayTime.format(new Date((long) (recordStartingTIme + this.start * 1000))) + ",termEndDt: "
+                + dayTime.format(new Date((long) (recordStartingTIme + this.end * 1000)));
+    }
+
+    public String getAnalysisRawDataList() {
+        String rtn = "";
+        if(this.AnalysisRawDataList!=null) {
+            for(AnalysisRawData d : this.AnalysisRawDataList) {
+                rtn+=d.toString()+"\r\n";
+            }
+        }
+        return rtn;
     }
 }

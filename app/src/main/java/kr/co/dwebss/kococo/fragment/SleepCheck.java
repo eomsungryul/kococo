@@ -2,6 +2,10 @@ package kr.co.dwebss.kococo.fragment;
 
 import android.util.Log;
 
+import java.util.ArrayList;
+
+import kr.co.dwebss.kococo.model.AnalysisRawData;
+
 public class SleepCheck {
 
 	static double curTermHz = 0.0;
@@ -43,7 +47,8 @@ public class SleepCheck {
 
 	static int EXCEPTION_DB_FOR_AVR_DB = -10;
     static int AVR_DB_CHECK_TERM = 6000;
-    static double AVR_DB_INIT_VALUE = -31.5;
+    static double MAX_DB_CRIT_VALUE = -31.5;
+    static double MIN_DB_CRIT_VALUE = -10;
 	static int NOISE_DB_INIT_VALUE = -10;
 	static int NOISE_DB_CHECK_TERM = 1*100*60;
 
@@ -55,8 +60,12 @@ public class SleepCheck {
 	static double GrindingCheckStartTermSecond = 0;
 	static double GrindingCheckStartTermDecibel = 0;
 
-	static double MAX_DB = -31.5;
+    static double MAX_DB = -31.5;
+    static double MIN_DB = 0;
 	static boolean isSnoringStart = false;
+
+    static boolean isOSATermTimeOccur = false;
+    static boolean isOSAAnsStart = false;
 
 	/*
 	static double getAvrDB(double decibel) {
@@ -88,7 +97,7 @@ public class SleepCheck {
 	}
 */
 
-	static double getAvrDB() {
+    static double getMinDB() {
 		/*
 		double avrDB = -AVR_DB_INIT_VALUE;
 		if (decibelSum != 0 && decibelSumCnt != 0) {
@@ -96,14 +105,14 @@ public class SleepCheck {
 		}
 		//System.out.print(decibelSum+" "+decibelSumCnt+" "+avrDB+" ");
 		*/
-		return MAX_DB*2 < AVR_DB_INIT_VALUE ? Math.floor(AVR_DB_INIT_VALUE) : MAX_DB*2;
-	}
+        return MIN_DB/2 < MIN_DB_CRIT_VALUE ? Math.floor(MIN_DB_CRIT_VALUE) : MIN_DB/2;
+    }
 
-	static double setAvrDB(double decibel) {
-		//10분마다 평균 데시벨을 다시 계산한다.
-		if(decibel > MAX_DB) {
-			MAX_DB = decibel;
-		}
+    static double setMinDB(double decibel) {
+        //10분마다 평균 데시벨을 다시 계산한다.
+        if(Math.abs(decibel) != 0 && decibel < MIN_DB) {
+            MIN_DB = decibel;
+        }
 		/*
 		if (decibelSumCnt >= AVR_DB_CHECK_TERM) {
 			decibelSum = 0;
@@ -116,8 +125,38 @@ public class SleepCheck {
 			avrDB = decibelSum / decibelSumCnt;
 		}
 		*/
-		return MAX_DB*2 < AVR_DB_INIT_VALUE? Math.floor(AVR_DB_INIT_VALUE) : MAX_DB*2;
-	}
+        return MIN_DB/2 < MIN_DB_CRIT_VALUE ? Math.floor(MIN_DB_CRIT_VALUE) : MIN_DB/2;
+    }
+    static double getMaxDB() {
+		/*
+		double avrDB = -AVR_DB_INIT_VALUE;
+		if (decibelSum != 0 && decibelSumCnt != 0) {
+			avrDB = decibelSum / decibelSumCnt;
+		}
+		//System.out.print(decibelSum+" "+decibelSumCnt+" "+avrDB+" ");
+		*/
+        return MAX_DB*2 < MAX_DB_CRIT_VALUE ? Math.floor(MAX_DB_CRIT_VALUE) : MAX_DB*2;
+    }
+
+    static double setMaxDB(double decibel) {
+        //10분마다 평균 데시벨을 다시 계산한다.
+        if(Math.abs(decibel) != 0 && decibel > MAX_DB) {
+            MAX_DB = decibel;
+        }
+		/*
+		if (decibelSumCnt >= AVR_DB_CHECK_TERM) {
+			decibelSum = 0;
+			decibelSumCnt = 0;
+		}
+		double avrDB = -AVR_DB_INIT_VALUE;
+		decibelSum += decibel;
+		decibelSumCnt ++;
+		if (decibelSum != 0 && decibelSumCnt != 0) {
+			avrDB = decibelSum / decibelSumCnt;
+		}
+		*/
+        return MAX_DB*2 < MAX_DB_CRIT_VALUE? Math.floor(MAX_DB_CRIT_VALUE) : MAX_DB*2;
+    }
 	static int noiseCheck(double decibel) {
 		//1분동안 소리가 발생하지 않았는지 체크한다.
 		//0.01초 단위임으로, 600번 해야 60초임.
@@ -131,7 +170,7 @@ public class SleepCheck {
 			//아직 1분이 안되었으면 계속 소리 체크를 한다.
 			//소리 체크는 1분동안 평균 데시벨보다 높은 데시벨의 소리가 발생했는지를 체크한다.
 			//리턴이 0이면 녹음 종료하게 되어있음.
-			if(decibel > getAvrDB()) {
+            if(decibel > getMaxDB()) {
 				noiseChkSum++;
 			}else {
 				noiseNoneChkSum++;
@@ -165,8 +204,8 @@ public class SleepCheck {
 	}
 
 	static int grindingCheck(double times, double decibel, int amplitude, double frequency, double sefrequency) {
-		if (decibel > grindChkDb
-				){
+        if (decibel > getMinDB()*1.1
+        ){
 			if(grindingRepeatOnceAmpCnt==0) {
 				GrindingCheckStartTermDecibel = decibel;
 			}else {
@@ -213,30 +252,67 @@ public class SleepCheck {
 	}
 
 	static int OSACheck(double times, double decibel, int amplitude, double frequency, double sefrequency) {
-		if (decibel > chkOSADb) {
+        //System.out.println("OSACheckDb:" +decibel +"vs" + getMinDB());
+        if (decibel > getMinDB()*0.9) {
 
-			if (isOSATerm == true) {
-				if (beforeTermWord.equals(BREATH) && isOSATermCnt > 3000) { //5초에서 30초로 변경
-					Log.v("YRSEO",("[" + String.format("%.2f", OSAcurTermTime) + "~" + String.format("%.2f", times)
+            if (isOSATerm == true) {
+                if (beforeTermWord.equals(BREATH) && isOSATermCnt > 1000) {
+                    isOSATermTimeOccur=false;
+                    Log.v("YRSEO",("[" + String.format("%.2f", OSAcurTermTime) + "~" + String.format("%.2f", times)
 							+ "s, isOSATermCnt: " + isOSATermCnt + ", isOSATermCntOpp:" + isOSATermCntOpp + "]"));
+//분석이 종료되는 시점은 앞에서 분석된 시간으로부터 1분이상 초과된 경우에 종료하고, 아닌 경우에는 현재 시간을 end.times에 추가한다.
+                    if(RecodeFragment.osaTermList.size()>1) {
+                        int beforeEndTime = (int) RecodeFragment.osaTermList.get(RecodeFragment.osaTermList.size()-2).end; //0이거나 값이 있거나
+                        int currentTime = (int) times;
+                        //System.out.println(beforeEndTime +" "+ currentTime+"="+(currentTime-beforeEndTime));
+                        if(currentTime - beforeEndTime > 60) {
+                            System.out.println("기록vo종료");
+                            isOSAAnsStart = false;
+                            RecodeFragment.osaTermList.get(RecodeFragment.osaTermList.size()-1).end=times;
+                        }else {
+                            //System.out.println("1분이 안 지났으므로, 기록vo종료하지 않고, 이전기록vo에 종료입력, 현재 기록vo 삭제");
+                            RecodeFragment.osaTermList.get(RecodeFragment.osaTermList.size()-2).AnalysisRawDataList.addAll(
+                                    RecodeFragment.osaTermList.get(RecodeFragment.osaTermList.size()-1).AnalysisRawDataList);
+                            RecodeFragment.osaTermList.remove(RecodeFragment.osaTermList.size()-1);
+                            RecodeFragment.osaTermList.get(RecodeFragment.osaTermList.size()-1).end=times;
+                        }
+                    }else {
+                        isOSAAnsStart = false;
+                        RecodeFragment.osaTermList.get(RecodeFragment.osaTermList.size()-1).end=times;
+                    }
 
-					RecodeFragment.osaTermList.add(new StartEnd());
-					RecodeFragment.osaTermList.get(RecodeFragment.osaTermList.size()-1).start=OSAcurTermTime;
-					RecodeFragment.osaTermList.get(RecodeFragment.osaTermList.size()-1).end=times;
-					double tmpD = OSAcurTermTime;
-					OSAcurTermTime = times;
-					isOSATerm = false;
-					isOSATermCnt = 0;
-					isOSATermCntOpp = 0;
-					return (int) (times-tmpD);
+                    double tmpD = OSAcurTermTime;
+                    OSAcurTermTime = times;
+                    isOSATerm = false;
+                    isOSATermCnt = 0;
+                    isOSATermCntOpp = 0;
+                    // beforeTermWord=OSA;
+                    return (int) (times-tmpD);
+
 				} else {
 					isOSATerm = false;
 					isOSATermCnt = 0;
 					isOSATermCntOpp = 0;
 				}
 			} else {
-				isBreathTermCnt++;
-				isBreathTerm = true;
+                if(!isOSATermTimeOccur || (isOSATermTimeOccur && times-OSAcurTermTime>15)) {
+                isOSAAnsStart = true;
+                OSAcurTermTime = times;
+                if(isOSATermTimeOccur && RecodeFragment.osaTermList.size()>0) {
+                    //System.out.println("이전기록vo취소");
+                    RecodeFragment.osaTermList.remove(RecodeFragment.osaTermList.size()-1);
+                }
+                //System.out.println("기록vo생성");
+                RecodeFragment.osaTermList.add(new StartEnd());
+                RecodeFragment.osaTermList.get(RecodeFragment.osaTermList.size()-1).start=times;
+                RecodeFragment.osaTermList.get(RecodeFragment.osaTermList.size() - 1).AnalysisRawDataList = new ArrayList<AnalysisRawData>();
+                RecodeFragment.osaTermList.get(RecodeFragment.osaTermList.size() - 1).AnalysisRawDataList.add(new AnalysisRawData(times, amplitude, decibel, frequency, sefrequency, 0));
+                isOSATermTimeOccur = true;
+                System.out.println(OSAcurTermTime);
+            }
+
+                isBreathTermCnt++;
+                isBreathTerm = true;
 			}
 		} else {
 			if (isBreathTerm == false) {
@@ -254,7 +330,7 @@ public class SleepCheck {
 				isBreathTermCntOpp = 0;
 				isBreathTerm = false;
 			} else {
-				OSAcurTermTime = times;
+				//OSAcurTermTime = times;
 				isBreathTermCnt = 0;
 				isBreathTermCntOpp = 0;
 				isBreathTerm = false;
@@ -262,7 +338,7 @@ public class SleepCheck {
 			}
 		}
 		if (OSAcurTermTime == 0 || (isBreathTermCnt == 0 && isOSATermCnt == 0)) {
-			OSAcurTermTime = times;
+			//OSAcurTermTime = times;
 		}
 		return 0;
 	}
