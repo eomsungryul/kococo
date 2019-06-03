@@ -185,7 +185,7 @@ public class SleepCheck {
 				noiseNoneChkSum++;
 			}
 			noiseChkCnt++;
-			return 601;
+			return 6001;
 			//return noiseChkCnt;
 		}
 
