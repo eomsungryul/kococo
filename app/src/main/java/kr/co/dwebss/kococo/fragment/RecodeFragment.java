@@ -41,6 +41,7 @@ import kr.co.dwebss.kococo.activity.ResultActivity;
 import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.model.AnalysisRawData;
 import kr.co.dwebss.kococo.util.AudioCalculator;
+import kr.co.dwebss.kococo.util.FindAppIdUtil;
 import kr.co.dwebss.kococo.util.SimpleLame;
 import kr.co.dwebss.kococo.util.WaveFormatConverter;
 import okhttp3.MediaType;
@@ -132,31 +133,8 @@ public class RecodeFragment extends Fragment  {
         recodeFlag = false;
         recodeBtn.setText("녹음 시작");
 
-
         retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();
         apiService = retrofit.create(ApiService.class);
-
-
-
-        String path = getContext().getFilesDir().getAbsolutePath();
-        //path 부분엔 파일 경로를 지정해주세요.
-        File files = new File(path+"/appId.txt");
-        //get app Id
-        StringBuffer buffer = new StringBuffer();
-        String data = null;
-        FileInputStream fis = null;
-        try {
-            fis = getContext().openFileInput("appId.txt");
-            BufferedReader iReader = new BufferedReader(new InputStreamReader((fis)));
-            userAppId = iReader.readLine();
-            iReader.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Toast.makeText(getActivity(), "userAppId :  "+userAppId, Toast.LENGTH_SHORT).show();
-
 
         //xml 내에서 onclick으로 가능하다. 하지만 그건 activity 내에서만 가능하고 프래그먼트에서는 onclickListener()로 해야함
         recodeBtn.setOnClickListener(new Button.OnClickListener() {
@@ -219,7 +197,8 @@ public class RecodeFragment extends Fragment  {
             }
         });
 
-
+        FindAppIdUtil fau = new FindAppIdUtil();
+        userAppId = fau.getAppid(getContext());
 
         Button testBtn = (Button) v.findViewById(R.id.testBtn) ;
         testBtn.setText("테스트");
