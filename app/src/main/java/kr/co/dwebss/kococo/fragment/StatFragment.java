@@ -1,5 +1,6 @@
 package kr.co.dwebss.kococo.fragment;
 
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -36,6 +37,8 @@ public class StatFragment extends Fragment implements SeekBar.OnSeekBarChangeLis
     private RecyclerView mAccountsRV;
     private PieChart chart;
     List<RowData> accounts;
+    Resources res;
+
 
     public StatFragment() {
         // Required empty public constructor
@@ -52,6 +55,9 @@ public class StatFragment extends Fragment implements SeekBar.OnSeekBarChangeLis
 
 
         View v = inflater.inflate(R.layout.fragment_stat, container, false);
+
+        //res/string.xml을 사용하기 위한
+        res = getResources();
 
         initializeData();
         mAccountsRV = v.findViewById(R.id.statView);
@@ -238,10 +244,10 @@ public class StatFragment extends Fragment implements SeekBar.OnSeekBarChangeLis
     //무호흡 (퍼플) #B15DFF RGB	177, 93, 255
     private void initializeData() {
         accounts = new ArrayList<RowData>();
-        accounts.add(new Account("숙면","8시간", 480f, "1", 0xFF1EB980));
-        accounts.add(new Account("코골이", "1시간 20분",80f, "1", 0xFFFF6859));
-        accounts.add(new Account("무호흡","20분", 20f, "1", 0xFFFFCF44));
-        accounts.add(new Account("이갈이","20분", 20f, "1", 0xFFB15DFF));
+        accounts.add(new Account(res.getString(R.string.goodSleepRow),"8시간", 480f, "1", 0xFF1EB980));
+        accounts.add(new Account(res.getString(R.string.snoreRow), "1시간 20분",80f, "1", 0xFFFF6859));
+        accounts.add(new Account(res.getString(R.string.grindRow),"20분", 20f, "1", 0xFFFFCF44));
+        accounts.add(new Account(res.getString(R.string.apneaRow),"20분", 20f, "1", 0xFFB15DFF));
         mAccountsSection = new Section(accounts, "수면 점수", false);
     }
 
