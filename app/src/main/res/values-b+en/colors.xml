@@ -14,17 +14,14 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<ConstraintLayoutStates xmlns:android="http://schemas.android.com/apk/res/android"
-                        xmlns:app="http://schemas.android.com/apk/res-auto">
+<resources>
+    <color name="colorPrimary">#005D57</color>
+    <color name="colorPrimaryDark">#04B97F</color>
+    <color name="colorAccent">#37EFBA</color>
 
-    <State
-        android:id="@+id/tabs_landscape"
-        app:constraints="@layout/layout_tabs_landscape">
-    </State>
+    <color name="background_light">#373741</color>
+    <color name="background_medium">#33333D</color>
+    <color name="background_dark">#26282F</color>
 
-    <!--<State-->
-        <!--android:id="@+id/tabs_portrait"-->
-        <!--app:constraints="@layout/layout_tabs_portrait">-->
-    <!--</State>-->
 
-</ConstraintLayoutStates>
+</resources>

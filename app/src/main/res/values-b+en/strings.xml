@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright 2018 Google LLC
   ~
@@ -14,17 +13,18 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<ConstraintLayoutStates xmlns:android="http://schemas.android.com/apk/res/android"
-                        xmlns:app="http://schemas.android.com/apk/res-auto">
+<resources>
+    <string name="app_name">Kococo</string>
+    <string name="record_start">Record Start</string>
+    <string name="record_end">Record End</string>
 
-    <State
-        android:id="@+id/tabs_landscape"
-        app:constraints="@layout/layout_tabs_landscape">
-    </State>
+    <string-array name="statusArr">
+        <item >일반잠</item>
+        <item >음주</item>
+        <item >야식</item>
+        <item >운동</item>
+        <item >흡연</item>
+        <item >카페인</item>
+    </string-array>
 
-    <!--<State-->
-        <!--android:id="@+id/tabs_portrait"-->
-        <!--app:constraints="@layout/layout_tabs_portrait">-->
-    <!--</State>-->
-
-</ConstraintLayoutStates>
+</resources>

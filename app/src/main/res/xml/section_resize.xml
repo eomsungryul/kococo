@@ -17,19 +17,19 @@
 <ConstraintLayoutStates xmlns:android="http://schemas.android.com/apk/res/android"
                         xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <State
-        android:id="@+id/section_phone"
-        app:constraints="@layout/layout_section_container_phone">
-    </State>
+    <!--<State-->
+        <!--android:id="@+id/section_phone"-->
+        <!--app:constraints="@layout/layout_section_container_phone">-->
+    <!--</State>-->
 
-    <State
-        android:id="@+id/section_tablet"
-        app:constraints="@layout/layout_section_container_tablet">
-    </State>
+    <!--<State-->
+        <!--android:id="@+id/section_tablet"-->
+        <!--app:constraints="@layout/layout_section_container_tablet">-->
+    <!--</State>-->
 
-    <State
-        android:id="@+id/section_laptop"
-        app:constraints="@layout/layout_section_container_laptop">
-    </State>
+    <!--<State-->
+        <!--android:id="@+id/section_laptop"-->
+        <!--app:constraints="@layout/layout_section_container_laptop">-->
+    <!--</State>-->
 
 </ConstraintLayoutStates>

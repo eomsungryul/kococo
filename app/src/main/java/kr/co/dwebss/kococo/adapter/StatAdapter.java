@@ -104,10 +104,10 @@ public class StatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         public HeaderViewHolder(View itemView) {
             super(itemView);
-            sectionName = itemView.findViewById(R.id.section_name);
-            sectionTotal1 = itemView.findViewById(R.id.section_total_1);
-            sectionTotal2 = itemView.findViewById(R.id.section_total_2);
-            barView = itemView.findViewById(R.id.section_bar_chart);
+//            sectionName = itemView.findViewById(R.id.section_name);
+//            sectionTotal1 = itemView.findViewById(R.id.section_total_1);
+//            sectionTotal2 = itemView.findViewById(R.id.section_total_2);
+//            barView = itemView.findViewById(R.id.section_bar_chart);
         }
     }
 
