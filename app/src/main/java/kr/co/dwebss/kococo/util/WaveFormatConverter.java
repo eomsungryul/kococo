@@ -98,7 +98,7 @@ public class WaveFormatConverter {
 //		File myDir = new File(Environment.getExternalStorageDirectory(), "rec_data/");
 		//Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 		String savePath = x.getFilesDir().getAbsolutePath(); // 이경로는 adb pull 이 안됨.
-		savePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath(); //테스트하려고 임시로 쓴 경로
+//		savePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath(); //테스트하려고 임시로 쓴 경로
 		System.out.println(savePath+"/rec_data/"+ "----------------------save rec_data/rec_data/rec_data/rec_data/rec_data/rec_data/");
 		subDirList(savePath+"/rec_data/");
 		folderCnt++;
