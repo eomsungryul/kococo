@@ -166,28 +166,29 @@ public class SleepCheck {
 
 	static int noiseCheck(double decibel) {
 		//1분동안 소리가 발생하지 않았는지 체크한다.
-		//0.01초 단위임으로, 600번 해야 60초임.
+		//0.01초 단위임으로, 6000번 해야 60초임.
 		//1분이 되었으면, 데시벨보다 높은 소리가 발생하지 않은 경우
-		if (noiseChkCnt >= 600) {
+		if(noiseChkCnt>=6000) {
 			int tmpN = noiseChkSum;
 			noiseChkCnt = 0;
 			noiseChkSum = 0;
 			noiseNoneChkSum = 0;
 			return tmpN;
-		} else {
+		}else {
 			//아직 1분이 안되었으면 계속 소리 체크를 한다.
 			//소리 체크는 1분동안 평균 데시벨보다 높은 데시벨의 소리가 발생했는지를 체크한다.
 			//리턴이 0이면 녹음 종료하게 되어있음.
-			if (decibel >= getMaxDB()) {
+			if(decibel >= getMaxDB()) {
 				//noiseChkCnt++;
 				noiseChkSum++;
-			} else {
+			}else {
 				noiseNoneChkSum++;
 			}
 			noiseChkCnt++;
-			//return 101;
-			return noiseChkCnt;
+			return 601;
+			//return noiseChkCnt;
 		}
+
 	}
 
 	static int snoringCheck(double decibel, double frequency, double sefrequency) {
