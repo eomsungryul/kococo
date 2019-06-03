@@ -15,8 +15,18 @@
   -->
 <resources>
     <string name="app_name">Kococo</string>
+
+    <!--recordFragement -->
     <string name="record_start">녹음 시작</string>
     <string name="record_end">녹음 종료</string>
+
+    <!--resultActivity -->
+    <string name="status">상태</string>
+    <string name="score">%1$d점</string>
+    <string name="allBtn">전체</string>
+    <string name="snoreBtn">코골이</string>
+    <string name="grindBtn">이갈이</string>
+    <string name="apneaBtn">무호흡</string>
 
     <string-array name="statusArr">
         <item >일반잠</item>
@@ -26,5 +36,16 @@
         <item >흡연</item>
         <item >카페인</item>
     </string-array>
+
+    <!--statFragment-->
+    <string name="goodSleepRow">숙면</string>
+    <string name="snoreRow">코골이</string>
+    <string name="grindRow">이갈이</string>
+    <string name="apneaRow">무호흡</string>
+
+    <!--settingFragment-->
+    <string name="profile">프로필</string>
+    <string name="expertConsultationHistory">전문가 상담 내역</string>
+    <string name="commentsAndSuggestions">의견 및 제안</string>
 
 </resources>

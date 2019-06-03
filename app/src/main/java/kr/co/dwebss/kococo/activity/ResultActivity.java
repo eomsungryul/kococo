@@ -20,6 +20,7 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -209,7 +210,10 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
         //공식은 전체 녹음시간 분의 검출된 시간으로 퍼센트로 구한다.
         sleepScore=100-(((float)kococoTerm/(float)recordTerm)*100);
         TextView scoreTextView = findViewById(R.id.scoreTextView);
-        scoreTextView.setText(Math.round(sleepScore)+"점");
+        //i18n 적용
+        Resources res = getResources();
+        String scoreText = String.format(res.getString(R.string.score),Math.round(sleepScore));
+        scoreTextView.setText(scoreText);
 
         //시간 HH:mm ~ HH:mm
 //        System.out.println("=============레알 kococoTerm=========="+kococoTerm);

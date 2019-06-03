@@ -64,7 +64,7 @@ public class DiaryFragment extends Fragment {
         apiService.getRecordList(userAppId,"recordId,desc").enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-//                System.out.println(" ============야야양============response: "+response);
+                System.out.println(" ============야야양============response: "+response);
                 //저장 시에 뒤로가기
 //                Toast.makeText(v.getContext(),response.body().toString(),Toast.LENGTH_LONG).show();
                 Gson gson = new Gson();

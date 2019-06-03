@@ -15,16 +15,38 @@
   -->
 <resources>
     <string name="app_name">Kococo</string>
+
+    <!--recordFragement -->
     <string name="record_start">Record Start</string>
     <string name="record_end">Record End</string>
 
+    <!--resultActivity -->
+    <string name="status">Status</string>
+    <string name="score">%1$d </string>
+    <string name="allBtn">All</string>
+    <string name="snoreBtn">Snore</string>
+    <string name="grindBtn">Grind</string>
+    <string name="apneaBtn">Apnea</string>
+
     <string-array name="statusArr">
-        <item >일반잠</item>
-        <item >음주</item>
-        <item >야식</item>
-        <item >운동</item>
-        <item >흡연</item>
-        <item >카페인</item>
+        <item >Normal Sleep</item>
+        <item >Drinking</item>
+        <item >Midnight Snack</item>
+        <item >Exercise</item>
+        <item >Smoking</item>
+        <item >Caffeine</item>
     </string-array>
+
+
+    <!--statFragment-->
+    <string name="goodSleepRow">Good Sleep</string>
+    <string name="snoreRow">Snore</string>
+    <string name="grindRow">Grind</string>
+    <string name="apneaRow">Apnea</string>
+
+    <!--settingFragment-->
+    <string name="profile">profile</string>
+    <string name="expertConsultationHistory">Expert consultation history</string>
+    <string name="commentsAndSuggestions">Comments and suggestions</string>
 
 </resources>
