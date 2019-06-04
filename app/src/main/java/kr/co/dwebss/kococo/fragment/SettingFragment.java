@@ -3,6 +3,7 @@ package kr.co.dwebss.kococo.fragment;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import kr.co.dwebss.kococo.adapter.DiaryListAdapter;
 import kr.co.dwebss.kococo.adapter.SettingListAdapter;
 
 public class SettingFragment extends Fragment {
+    private String LOG_TAG = "SettingFragment";
 
     Resources res;
 
@@ -53,4 +55,20 @@ public class SettingFragment extends Fragment {
 
         return v;
     }
+
+//    @Override
+//    public void setUserVisibleHint(boolean isVisibleToUser) {
+//        System.out.println("=============="+LOG_TAG+"================"+isVisibleToUser);
+//        super.setUserVisibleHint(isVisibleToUser);
+//        if (isVisibleToUser) {
+//            // Refresh your fragment here
+//            refresh();
+//        }
+//    }
+//
+//    //프래그먼트 초기화 방법
+//    private  void refresh(){
+//        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+//        transaction.detach(this).attach(this).commit();
+//    }
 }

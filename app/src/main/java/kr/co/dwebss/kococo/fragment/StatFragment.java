@@ -4,6 +4,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.SpannableString;
@@ -32,6 +33,7 @@ import kr.co.dwebss.kococo.model.Section;
 import kr.co.dwebss.kococo.util.StatFormatter;
 
 public class StatFragment extends Fragment implements SeekBar.OnSeekBarChangeListener {
+    private String LOG_TAG = "StatFragment";
 
     private Section mAccountsSection;
     private RecyclerView mAccountsRV;
@@ -256,6 +258,23 @@ public class StatFragment extends Fragment implements SeekBar.OnSeekBarChangeLis
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {}
+
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        System.out.println("=============="+LOG_TAG+"================"+isVisibleToUser);
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            // Refresh your fragment here
+            refresh();
+        }
+    }
+
+    //프래그먼트 초기화 방법
+    private  void refresh(){
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.detach(this).attach(this).commit();
+    }
 
 
 }

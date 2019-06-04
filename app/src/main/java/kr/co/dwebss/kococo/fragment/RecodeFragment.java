@@ -70,7 +70,7 @@ public class RecodeFragment extends Fragment  {
     }
 
     Boolean recodeFlag = false;
-    private String LOG_TAG = "Audio_Recording";
+    private String LOG_TAG = "RecodeFragment";
     private static AudioRecord record;
 
     //오디오 품질 고정값
@@ -85,7 +85,7 @@ public class RecodeFragment extends Fragment  {
     private static final int REQUEST_CAMERA = 1;
 
     //녹음 관련
-    private String LOG_TAG2 = "Audio_Recording2";
+    private String LOG_TAG2 = "Audio_Recording";
     int state = 0;
     private boolean mShouldContinue = true;
     private AudioCalculator audioCalculator;
@@ -172,12 +172,12 @@ public class RecodeFragment extends Fragment  {
                         public void run() {
                             // TODO
                             RequestBody requestData = RequestBody.create(MediaType.parse("application/json"), new Gson().toJson(recordData));
-                            System.out.println(" ================ddddd========requestData: "+requestData.toString());
+                            System.out.println(" ================녹음 종료 시 DB 저장========requestData: "+requestData.toString());
                             //POST /api/record를 호출한다.
                             apiService.addRecord(requestData).enqueue(new Callback<JsonObject>() {
                                 @Override
                                 public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                                    System.out.println(" ========================response: "+response.body().toString());
+                                    System.out.println(" ============녹음 종료 시 DB 저장============response: "+response.body().toString());
                                     //창 띄우기
 //                                    startActivity(new Intent(getActivity(), ResultActivity.class));
                                     Intent intent = new Intent(getActivity(), ResultActivity.class);
@@ -186,7 +186,7 @@ public class RecodeFragment extends Fragment  {
                                 }
                                 @Override
                                 public void onFailure(Call<JsonObject> call, Throwable t) {
-                                    System.out.println(" ========================Throwable: "+ t);
+                                    System.out.println(" ============녹음 종료 시 DB 저장============Throwable: "+ t);
 
                                 }
                             });
@@ -202,6 +202,7 @@ public class RecodeFragment extends Fragment  {
 
         Button testBtn = (Button) v.findViewById(R.id.testBtn) ;
         testBtn.setText("테스트");
+
         //xml 내에서 onclick으로 가능하다. 하지만 그건 activity 내에서만 가능하고 프래그먼트에서는 onclickListener()로 해야함
         testBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
@@ -260,6 +261,22 @@ public class RecodeFragment extends Fragment  {
             mediaPlayer.release();
             mediaPlayer = null;
         }
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        System.out.println("=============="+LOG_TAG+"================"+isVisibleToUser);
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            // Refresh your fragment here
+            refresh();
+        }
+    }
+
+    //프래그먼트 초기화 방법
+    private  void refresh(){
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.detach(this).attach(this).commit();
     }
 
 

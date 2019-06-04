@@ -26,6 +26,8 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
@@ -170,14 +172,22 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-
-
         viewPager = (ViewPager) findViewById(R.id.view_pager);
         setupViewPager(viewPager);
 
         tabs = (TabLayout)findViewById(R.id.tablayouts);
         tabs.setupWithViewPager(viewPager);
         setupTabIcons();
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+//                onSlideChanged(position); // change color of the dots
+            }
+            @Override
+            public void onPageSelected(int position) {}
+            @Override
+            public void onPageScrollStateChanged(int state) {}
+        });
 
         //http 통신
         retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();
@@ -227,18 +237,17 @@ public class MainActivity extends AppCompatActivity {
 ////
 
     }
-
     @Override
     public void onResume() {
         super.onResume();
-
+        System.out.println(" ============onResume============: ");
     }
-
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         Log.v(TAG, "onConfigurationChanged " + newConfig.screenWidthDp + "," + newConfig.screenHeightDp);
+        System.out.println(" ============onConfigurationChanged============: ");
 
     }
 
@@ -262,10 +271,11 @@ public class MainActivity extends AppCompatActivity {
         adapter.addFrag(new DiaryFragment(), "Diary");
         adapter.addFrag(new StatFragment(), "Stat");
         adapter.addFrag(new SettingFragment(), "Setting");
+        adapter.notifyDataSetChanged();
         viewPager.setAdapter(adapter);
     }
 
-    class ViewPagerAdapter extends FragmentPagerAdapter {
+    class ViewPagerAdapter extends FragmentStatePagerAdapter {
         private final List<Fragment> mFragmentList = new ArrayList<>();
         private final List<String> mFragmentTitleList = new ArrayList<>();
 
@@ -274,7 +284,22 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
+        public int getItemPosition(Object object) {
+//            if (object instanceof DiaryFragment) {
+//
+//                System.out.println("=================if=======getItemPosition : "+object);
+//
+//                return super.getItemPosition(object);
+//            } else {
+//                System.out.println("=================else=======getItemPosition : "+object);
+//                return POSITION_NONE;
+//            }
+            return POSITION_NONE;
+        }
+
+        @Override
         public Fragment getItem(int position) {
+            System.out.println("========================getItem : "+position);
             return mFragmentList.get(position);
         }
 
@@ -284,6 +309,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public void addFrag(Fragment fragment, String title) {
+            System.out.println("========================addFrag : "+title);
             mFragmentList.add(fragment);
             mFragmentTitleList.add(title);
         }
@@ -294,6 +320,7 @@ public class MainActivity extends AppCompatActivity {
             // return null to display only the icon
             return null;
         }
+
     }
 
     public void includesForCreateReference() {

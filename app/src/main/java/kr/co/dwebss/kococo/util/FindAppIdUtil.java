@@ -132,6 +132,7 @@ public class FindAppIdUtil {
                 e.printStackTrace();
             }
 //            Toast.makeText(MainActivity.this, "파일이 있네유" +data,Toast.LENGTH_SHORT).show();
+            System.out.println("=====================파일이 있네유======================"+data);
         } else {
             //파일이 없을시
 //            Toast.makeText(MainActivity.this, "파일이 읍네요",Toast.LENGTH_SHORT).show();
@@ -142,7 +143,6 @@ public class FindAppIdUtil {
 
                     JsonObject result = response.body();
                     System.out.println("=====================파일이없어요======================"+response);
-//                    System.out.println("==========================================="+result);
                     APP_ID = result.get("userAppId").toString().replace("\"" ,"");
 //                    Toast.makeText(MainActivity.this, "파일이 읍네요"+APP_ID,Toast.LENGTH_SHORT).show();
 
@@ -169,11 +169,4 @@ public class FindAppIdUtil {
         }
 
     }
-
-
-
-
-
-
-
 }

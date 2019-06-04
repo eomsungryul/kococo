@@ -44,7 +44,7 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
-        tools:layout_editor_absoluteX="0dp">
+        tools:layout_editor_absoluteX="-48dp">
         <!--이미지 버튼 투명   android:background="@android:color/transparent"
     이미지 버튼 스케일 조정    android:scaleType="fitXY"
     이미지의 색을 바꾸는 방법 android:tint="@color/background_dark"
@@ -316,7 +316,7 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         android:layout_height="300dp"
         android:fillViewport="true"
         app:layout_constraintTop_toBottomOf="@+id/divider"
-        tools:layout_editor_absoluteX="16dp">
+        tools:layout_editor_absoluteX="-8dp">
 
         <!--리스트뷰의 디폴트 선(item의 하단의 선 )을 없애는 법 :  android:divider = "#ffffff"-->
         <ListView
@@ -343,10 +343,10 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         android:src="@drawable/baseline_edit_white_48dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.952"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/recordListScrollview"
-        app:layout_constraintVertical_bias="0.703" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.974" />
 
 
 </android.support.constraint.ConstraintLayout>

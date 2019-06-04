@@ -34,6 +34,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class DiaryFragment extends Fragment {
 
+    private String LOG_TAG = "DiaryFragment";
+
     Retrofit retrofit;
     ApiService apiService;
     View v;
@@ -89,12 +91,20 @@ public class DiaryFragment extends Fragment {
         return v;
     }
 
-
-    //프래그먼트 초기화 방법
-    private  void refresh(){
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.detach(this).attach(this).commit();
-    }
-
+//    @Override
+//    public void setUserVisibleHint(boolean isVisibleToUser) {
+//        System.out.println("=============="+LOG_TAG+"================"+isVisibleToUser);
+//        super.setUserVisibleHint(isVisibleToUser);
+//        if (isVisibleToUser) {
+//            // Refresh your fragment here
+//            refresh();
+//        }
+//    }
+//
+//    //프래그먼트 초기화 방법
+//    private  void refresh(){
+//        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+//        transaction.detach(this).attach(this).commit();
+//    }
 
 }
