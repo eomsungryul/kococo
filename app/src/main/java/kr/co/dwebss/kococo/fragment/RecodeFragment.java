@@ -690,7 +690,7 @@ public class RecodeFragment extends Fragment  {
                         grindingContinue = true;
                         // 이갈이 체크 중에 1초간격으로 유효 카운트가 연속적으로 발생하지 않으면 체크를 취소한다.
                     } else if (Math.floor((SleepCheck.GrindingCheckTermSecond - SleepCheck.GrindingCheckStartTermSecond)*100) == 101
-                            && SleepCheck.grindingRepeatAmpCnt == 0 && grindingStart == true
+                            && SleepCheck.grindingRepeatAmpCnt <= 1000 && grindingStart == true
                             && grindingContinue == false) {
                         // 1초 단위 발생하는 이갈이도 잡기위해 유예 카운트를 넣는다. 1초만 한번더 체크함.
                         if (grindingRecordingContinueCnt >= SleepCheck.GRINDING_RECORDING_CONTINUE_CNT) {
