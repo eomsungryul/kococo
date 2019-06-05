@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import kr.co.dwebss.kococo.fragment.RecodeFragment;
+import kr.co.dwebss.kococo.fragment.RecordFragment;
 import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.model.StartEnd;
 import okhttp3.MediaType;
@@ -88,9 +88,9 @@ public class AudioAnalysisUtil {
         int result  = v.getContext().checkCallingOrSelfPermission(permission);
         record.startRecording();
         int recordingState = record.getRecordingState();
-        Log.e(RecodeFragment.class.getSimpleName(), "RecordingState() after startRecording() = " + String.valueOf(recordingState));
+        Log.e(RecordFragment.class.getSimpleName(), "RecordingState() after startRecording() = " + String.valueOf(recordingState));
         if (recordingState != AudioRecord.RECORDSTATE_RECORDING) {
-            Log.e(RecodeFragment.class.getSimpleName(), "AudioRecord error has occured. Reopen app.");
+            Log.e(RecordFragment.class.getSimpleName(), "AudioRecord error has occured. Reopen app.");
             //System.exit(0);
         }
         Log.v(LOG_TAG, "Recording has started");

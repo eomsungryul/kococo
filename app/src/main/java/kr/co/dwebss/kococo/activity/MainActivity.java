@@ -41,7 +41,7 @@ import java.util.List;
 
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.fragment.DiaryFragment;
-import kr.co.dwebss.kococo.fragment.RecodeFragment;
+import kr.co.dwebss.kococo.fragment.RecordFragment;
 import kr.co.dwebss.kococo.fragment.SettingFragment;
 import kr.co.dwebss.kococo.fragment.StatFragment;
 import kr.co.dwebss.kococo.http.ApiService;
@@ -221,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFrag(new RecodeFragment(), "RecodeFragment");
+        adapter.addFrag(new RecordFragment(), "RecodeFragment");
         adapter.addFrag(new DiaryFragment(), "Diary");
         adapter.addFrag(new StatFragment(), "Stat");
         adapter.addFrag(new SettingFragment(), "Setting");

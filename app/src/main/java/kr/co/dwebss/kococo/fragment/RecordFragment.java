@@ -419,8 +419,8 @@ public class RecordFragment extends Fragment  {
                         snoringTermList = new ArrayList<StartEnd>();
                         grindingTermList = new ArrayList<StartEnd>();
                         osaTermList = new ArrayList<StartEnd>();
-                    } else if (isRecording == true && (SleepCheck.noiseCheck(decibel)==0 || recodeFlag==false) ) {
-//                    } else if (isRecording == true && (SleepCheck.noiseCheck(decibel)==0 ) ) {
+//                    } else if (isRecording == true && (SleepCheck.noiseCheck(decibel)==0 || recodeFlag==false) ) {
+                    } else if (isRecording == true && (SleepCheck.noiseCheck(decibel)==0 ) ) {
                         Log.v(LOG_TAG2,("녹음 종료! "));
                         Log.v(LOG_TAG2,(String.format("%.2f", times)+"s "));
                         SimpleDateFormat dayTime = new SimpleDateFormat("yyyymmdd_HHmm");
@@ -465,7 +465,7 @@ public class RecordFragment extends Fragment  {
                             ansDList.add(ansd);
                         }
                         for(StartEnd se : grindingTermList) {
-                            if(se.end!=0){
+//                            if(se.end!=0){
                                 ansd = new JsonObject();
                                 ansd.addProperty("termTypeCd",200102);
                                 ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
@@ -479,10 +479,10 @@ public class RecordFragment extends Fragment  {
                                     e.getMessage();
                                 }
                                 ansDList.add(ansd);
-                            }
+//                            }
                         }
                         for(StartEnd se : osaTermList) {
-                            if(se.end!=0){
+//                            if(se.end!=0){
                                 ansd = new JsonObject();
                                 ansd.addProperty("termTypeCd",200103);
                                 ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
@@ -496,7 +496,7 @@ public class RecordFragment extends Fragment  {
                                     e.getMessage();
                                 }
                                 ansDList.add(ansd);
-                            }
+//                            }
                         }
                         ans.add("analysisDetailsList", ansDList);
                         ansList.add(ans);

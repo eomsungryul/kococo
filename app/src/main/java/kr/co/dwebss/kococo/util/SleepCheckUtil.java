@@ -2,7 +2,7 @@ package kr.co.dwebss.kococo.util;
 
 import android.util.Log;
 
-import kr.co.dwebss.kococo.fragment.RecodeFragment;
+import kr.co.dwebss.kococo.fragment.RecordFragment;
 import kr.co.dwebss.kococo.model.StartEnd;
 
 public class SleepCheckUtil {

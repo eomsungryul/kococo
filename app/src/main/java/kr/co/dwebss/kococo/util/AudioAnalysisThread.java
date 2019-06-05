@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import kr.co.dwebss.kococo.fragment.RecodeFragment;
+import kr.co.dwebss.kococo.fragment.RecordFragment;
 import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.model.StartEnd;
 import retrofit2.Retrofit;
