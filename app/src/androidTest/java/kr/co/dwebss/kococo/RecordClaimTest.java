@@ -44,9 +44,9 @@ public class RecordClaimTest {
     public void recordClaim() {
         retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();
         apiService = retrofit.create(ApiService.class);
-        String fileNm = "snoring-20193503_0135-03_0558_1559509249064.mp3";
+        String fileNm = "snoring-20192404_1624-04_1624_1559633052843.mp3";
 
-        String uploadFirebasePath = "rec_data/7f6b2855-a435-46ab-b9f4-4b15ef476b8f/2019-06-03/"+fileNm;
+        String uploadFirebasePath = "rec_data/7f6b2855-a435-46ab-b9f4-4b15ef476b8f/2019-06-04/"+fileNm;
 
         //FindAppIdUtil fau = new FindAppIdUtil();
         String appId =  "7f6b2855-a435-46ab-b9f4-4b15ef476b8f";
@@ -60,7 +60,7 @@ public class RecordClaimTest {
         StorageReference spaceRef = storageRef.child(uploadFirebasePath);
 
         //내 실제 경로를 입력한다.
-        Uri file = Uri.fromFile(new File("/storage/emulated/0/Download/rec_data/24/"+fileNm));
+        Uri file = Uri.fromFile(new File("/data/data/kr.co.dwebss.kococo/files/rec_data/9/"+fileNm));
         UploadTask uploadTask = spaceRef.putFile(file);
 
         // 파일 업로드의 성공/실패에 대한 콜백 받아 핸들링 하기 위해 아래와 같이 작성한다
@@ -76,6 +76,7 @@ public class RecordClaimTest {
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                System.out.println("======================성공");
                 //신고 전송
                 JsonObject requestJson = new JsonObject();
                 requestJson.addProperty("analysisServerUploadPath",uploadFirebasePath);

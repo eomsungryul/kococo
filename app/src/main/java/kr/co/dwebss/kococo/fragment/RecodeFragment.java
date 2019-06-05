@@ -564,13 +564,6 @@ public class RecodeFragment extends Fragment  {
                         } ]
                         }
                         */
-                        recordData = new JsonObject();
-                        recordData.addProperty("userAppId",userAppId);
-                        recordData.addProperty("recordStartDt",recordStartDt);
-                        recordData.addProperty("recordEndDt",recordEndDt);
-                        recordData.add("analysisList", ansList);
-
-                        System.out.println(" ========================recordData: "+recordData.toString());
 
                         /*
                         System.out.println("analysisStartDt: "+dayTimeT.format(new Date(recordStartingTIme)));
@@ -936,17 +929,18 @@ public class RecodeFragment extends Fragment  {
                     }
                     ans.add("analysisDetailsList", ansDList);
                     ansList.add(ans);
-                    recordData = new JsonObject();
-                    recordData.addProperty("userAppId",userAppId);
-                    recordData.addProperty("recordStartDt",recordStartDt);
-                    recordData.addProperty("recordEndDt",recordEndDt);
-                    recordData.add("analysisList", ansList);
-
-                    System.out.println(" =============dddd===========recordData: "+recordData.toString());
 
                     Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 끝====="));
                     isRecording = false;
                 }
+
+                recordData = new JsonObject();
+                recordData.addProperty("userAppId",userAppId);
+                recordData.addProperty("recordStartDt",recordStartDt);
+                recordData.addProperty("recordEndDt",recordEndDt);
+                recordData.add("analysisList", ansList);
+
+                System.out.println(" =============녹음 종료버튼  ===========recordData: "+recordData.toString());
 
                 //Log.v(LOG_TAG2,("audio length(s): " + ((double) (audioData.length / (44100d * 16 * 1))) * 8));
                 Log.v(LOG_TAG2,("녹음시작-종료(s): " + String.format("%.2f", times)));

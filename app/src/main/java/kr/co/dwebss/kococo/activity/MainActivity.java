@@ -15,26 +15,18 @@
  */
 package kr.co.dwebss.kococo.activity;
 
-import android.Manifest;
-import android.content.Context;
 import android.content.res.Configuration;
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.BuildConfig;
@@ -44,16 +36,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.gson.JsonObject;
 
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,14 +46,13 @@ import kr.co.dwebss.kococo.fragment.SettingFragment;
 import kr.co.dwebss.kococo.fragment.StatFragment;
 import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.main.SectionsPagerAdapter;
-import kr.co.dwebss.kococo.model.ApiCode;
 import kr.co.dwebss.kococo.util.FindAppIdUtil;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -194,55 +175,28 @@ public class MainActivity extends AppCompatActivity {
         apiService = retrofit.create(ApiService.class);
 
         System.out.println(" ===========http 통신=============statr: ");
-        apiService.getApiCode().enqueue(new Callback<ApiCode>() {
-            @Override
-            public void onResponse(Call<ApiCode> call, Response<ApiCode> response) {
-//                Toast.makeText(MainActivity.this, "sucess"+response,Toast.LENGTH_SHORT).show();
 
-                System.out.println(" ==========http 통신==============response: "+response.body().toString());
-
-                ApiCode result = response.body();
-                result.getEmbedded().getCode().get(0).getCode();
-                System.out.println(" ===========http 통신=============result.getEmbedded().getCode().get(0).getCode();: "+result.getEmbedded().getCode().get(0).getCode());
-                System.out.println(" ===========http 통신=============result.getEmbedded().getCode().get(0).getCode();: "+result.getEmbedded().getCode().get(0).getCodeCateogry());
-                System.out.println(" ============http 통신============result.getEmbedded().getCode().get(0).getCode();: "+result.getEmbedded().getCode().get(1).getCode());
-                System.out.println(" =============http 통신===========result.getEmbedded().getCode().get(0).getCode();: "+result.getEmbedded().getCode().get(1).getCodeCateogry());
-            }
-
-            @Override
-            public void onFailure(Call<ApiCode> call, Throwable t) {
-
-            }
-        });
-
-//        retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).build();
-//        apiService = retrofit.create(ApiService.class);
-
-        apiService.getApiCode2().enqueue(new Callback<JsonObject>() {
+        apiService.getApiCode().enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-
-                System.out.println(" ===========getApiCode2=============response22: "+response);
-                System.out.println(" ===========getApiCode2=============response22: "+response.body().toString());
-
                 JsonObject result = response.body();
                 System.out.println(" ============getApiCode2============result: "+result);
             }
-
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {
 
             }
         });
-////
 
     }
+
+    //onResume()은 Activity가 사용자와 상호작용을 하기 직전에 호출됩니다. 스택의 최상위에 위치하여 Activity를 활성화
     @Override
     public void onResume() {
         super.onResume();
-        System.out.println(" ============onResume============: ");
     }
 
+    // 화면전환이 일어난 경우에만 호출된다고 생각하지만 Locale 이나 각종 설정값이 바꼇을 경우도 호출
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -285,15 +239,6 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getItemPosition(Object object) {
-//            if (object instanceof DiaryFragment) {
-//
-//                System.out.println("=================if=======getItemPosition : "+object);
-//
-//                return super.getItemPosition(object);
-//            } else {
-//                System.out.println("=================else=======getItemPosition : "+object);
-//                return POSITION_NONE;
-//            }
             return POSITION_NONE;
         }
 
