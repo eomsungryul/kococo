@@ -331,4 +331,19 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 //        }
 ////        resultListSection = new Section(resultList, "recodes", false);
 //    }
+
+
+
+    // MediaPlayer는 시스템 리소스를 잡아먹는다.
+    // MediaPlayer는 필요이상으로 사용하지 않도록 주의해야 한다.
+    //Fragment에서는 onDestoryView , activity에서는 onDestory
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        // MediaPlayer 해지
+//        if (mediaPlayer != null) {
+////            mediaPlayer.release();
+////            mediaPlayer = null;
+////        }
+    }
 }

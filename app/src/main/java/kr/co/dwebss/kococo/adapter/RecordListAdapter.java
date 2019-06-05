@@ -195,7 +195,6 @@ public class RecordListAdapter extends BaseAdapter {
         }.start();
     }
 
-
     public void stopPlayer(){
         mediaPlayer.stop();
         mediaPlayer.reset();

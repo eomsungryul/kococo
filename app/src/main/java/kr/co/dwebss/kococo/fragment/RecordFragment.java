@@ -24,13 +24,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -63,7 +57,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 //        4. 분석종료시  마이크를 끈다.
 //        5. 녹음파일 데이터를 기기에 저장한다.
 //        6. 녹음분석 데이터를 서버에 보낸다.
-public class RecodeFragment extends Fragment  {
+public class RecordFragment extends Fragment  {
 
     static {
         System.loadLibrary("mp3lame");
@@ -115,7 +109,7 @@ public class RecodeFragment extends Fragment  {
 
     byte[] mp3buffer;
 
-    public RecodeFragment() {
+    public RecordFragment() {
         // Required empty public constructor
     }
 
@@ -128,7 +122,7 @@ public class RecodeFragment extends Fragment  {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View v = inflater.inflate(R.layout.fragment_recode, container, false);
+        View v = inflater.inflate(R.layout.fragment_record, container, false);
         Button recodeBtn = (Button) v.findViewById(R.id.recodeBtn) ;
         recodeFlag = false;
         recodeBtn.setText("녹음 시작");
@@ -173,23 +167,7 @@ public class RecodeFragment extends Fragment  {
                             // TODO
                             RequestBody requestData = RequestBody.create(MediaType.parse("application/json"), new Gson().toJson(recordData));
                             System.out.println(" ================녹음 종료 시 DB 저장========requestData: "+requestData.toString());
-                            //POST /api/record를 호출한다.
-                            apiService.addRecord(requestData).enqueue(new Callback<JsonObject>() {
-                                @Override
-                                public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                                    System.out.println(" ============녹음 종료 시 DB 저장============response: "+response.body().toString());
-                                    //창 띄우기
-//                                    startActivity(new Intent(getActivity(), ResultActivity.class));
-                                    Intent intent = new Intent(getActivity(), ResultActivity.class);
-                                    intent.putExtra("responseData",response.body().toString()); /*송신*/
-                                    startActivity(intent);
-                                }
-                                @Override
-                                public void onFailure(Call<JsonObject> call, Throwable t) {
-                                    System.out.println(" ============녹음 종료 시 DB 저장============Throwable: "+ t);
-
-                                }
-                            });
+                            addRecord(requestData);
                         }
                     }, 3000);
 
@@ -207,39 +185,6 @@ public class RecodeFragment extends Fragment  {
         testBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                if( testFlag == false){
-//                    testBtn.setText("종료");
-//                    testFlag = true;
-//                    mediaPlayer = MediaPlayer.create(getActivity(), R.raw.queen);
-//                    //구간 재생
-//                    mediaPlayer.seekTo(15000);
-//                    mediaPlayer.getCurrentPosition();
-//                    mediaPlayer.start();
-//                    int endTime =21000;
-//                    //카운트 다운
-//                    new CountDownTimer(endTime, 100) {
-//                        public void onTick(long millisUntilFinished) {
-//
-//                            if(MediaPlayerUtility.getTime(mediaPlayer)>=endTime){
-//                                mediaPlayer.stop();
-//                                // 초기화
-//                                mediaPlayer.reset();
-//                                testFlag = false;
-//                                testBtn.setText("시작");
-//                            }
-//                        }
-//                        public void onFinish() {
-//                            testBtn.setText("시작2");
-//                        }
-//                    }.start();
-//                }else{
-//                    testFlag = false;
-//                    testBtn.setText("시작");
-//                    // 정지버튼
-//                    mediaPlayer.stop();
-//                    // 초기화
-//                    mediaPlayer.reset();
-//                }
                 String testDt = "{\"userAppId\":\"7dc9e960-b0db-4c1c-81b5-2c8f2ce7ca4f\",\"recordId\":86,\"recordStartD\":\"2019-05-29\",\"recordStartDt\":\"2019-05-29T16:10:31\",\"recordEndD\":\"2019-05-29\",\"recordEndDt\":\"2019-05-29T16:10:54\",\"consultingYn\":\"N\",\"consultingReplyYn\":\"N\",\"analysisList\":[{\"analysisId\":63,\"analysisStartD\":\"2019-05-29T16:10:34\",\"analysisStartDt\":\"2019-05-29T16:10:34\",\"analysisEndD\":\"2019-05-29T16:10:54\",\"analysisEndDt\":\"2019-05-29T16:10:54\",\"analysisFileNm\":\"snoring-20191029_0410-29_0410_1559113854914.wav\",\"analysisFileAppPath\":\"/data/user/0/kr.co.dwebss.kococo/files/rec_data/23\",\"analysisServerUploadYn\":\"N\",\"claimYn\":\"N\",\"analysisDetailsList\":[{\"analysisDetailsId\":65,\"termTypeCd\":200102,\"termStartDt\":\"2019-05-29T16:10:36\",\"termEndDt\":\"2019-05-29T16:10:40\"}],\"_links\":{\"record\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86\"}}}],\"_links\":{\"self\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86\"},\"record\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86\"},\"admin\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86/admin\"},\"user\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86/user\"}}}";
                 Intent intent = new Intent(getActivity(), ResultActivity.class);
                 intent.putExtra("responseData",testDt); /*송신*/
@@ -248,6 +193,26 @@ public class RecodeFragment extends Fragment  {
             }
         });
         return v;
+    }
+
+    public void addRecord(RequestBody requestData) {
+        //POST /api/record를 호출한다.
+        apiService.addRecord(requestData).enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                System.out.println(" ============녹음 종료 시 DB 저장============response: "+response.body().toString());
+                //창 띄우기
+//                                    startActivity(new Intent(getActivity(), ResultActivity.class));
+                Intent intent = new Intent(getActivity(), ResultActivity.class);
+                intent.putExtra("responseData",response.body().toString()); /*송신*/
+                startActivity(intent);
+            }
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                System.out.println(" ============녹음 종료 시 DB 저장============Throwable: "+ t);
+
+            }
+        });
     }
 
     // MediaPlayer는 시스템 리소스를 잡아먹는다.
@@ -306,9 +271,9 @@ public class RecodeFragment extends Fragment  {
         int result  = getActivity().checkCallingOrSelfPermission(permission);
         record.startRecording();
         int recordingState = record.getRecordingState();
-        Log.e(RecodeFragment.class.getSimpleName(), "RecordingState() after startRecording() = " + String.valueOf(recordingState));
+        Log.e(RecordFragment.class.getSimpleName(), "RecordingState() after startRecording() = " + String.valueOf(recordingState));
         if (recordingState != AudioRecord.RECORDSTATE_RECORDING) {
-            Log.e(RecodeFragment.class.getSimpleName(), "AudioRecord error has occured. Reopen app.");
+            Log.e(RecordFragment.class.getSimpleName(), "AudioRecord error has occured. Reopen app.");
             //System.exit(0);
         }
         Log.v(LOG_TAG, "Recording has started");
@@ -455,6 +420,7 @@ public class RecodeFragment extends Fragment  {
                         grindingTermList = new ArrayList<StartEnd>();
                         osaTermList = new ArrayList<StartEnd>();
                     } else if (isRecording == true && (SleepCheck.noiseCheck(decibel)==0 || recodeFlag==false) ) {
+//                    } else if (isRecording == true && (SleepCheck.noiseCheck(decibel)==0 ) ) {
                         Log.v(LOG_TAG2,("녹음 종료! "));
                         Log.v(LOG_TAG2,(String.format("%.2f", times)+"s "));
                         SimpleDateFormat dayTime = new SimpleDateFormat("yyyymmdd_HHmm");

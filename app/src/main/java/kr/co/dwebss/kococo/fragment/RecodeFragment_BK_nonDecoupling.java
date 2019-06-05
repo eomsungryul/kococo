@@ -109,7 +109,7 @@ public class RecodeFragment_BK_nonDecoupling extends Fragment  {
 //    public View onCreateView(LayoutInflater inflater, ViewGroup container,
 //                             Bundle savedInstanceState) {
 //
-//        View v = inflater.inflate(R.layout.fragment_recode, container, false);
+//        View v = inflater.inflate(R.layout.fragment_record, container, false);
 //        Button recodeBtn = (Button) v.findViewById(R.id.recodeBtn) ;
 //        recodeFlag = false;
 //        recodeBtn.setText("녹음 시작");
