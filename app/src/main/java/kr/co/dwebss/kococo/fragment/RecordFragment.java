@@ -158,7 +158,6 @@ public class RecordFragment extends Fragment  {
                     recordEndDt= dayTimeDefalt.format(new Date(System.currentTimeMillis()));
                     recodeFlag = false;
                     stop(v);
-                    recodeBtn.setText("녹음 시작");
 
                     Handler delayHandler = new Handler();
                     delayHandler.postDelayed(new Runnable() {
@@ -170,7 +169,7 @@ public class RecordFragment extends Fragment  {
                             addRecord(requestData);
                         }
                     }, 3000);
-
+                    recodeBtn.setText("녹음 시작");
                 }
             }
         });
@@ -185,7 +184,10 @@ public class RecordFragment extends Fragment  {
         testBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String testDt = "{\"userAppId\":\"7dc9e960-b0db-4c1c-81b5-2c8f2ce7ca4f\",\"recordId\":86,\"recordStartD\":\"2019-05-29\",\"recordStartDt\":\"2019-05-29T16:10:31\",\"recordEndD\":\"2019-05-29\",\"recordEndDt\":\"2019-05-29T16:10:54\",\"consultingYn\":\"N\",\"consultingReplyYn\":\"N\",\"analysisList\":[{\"analysisId\":63,\"analysisStartD\":\"2019-05-29T16:10:34\",\"analysisStartDt\":\"2019-05-29T16:10:34\",\"analysisEndD\":\"2019-05-29T16:10:54\",\"analysisEndDt\":\"2019-05-29T16:10:54\",\"analysisFileNm\":\"snoring-20190605_1708-05_1709_1559722170788.mp3\",\"analysisFileAppPath\":\"/data/user/0/kr.co.dwebss.kococo/files/rec_data/8\",\"analysisServerUploadYn\":\"N\",\"claimYn\":\"N\",\"analysisDetailsList\":[{\"analysisDetailsId\":65,\"termTypeCd\":200102,\"termStartDt\":\"2019-05-29T16:10:36\",\"termEndDt\":\"2019-05-29T16:10:40\"}],\"_links\":{\"record\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86\"}}}],\"_links\":{\"self\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86\"},\"record\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86\"},\"admin\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86/admin\"},\"user\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86/user\"}}}";
+                //정상 테스트 데이터
+//                String testDt = "{\"userAppId\":\"7dc9e960-b0db-4c1c-81b5-2c8f2ce7ca4f\",\"recordId\":86,\"recordStartD\":\"2019-05-29\",\"recordStartDt\":\"2019-05-29T16:10:31\",\"recordEndD\":\"2019-05-29\",\"recordEndDt\":\"2019-05-29T16:10:54\",\"consultingYn\":\"N\",\"consultingReplyYn\":\"N\",\"analysisList\":[{\"analysisId\":63,\"analysisStartD\":\"2019-05-29T16:10:34\",\"analysisStartDt\":\"2019-05-29T16:10:34\",\"analysisEndD\":\"2019-05-29T16:10:54\",\"analysisEndDt\":\"2019-05-29T16:10:54\",\"analysisFileNm\":\"snoring-20190605_1708-05_1709_1559722170788.mp3\",\"analysisFileAppPath\":\"/data/user/0/kr.co.dwebss.kococo/files/rec_data/8\",\"analysisServerUploadYn\":\"N\",\"claimYn\":\"N\",\"analysisDetailsList\":[{\"analysisDetailsId\":65,\"termTypeCd\":200102,\"termStartDt\":\"2019-05-29T16:10:36\",\"termEndDt\":\"2019-05-29T16:10:40\"}],\"_links\":{\"record\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86\"}}}],\"_links\":{\"self\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86\"},\"record\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86\"},\"admin\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86/admin\"},\"user\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86/user\"}}}";
+                //mp3파일이 삭제됬거나  이상하게 저장되어있는 테스트 데이터
+                String testDt = "{\"userAppId\":\"7dc9e960-b0db-4c1c-81b5-2c8f2ce7ca4f\",\"recordId\":86,\"recordStartD\":\"2019-05-29\",\"recordStartDt\":\"2019-05-29T16:10:31\",\"recordEndD\":\"2019-05-29\",\"recordEndDt\":\"2019-05-29T16:10:54\",\"consultingYn\":\"N\",\"consultingReplyYn\":\"N\",\"analysisList\":[{\"analysisId\":63,\"analysisStartD\":\"2019-05-29T16:10:34\",\"analysisStartDt\":\"2019-05-29T16:10:34\",\"analysisEndD\":\"2019-05-29T16:10:54\",\"analysisEndDt\":\"2019-05-29T16:10:54\",\"analysisFileNm\":\"snoring-20190605_1708-05_1709_1559712312312312322170788.mp3\",\"analysisFileAppPath\":\"/data/user/0/kr.co.dwebss.kococo/files/rec_data/8\",\"analysisServerUploadYn\":\"N\",\"claimYn\":\"N\",\"analysisDetailsList\":[{\"analysisDetailsId\":65,\"termTypeCd\":200102,\"termStartDt\":\"2019-05-29T16:10:36\",\"termEndDt\":\"2019-05-29T16:10:40\"}],\"_links\":{\"record\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86\"}}}],\"_links\":{\"self\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86\"},\"record\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86\"},\"admin\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86/admin\"},\"user\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86/user\"}}}";
                 Intent intent = new Intent(getActivity(), ResultActivity.class);
                 intent.putExtra("responseData",testDt); /*송신*/
                 startActivity(intent);

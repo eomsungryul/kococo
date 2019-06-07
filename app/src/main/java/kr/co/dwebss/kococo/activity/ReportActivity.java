@@ -259,7 +259,7 @@ public class ReportActivity extends AppCompatActivity {
             });
         }else{
             //파일이 없는 경우
-            Toast.makeText(getApplicationContext(),"파일 없습니다.\n 신고하기를 실패하였습니다. ",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"분석할 파일이 없어 신고하기를 실패하였습니다.",Toast.LENGTH_SHORT).show();
         }
     }
 

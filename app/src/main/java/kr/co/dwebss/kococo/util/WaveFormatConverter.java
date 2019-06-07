@@ -134,8 +134,7 @@ public class WaveFormatConverter {
 
 	public String[] saveLongTermWave(String fileName, Context x) {
 //		File myDir = new File(Environment.getExternalStorageDirectory(), "rec_data/");
-
-		System.out.println(x.getFilesDir().getAbsolutePath()+"/rec_data/"+ "----------------------save rec_data/rec_data/rec_data/rec_data/rec_data/rec_data/");
+		System.out.println(x.getFilesDir().getAbsolutePath()+"/rec_data/"+ "=======save rec_data");
 		subDirList(x.getFilesDir().getAbsolutePath()+"/rec_data/");
 		folderCnt++;
 		File myDir = new File(x.getFilesDir().getAbsolutePath(), "rec_data/"+folderCnt+"/");
@@ -143,11 +142,10 @@ public class WaveFormatConverter {
 			myDir.mkdirs();
 		}
 
-		System.out.println(fileName+ "----------------------save start");
-		System.out.println(myDir.toString()+ "----------------------save wdawdawdawdawdawdawdadw");
+		System.out.println("============save===fileName=========="+fileName);
+		System.out.println("============myDir.toString()======"+myDir.toString());
 		String filename = "snoring-"+fileName+"_"+System.currentTimeMillis()+".wav";
 		try {
-
 			File path=new File(myDir,filename);
 			FileOutputStream outFile = new FileOutputStream(path);
 			outFile.write(output);

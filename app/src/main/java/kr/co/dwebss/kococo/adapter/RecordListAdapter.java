@@ -31,6 +31,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -97,7 +98,7 @@ public class RecordListAdapter extends BaseAdapter {
         playBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, "ㅎㅇ : "+position+" : "+listViewItem.getAnalysisFileAppPath()+"/"+listViewItem.getAnalysisFileNm(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(context, "파일정보 : "+position+" : "+listViewItem.getAnalysisFileAppPath()+"/"+listViewItem.getAnalysisFileNm(), Toast.LENGTH_SHORT).show();
                 //재생버튼 누를 시 정지버튼으로 변경하는 메소드
                 if(!playBtnFlag){
                     //재생일 시에
@@ -172,27 +173,35 @@ public class RecordListAdapter extends BaseAdapter {
 //        mediaPlayer = MediaPlayer.create(context, Uri.parse("/data/data/kr.co.dwebss.kococo/files/rec_data/23/snoring-20191029_0410-29_0410_1559113854914.wav"));
 //        mediaPlayer = MediaPlayer.create(context, R.raw.queen);
         Log.v(LOG_TAG,( "======== play() startTime : " +startTime+" /endTime : "+endTime+"/filePath : "+filePath));
-        mediaPlayer = MediaPlayer.create(context, Uri.parse(filePath));
-        //구간 재생
-        mediaPlayer.seekTo(startTime);
-        mediaPlayer.getCurrentPosition();
-        mediaPlayer.start();
-        //카운트 다운
-        new CountDownTimer(endTime, 100) {
-            public void onTick(long millisUntilFinished) {
-                if(MediaPlayerUtility.getTime(mediaPlayer)>=endTime){
-                    mediaPlayer.stop();
-                    // 초기화
-                    mediaPlayer.reset();
+
+        File file = new File(filePath);
+        if(file.exists()){
+            mediaPlayer = MediaPlayer.create(context, Uri.parse(filePath));
+            //구간 재생
+            mediaPlayer.seekTo(startTime);
+            mediaPlayer.getCurrentPosition();
+            mediaPlayer.start();
+            //카운트 다운
+            new CountDownTimer(endTime, 100) {
+                public void onTick(long millisUntilFinished) {
+                    if(MediaPlayerUtility.getTime(mediaPlayer)>=endTime){
+                        mediaPlayer.stop();
+                        // 초기화
+                        mediaPlayer.reset();
 //                    testFlag = false;
 //                    testBtn.setText("시작");
+                    }
                 }
-            }
-            public void onFinish() {
-                playBtn.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
-                playBtnFlag = false;
-            }
-        }.start();
+                public void onFinish() {
+                    playBtn.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
+                    playBtnFlag = false;
+                }
+            }.start();
+        }else{
+            Toast.makeText(context,"파일이 존재하지않습니다.",Toast.LENGTH_SHORT).show();
+            playBtn.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
+            playBtnFlag = false;
+        }
     }
 
     public void stopPlayer(){

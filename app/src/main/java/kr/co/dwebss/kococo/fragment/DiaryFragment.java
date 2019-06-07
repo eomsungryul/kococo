@@ -58,7 +58,6 @@ public class DiaryFragment extends Fragment {
 
         FindAppIdUtil fau = new FindAppIdUtil();
         String userAppId=fau.getAppid(v.getContext());
-        userAppId="";
         System.out.println("DiaryFragment"+" ===============start=========response: "+userAppId);
 
         retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();

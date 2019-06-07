@@ -15,16 +15,10 @@
  */
 package kr.co.dwebss.kococo.activity;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -51,19 +45,16 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import org.w3c.dom.Text;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.adapter.RecordListAdapter;
 import kr.co.dwebss.kococo.model.RecordData;
-import kr.co.dwebss.kococo.util.MediaPlayerUtility;
+import kr.co.dwebss.kococo.util.JsonNullCheckUtil;
 
 public class ResultActivity extends AppCompatActivity implements OnSeekBarChangeListener {
 
@@ -86,6 +77,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
     double sleepScore;
 
     RecordData recordData;
+    JsonNullCheckUtil jncu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +90,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
 //        initializeData();
         super.onCreate(savedInstanceState);
-
+        jncu = new JsonNullCheckUtil();
         //녹음 기록 갱신
 //        FragmentManager fragmentManager = getFragmentManager();
 //        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -164,11 +156,12 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                     JsonObject analysisObj = (JsonObject) analysisList.get(i);
                     analysisObj.get("analysisStartDt");
                     recordData = new RecordData();
-                    recordData.setAnalysisFileNm(analysisObj.get("analysisFileNm").toString().replace("\"",""));
-                    recordData.setAnalysisFileAppPath(analysisObj.get("analysisFileAppPath").toString().replace("\"",""));
+
+                    recordData.setAnalysisFileNm(jncu.JsonStringNullCheck(analysisObj,"analysisFileNm"));
+                    recordData.setAnalysisFileAppPath(jncu.JsonStringNullCheck(analysisObj,"analysisFileAppPath"));
                     recordData.setAnalysisId(analysisObj.get("analysisId").getAsInt());
-                    recordData.setAnalysisStartDt(analysisObj.get("analysisStartDt").toString().replace("\"",""));
-                    recordData.setAnalysisEndDt(analysisObj.get("analysisEndDt").toString().replace("\"",""));
+                    recordData.setAnalysisStartDt(jncu.JsonStringNullCheck(analysisObj,"analysisStartDt"));
+                    recordData.setAnalysisEndDt(jncu.JsonStringNullCheck(analysisObj,"analysisEndDt"));
                     JsonArray analysisDetailsList = analysisObj.getAsJsonArray("analysisDetailsList");
                     if(analysisDetailsList.size()>0){
                         for(int j=0; j<analysisDetailsList.size(); j++){
