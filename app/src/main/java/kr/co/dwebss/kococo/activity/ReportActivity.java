@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
@@ -41,6 +42,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -124,41 +127,40 @@ public class ReportActivity extends AppCompatActivity {
     //얼럿 다이얼로그 띄우기
     void showDeclareDialog()
     {
-        //Style을 넣어서 커스텀 가능
-        // 타이틀이 없으면 안나오고 메세지 길이에 따라 경고창길이가 달라진다.
-        AlertDialog.Builder builder = new AlertDialog.Builder(this,R.style.MyAlertDialogStyle);
-        builder.setTitle("제출하기");
-        builder.setMessage("제출하시겠습니까?");
-        //setView()를 이용하여 view를 넣고 커스텀 할 수 있다.
-
-
-        //예일 경우에는 신고하기를 한다.
-        //1. 파이어베이스에 업로드를 한다.
-        //2. 업로드가 되면 신고하기 제출을 한다.
-        builder.setPositiveButton("예",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
+        if(TextUtils.isEmpty(claimContents.getText())){
+            Toast.makeText(getApplicationContext(),"내용을 입력해주세요.",Toast.LENGTH_SHORT).show();
+            return;
+        }else{
+            //Style을 넣어서 커스텀 가능
+            // 타이틀이 없으면 안나오고 메세지 길이에 따라 경고창길이가 달라진다.
+            AlertDialog.Builder builder = new AlertDialog.Builder(this,R.style.MyAlertDialogStyle);
+            builder.setTitle("제출하기");
+            builder.setMessage("제출하시겠습니까?");
+            //setView()를 이용하여 view를 넣고 커스텀 할 수 있다.
+            //예일 경우에는 신고하기를 한다.
+            //1. 파이어베이스에 업로드를 한다.
+            //2. 업로드가 되면 신고하기 제출을 한다.
+            builder.setPositiveButton("예",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
 //                        Toast.makeText(getApplicationContext(),"예를 선택했습니다.",Toast.LENGTH_LONG).show();
-                        Toast.makeText(getApplicationContext(),"등록중입니다 잠시만기다려주세요. ",Toast.LENGTH_LONG).show();
-                        if(claimContents.getText().length()==0){
-                            Toast.makeText(getApplicationContext(),"내용을 입력해주세요.",Toast.LENGTH_SHORT).show();
-                            return;
-                        }else{
-                            //firebase 파일 업로드
+                            Toast.makeText(getApplicationContext(),"등록중입니다 잠시만기다려주세요. ",Toast.LENGTH_LONG).show();
                             addClaim();
                         }
-                    }
-
-                });
-        builder.setNegativeButton("아니오",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
+                    });
+            builder.setNegativeButton("아니오",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
 //                        Toast.makeText(getApplicationContext(),"아니오를 선택했습니다.", Toast.LENGTH_LONG).show();
-                    }
-                });
-        builder.show();
-        //이런식으로 높이와 길이를 지정할수있지만 비율에 맞게 버튼위치가 늘어나지않음 비추.
+                        }
+                    });
+            builder.show();
+            //이런식으로 높이와 길이를 지정할수있지만 비율에 맞게 버튼위치가 늘어나지않음 비추.
 //        builder.show().getWindow().setLayout(600, 400);
+
+        }
+
+
     }
 
     private Boolean requestClaim() {
