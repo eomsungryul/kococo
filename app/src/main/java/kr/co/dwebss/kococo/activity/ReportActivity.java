@@ -70,9 +70,7 @@ public class ReportActivity extends AppCompatActivity {
     Retrofit retrofit;
     ApiService apiService;
     //
-    Boolean requestClaimFlag;
-    Boolean uploadClaimFileFlag;
-
+    Boolean addClaimFlag;
     String uploadFirebasePath;
 
     @Override
@@ -109,7 +107,6 @@ public class ReportActivity extends AppCompatActivity {
                 +"/getAnalysisId :"+recordData.getAnalysisId()
         );
 
-
         Button declareBtn = (Button) findViewById(R.id.declareBtn);
         declareBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
@@ -117,10 +114,6 @@ public class ReportActivity extends AppCompatActivity {
                 showDeclareDialog();
             }
         });
-
-
-
-
 
     }
 
@@ -145,7 +138,7 @@ public class ReportActivity extends AppCompatActivity {
                         public void onClick(DialogInterface dialog, int which) {
 //                        Toast.makeText(getApplicationContext(),"예를 선택했습니다.",Toast.LENGTH_LONG).show();
                             Toast.makeText(getApplicationContext(),"등록중입니다 잠시만기다려주세요. ",Toast.LENGTH_LONG).show();
-                            addClaim();
+                            addFirebaseStorage();
                         }
                     });
             builder.setNegativeButton("아니오",
@@ -163,8 +156,8 @@ public class ReportActivity extends AppCompatActivity {
 
     }
 
-    private Boolean requestClaim() {
-        requestClaimFlag= false;
+    private Boolean addClaim() {
+        addClaimFlag= false;
         //형태
         // 아래 값중 값이 하나라도 빠져있으면, 400 bad request 발생
         //{
@@ -196,10 +189,15 @@ public class ReportActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
 //                System.out.println(" ========================response: "+response.body());
-                //저장 시에 뒤로가기
-                Toast.makeText(getApplicationContext(),"신고하기가 완료되었습니다.",Toast.LENGTH_LONG).show();
-                ReportActivity.super.onBackPressed();
-                requestClaimFlag=true;
+                JsonObject jsonObject = response.body();
+                if(jsonObject==null){
+                    Toast.makeText(getApplicationContext(),"신고하기가 실패되었습니다.",Toast.LENGTH_LONG).show();
+                }else{
+                    //저장 시에 뒤로가기
+                    Toast.makeText(getApplicationContext(),"신고하기가 완료되었습니다.",Toast.LENGTH_LONG).show();
+                    ReportActivity.super.onBackPressed();
+                    addClaimFlag=true;
+                }
             }
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {
@@ -207,13 +205,13 @@ public class ReportActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(),"신고하기가 실패되었습니다.",Toast.LENGTH_LONG).show();
             }
         });
-        return requestClaimFlag;
+        return addClaimFlag;
 
 
 
     }
 
-    private void addClaim() {
+    private void addFirebaseStorage() {
         //업로드 파일 시작
         FindAppIdUtil fau = new FindAppIdUtil();
         String appId =  fau.getAppid(getApplicationContext());
@@ -237,25 +235,32 @@ public class ReportActivity extends AppCompatActivity {
         StorageReference spaceRef = storageRef.child(uploadFirebasePath);
 
         //내 실제 경로를 입력한다.
-        Uri file = Uri.fromFile(new File(recordData.getAnalysisFileAppPath()+"/"+recordData.getAnalysisFileNm()));
-        UploadTask uploadTask = spaceRef.putFile(file);
 
-        // 파일 업로드의 성공/실패에 대한 콜백 받아 핸들링 하기 위해 아래와 같이 작성한다
+        File file = new File(recordData.getAnalysisFileAppPath()+"/"+recordData.getAnalysisFileNm());
+        if(file.exists()){
+            Uri putFile = Uri.fromFile(file);
+            UploadTask uploadTask = spaceRef.putFile(putFile);
 
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle unsuccessful uploads
-                System.out.println("======================실패"+exception.getMessage());
-                Toast.makeText(getApplicationContext(),"파일 업로드에 실패하였습니다. ",Toast.LENGTH_SHORT).show();
+            // 파일 업로드의 성공/실패에 대한 콜백 받아 핸들링 하기 위해 아래와 같이 작성한다
+
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle unsuccessful uploads
+                    System.out.println("======================실패"+exception.getMessage());
+                    Toast.makeText(getApplicationContext(),"파일 업로드에 실패하였습니다. ",Toast.LENGTH_SHORT).show();
             }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                //신고 전송
-                requestClaim();
-            }
-        });
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    //신고 전송
+                    addClaim();
+                }
+            });
+        }else{
+            //파일이 없는 경우
+            Toast.makeText(getApplicationContext(),"파일 없습니다.\n 신고하기를 실패하였습니다. ",Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

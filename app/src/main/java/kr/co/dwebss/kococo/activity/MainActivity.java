@@ -136,9 +136,10 @@ public class MainActivity extends AppCompatActivity {
 //                            Toast.makeText(MainActivity.this, "Fetch failed",Toast.LENGTH_SHORT).show();
                         }
                         //여기서 함 설정 가져옴!
-
                         String welcomeMessage = mFirebaseRemoteConfig.getString(WELCOME_MESSAGE_KEY);
 //                        Toast.makeText(MainActivity.this, welcomeMessage,Toast.LENGTH_SHORT).show();
+
+                        System.out.println("=========welcomeMessage============"+welcomeMessage);
                     }
                 });
         // [END fetch_config_with_callback]

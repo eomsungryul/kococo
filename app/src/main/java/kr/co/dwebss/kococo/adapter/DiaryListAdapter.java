@@ -149,19 +149,19 @@ public class DiaryListAdapter extends BaseAdapter {
     public void addItems(
             JsonArray resultDataList) {
         Record item;
-
-        for(int i=0; i<resultDataList.size(); i++){
-            JsonObject recordObj = (JsonObject) resultDataList.get(i);
-            System.out.println("==================recordObj=================="+recordObj);
-            item = new Record(
-                    recordObj.get("recordId").getAsInt()
-                    ,recordObj.get("recordStartD").toString()
-                    ,recordObj.get("recordEndD").toString()
-                    ,recordObj.get("recordStartDt").toString()
-                    ,recordObj.get("recordEndDt").toString()
-            );
-            listViewItemList.add(item);
+        if(resultDataList.size()>0){
+            for(int i=0; i<resultDataList.size(); i++){
+                JsonObject recordObj = (JsonObject) resultDataList.get(i);
+                System.out.println("============addItems======recordObj=================="+recordObj);
+                item = new Record(
+                        recordObj.get("recordId").getAsInt()
+                        ,recordObj.get("recordStartD").toString()
+                        ,recordObj.get("recordEndD").toString()
+                        ,recordObj.get("recordStartDt").toString()
+                        ,recordObj.get("recordEndDt").toString()
+                );
+                listViewItemList.add(item);
+            }
         }
     }
-
 }

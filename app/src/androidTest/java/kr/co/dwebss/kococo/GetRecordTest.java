@@ -55,7 +55,8 @@ public class GetRecordTest {
         apiService.getRecord(recordId).enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                System.out.println(" ========================response: "+response.body());
+                System.out.println(" ========================response: "+response.body().toString());
+                System.out.println(" ========================response2222222222222: "+response.body().toString());
                 checkValueForAssertion = "success";
                 assertEquals("success", checkValueForAssertion);
             }

@@ -244,8 +244,6 @@ public class RecordFragment extends Fragment  {
         transaction.detach(this).attach(this).commit();
     }
 
-
-
     public void start() {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO);
         //int bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT);
