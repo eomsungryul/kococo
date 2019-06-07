@@ -200,7 +200,7 @@ public class RecordFragment extends Fragment  {
         apiService.addRecord(requestData).enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                System.out.println(" ============녹음 종료 시 DB 저장============response: "+response.body().toString());
+                System.out.println(" ============녹음 종료 시 DB 저장============response: "+response.body());
                 //창 띄우기
 //                                    startActivity(new Intent(getActivity(), ResultActivity.class));
                 Intent intent = new Intent(getActivity(), ResultActivity.class);

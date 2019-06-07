@@ -195,7 +195,7 @@ public class ReportActivity extends AppCompatActivity {
         apiService.addClaim(recordData.getAnalysisDetailsId(),requestData).enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-//                System.out.println(" ========================response: "+response.body().toString());
+//                System.out.println(" ========================response: "+response.body());
                 //저장 시에 뒤로가기
                 Toast.makeText(getApplicationContext(),"신고하기가 완료되었습니다.",Toast.LENGTH_LONG).show();
                 ReportActivity.super.onBackPressed();

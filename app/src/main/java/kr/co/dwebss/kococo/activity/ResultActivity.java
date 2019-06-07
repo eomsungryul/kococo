@@ -38,6 +38,7 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -108,165 +109,165 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
         //데이터 수신
         Intent intent = getIntent();
-        if(getIntent().hasExtra("responseData")) responseData = new JsonParser().parse(getIntent().getStringExtra("responseData")).getAsJsonObject();
+        if(getIntent().hasExtra("responseData")){
+            responseData = new JsonParser().parse(getIntent().getStringExtra("responseData")).getAsJsonObject();
+
+            //뒤로가기 버튼
+            ImageButton bt = (ImageButton) findViewById(R.id.previousButton);
+            bt.setOnClickListener(new Button.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ResultActivity.super.onBackPressed();
+                }
+            });
 
 
-//        System.out.println("=============레알 되라===================="+responseData);
+            //상단 헤더 날짜 텍스트 날짜가 넘어가면 시작~종료 아니면 그냥 시작 날짜로 보여준다.
+            TextView dateTxtHeader = (TextView) findViewById(R.id.date_txt_header);
+            Date from = new Date();
+            SimpleDateFormat stringtoDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat transFormat = new SimpleDateFormat("yyyy년 MM월 dd일");
+            SimpleDateFormat stringtoDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+            SimpleDateFormat DateTimeToStringFormat = new SimpleDateFormat("HH:mm");
+            try {
+                recordStartD =  stringtoDateFormat.parse(responseData.get("recordStartD").toString().replace("\"",""));
+                recordEndD =  stringtoDateFormat.parse(responseData.get("recordEndD").toString().replace("\"",""));
 
-        //        responseData.getAsJsonArray("e");
+                recordStartDT =  stringtoDateTimeFormat.parse(responseData.get("recordStartDt").toString().replace("\"",""));
+                recordEndDT =  stringtoDateTimeFormat.parse(responseData.get("recordEndDt").toString().replace("\"",""));
+                recordTerm = recordEndDT.getTime()-recordStartDT.getTime();
 
-        //뒤로가기 버튼
-        ImageButton bt = (ImageButton) findViewById(R.id.previousButton);
-        bt.setOnClickListener(new Button.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ResultActivity.super.onBackPressed();
+            } catch (ParseException e) {
+                e.printStackTrace();
             }
-        });
-
-
-        //상단 헤더 날짜 텍스트 날짜가 넘어가면 시작~종료 아니면 그냥 시작 날짜로 보여준다.
-        TextView dateTxtHeader = (TextView) findViewById(R.id.date_txt_header);
-        Date from = new Date();
-        SimpleDateFormat stringtoDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        SimpleDateFormat transFormat = new SimpleDateFormat("yyyy년 MM월 dd일");
-        SimpleDateFormat stringtoDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        SimpleDateFormat DateTimeToStringFormat = new SimpleDateFormat("HH:mm");
-        try {
-            recordStartD =  stringtoDateFormat.parse(responseData.get("recordStartD").toString().replace("\"",""));
-            recordEndD =  stringtoDateFormat.parse(responseData.get("recordEndD").toString().replace("\"",""));
-
-            recordStartDT =  stringtoDateTimeFormat.parse(responseData.get("recordStartDt").toString().replace("\"",""));
-            recordEndDT =  stringtoDateTimeFormat.parse(responseData.get("recordEndDt").toString().replace("\"",""));
-            recordTerm = recordEndDT.getTime()-recordStartDT.getTime();
-
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
 
 //        String recordStartD =  responseData.get("recordStartD").toString().replace("\"","");
 //        String recordEndD =  responseData.get("recordEndD").toString().replace("\"","");
-        if(recordStartD.equals(recordEndD)){
-            dateTxtHeader.setText(transFormat.format(recordStartD));
+            if(recordStartD.equals(recordEndD)){
+                dateTxtHeader.setText(transFormat.format(recordStartD));
 
-        }else{
-            dateTxtHeader.setText(transFormat.format(recordStartD)+"~"+transFormat.format(recordEndD));
-        }
+            }else{
+                dateTxtHeader.setText(transFormat.format(recordStartD)+"~"+transFormat.format(recordEndD));
+            }
 
-        // 하단에 녹음 검출리스트 파일 리스트  Adapter 생성
-        RecordListAdapter adapter = new RecordListAdapter() ;
-        //listView 생성
-        ListView listview = (ListView) findViewById(R.id.recordListview);
-        listview.setAdapter(adapter);
+            // 하단에 녹음 검출리스트 파일 리스트  Adapter 생성
+            RecordListAdapter adapter = new RecordListAdapter() ;
+            //listView 생성
+            ListView listview = (ListView) findViewById(R.id.recordListview);
+            listview.setAdapter(adapter);
 
-        // 녹음 검출리스트 추가.
-       JsonArray analysisList = responseData.getAsJsonArray("analysisList");
+            // 녹음 검출리스트 추가.
+            JsonArray analysisList = responseData.getAsJsonArray("analysisList");
 
-        if(analysisList.size()>0){
-            for(int i=0; i<analysisList.size(); i++){
-                JsonObject analysisObj = (JsonObject) analysisList.get(i);
-                analysisObj.get("analysisStartDt");
-                recordData = new RecordData();
-                recordData.setAnalysisFileNm(analysisObj.get("analysisFileNm").toString().replace("\"",""));
-                recordData.setAnalysisFileAppPath(analysisObj.get("analysisFileAppPath").toString().replace("\"",""));
-                recordData.setAnalysisId(analysisObj.get("analysisId").getAsInt());
-                recordData.setAnalysisStartDt(analysisObj.get("analysisStartDt").toString().replace("\"",""));
-                recordData.setAnalysisEndDt(analysisObj.get("analysisEndDt").toString().replace("\"",""));
-                JsonArray analysisDetailsList = analysisObj.getAsJsonArray("analysisDetailsList");
-                if(analysisDetailsList.size()>0){
-                    for(int j=0; j<analysisDetailsList.size(); j++){
-                        JsonObject analysisDetailsObj = (JsonObject) analysisDetailsList.get(i);
-                        int termTypeCd =  analysisDetailsObj.get("termTypeCd").getAsInt();
-                        if(termTypeCd==200101){
-                            recordData.setTitle("코골이"+(i+j+1));
-                        }else if(termTypeCd==200102){
-                            recordData.setTitle("이갈이"+(i+j+1));
-                        }else{
-                            recordData.setTitle("무호흡"+(i+j+1));
-                        }
-                        recordData.setAnalysisDetailsId(analysisDetailsObj.get("analysisDetailsId").getAsInt());
-                        recordData.setTermStartDt(analysisDetailsObj.get("termStartDt").toString().replace("\"",""));
-                        recordData.setTermEndDt(analysisDetailsObj.get("termEndDt").toString().replace("\"",""));
-                        recordData.setTermTypeCd(termTypeCd);
-                        adapter.addItem(recordData) ;
+            if(analysisList.size()>0){
+                for(int i=0; i<analysisList.size(); i++){
+                    JsonObject analysisObj = (JsonObject) analysisList.get(i);
+                    analysisObj.get("analysisStartDt");
+                    recordData = new RecordData();
+                    recordData.setAnalysisFileNm(analysisObj.get("analysisFileNm").toString().replace("\"",""));
+                    recordData.setAnalysisFileAppPath(analysisObj.get("analysisFileAppPath").toString().replace("\"",""));
+                    recordData.setAnalysisId(analysisObj.get("analysisId").getAsInt());
+                    recordData.setAnalysisStartDt(analysisObj.get("analysisStartDt").toString().replace("\"",""));
+                    recordData.setAnalysisEndDt(analysisObj.get("analysisEndDt").toString().replace("\"",""));
+                    JsonArray analysisDetailsList = analysisObj.getAsJsonArray("analysisDetailsList");
+                    if(analysisDetailsList.size()>0){
+                        for(int j=0; j<analysisDetailsList.size(); j++){
+                            JsonObject analysisDetailsObj = (JsonObject) analysisDetailsList.get(i);
+                            int termTypeCd =  analysisDetailsObj.get("termTypeCd").getAsInt();
+                            if(termTypeCd==200101){
+                                recordData.setTitle("코골이"+(i+j+1));
+                            }else if(termTypeCd==200102){
+                                recordData.setTitle("이갈이"+(i+j+1));
+                            }else{
+                                recordData.setTitle("무호흡"+(i+j+1));
+                            }
+                            recordData.setAnalysisDetailsId(analysisDetailsObj.get("analysisDetailsId").getAsInt());
+                            recordData.setTermStartDt(analysisDetailsObj.get("termStartDt").toString().replace("\"",""));
+                            recordData.setTermEndDt(analysisDetailsObj.get("termEndDt").toString().replace("\"",""));
+                            recordData.setTermTypeCd(termTypeCd);
+                            adapter.addItem(recordData) ;
 
-                        try {
-                            kococoTerm += (stringtoDateTimeFormat.parse(recordData.getTermEndDt()).getTime()
-                                    -stringtoDateTimeFormat.parse(recordData.getTermStartDt()).getTime());
-                        } catch (ParseException e) {
-                            e.printStackTrace();
+                            try {
+                                kococoTerm += (stringtoDateTimeFormat.parse(recordData.getTermEndDt()).getTime()
+                                        -stringtoDateTimeFormat.parse(recordData.getTermStartDt()).getTime());
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
-                }
 //                System.out.println("=============레알 analysisStartDt=========="+analysisObj.get("analysisStartDt"));
+                }
             }
-        }
 
-        //test용
+            //test용
 //        dateTxtHeader.setText(transFormat.format(recordStartD)+"===="+recordData.getAnalysisId());
 
 
-        //점수 구하는법
-        //공식은 전체 녹음시간 분의 검출된 시간으로 퍼센트로 구한다.
-        sleepScore=100-(((float)kococoTerm/(float)recordTerm)*100);
-        TextView scoreTextView = findViewById(R.id.scoreTextView);
-        //i18n 적용
-        Resources res = getResources();
-        String scoreText = String.format(res.getString(R.string.score),Math.round(sleepScore));
-        scoreTextView.setText(scoreText);
+            //점수 구하는법
+            //공식은 전체 녹음시간 분의 검출된 시간으로 퍼센트로 구한다.
+            sleepScore=100-(((float)kococoTerm/(float)recordTerm)*100);
+            TextView scoreTextView = findViewById(R.id.scoreTextView);
+            //i18n 적용
+            Resources res = getResources();
+            String scoreText = String.format(res.getString(R.string.score),Math.round(sleepScore));
+            scoreTextView.setText(scoreText);
 
-        //시간 HH:mm ~ HH:mm
+            //시간 HH:mm ~ HH:mm
 //        System.out.println("=============레알 kococoTerm=========="+kococoTerm);
 //        System.out.println("=============레알 recordTerm=========="+recordTerm);
-        String recodeText = DateTimeToStringFormat.format(recordStartDT)+"~"+DateTimeToStringFormat.format(recordEndDT);
-        TextView recodeTextView = findViewById(R.id.recodeTextView);
-        recodeTextView.setText(recodeText);
+            String recodeText = DateTimeToStringFormat.format(recordStartDT)+"~"+DateTimeToStringFormat.format(recordEndDT);
+            TextView recodeTextView = findViewById(R.id.recodeTextView);
+            recodeTextView.setText(recodeText);
 
 
-        //차트 시작
-        chart = findViewById(R.id.chart1);
-        chart.getDescription().setEnabled(false);
-        // if more than 60 entries are displayed in the chart, no values will be
-        // drawn
-        chart.setMaxVisibleValueCount(60);
+            //차트 시작
+            chart = findViewById(R.id.chart1);
+            chart.getDescription().setEnabled(false);
+            // if more than 60 entries are displayed in the chart, no values will be
+            // drawn
+            chart.setMaxVisibleValueCount(60);
 
-        // scaling can now only be done on x- and y-axis separately
-        chart.setPinchZoom(false);
+            // scaling can now only be done on x- and y-axis separately
+            chart.setPinchZoom(false);
 
-        chart.setDrawBarShadow(false);
-        chart.setDrawGridBackground(false);
+            chart.setDrawBarShadow(false);
+            chart.setDrawGridBackground(false);
 
-        XAxis xAxis = chart.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setDrawGridLines(false);
+            XAxis xAxis = chart.getXAxis();
+            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+            xAxis.setDrawGridLines(false);
 
-        chart.getAxisLeft().setDrawGridLines(false);
-        // setting data
-        // add a nice and smooth animation
-        chart.animateY(1500);
-        chart.getLegend().setEnabled(false);
+            chart.getAxisLeft().setDrawGridLines(false);
+            // setting data
+            // add a nice and smooth animation
+            chart.animateY(1500);
+            chart.getLegend().setEnabled(false);
 
-        chart = (BarChart)findViewById(R.id.chart1);
+            chart = (BarChart)findViewById(R.id.chart1);
 
-        List<BarEntry> entries = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            float multi = (100 + 1);
-            float val = (float) (Math.random() * multi) + multi / 3;
-            entries.add(new BarEntry(i, val));
+            List<BarEntry> entries = new ArrayList<>();
+            for (int i = 0; i < 100; i++) {
+                float multi = (100 + 1);
+                float val = (float) (Math.random() * multi) + multi / 3;
+                entries.add(new BarEntry(i, val));
+            }
+            BarDataSet set1;
+            set1 = new BarDataSet(entries, "Data Set");
+            set1.setColors(ColorTemplate.VORDIPLOM_COLORS);
+            set1.setDrawValues(false);
+
+            ArrayList<IBarDataSet> dataSets = new ArrayList<>();
+            dataSets.add(set1);
+
+            BarData data = new BarData(dataSets);
+            chart.setData(data);
+            chart.setFitBars(true);
+            chart.invalidate();
+
+
+        }else{
+            Toast.makeText(getApplicationContext(),"error",Toast.LENGTH_LONG);
         }
-        BarDataSet set1;
-        set1 = new BarDataSet(entries, "Data Set");
-        set1.setColors(ColorTemplate.VORDIPLOM_COLORS);
-        set1.setDrawValues(false);
-
-        ArrayList<IBarDataSet> dataSets = new ArrayList<>();
-        dataSets.add(set1);
-
-        BarData data = new BarData(dataSets);
-        chart.setData(data);
-        chart.setFitBars(true);
-        chart.invalidate();
-
     }
 
     //getSupportActionBar 사용하려면 추가해야함
@@ -323,16 +324,6 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {}
-//    //녹음 리스트 더미 데이터
-//    private void initializeData() {
-//        ArrayList<Record> resultList = new ArrayList<Record>();
-//        for(int i=0; i<10; i++){
-//            resultList.add(new Record("녹음 파일"+i,"i"));
-//        }
-////        resultListSection = new Section(resultList, "recodes", false);
-//    }
-
-
 
     // MediaPlayer는 시스템 리소스를 잡아먹는다.
     // MediaPlayer는 필요이상으로 사용하지 않도록 주의해야 한다.
@@ -342,8 +333,8 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
         super.onDestroy();
         // MediaPlayer 해지
 //        if (mediaPlayer != null) {
-////            mediaPlayer.release();
-////            mediaPlayer = null;
-////        }
+//            mediaPlayer.release();
+//            mediaPlayer = null;
+//        }
     }
 }

@@ -120,7 +120,7 @@ public class DiaryListAdapter extends BaseAdapter {
         apiService.getRecord(data.getRecordId()).enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                System.out.println(data.getRecordId()+" ========================response: "+response.body().toString());
+                System.out.println(data.getRecordId()+" ========================response: "+response.body());
                 //창 띄우기
                 Intent intent = new Intent(context, ResultActivity.class);
                 intent.putExtra("responseData",response.body().toString()); /*송신*/

@@ -48,4 +48,9 @@
     <string name="expertConsultationHistory">전문가 상담 내역</string>
     <string name="commentsAndSuggestions">의견 및 제안</string>
 
+
+    <!--error property-->
+    <string name="error_server">서버에 접속 할 수없습니다.\n관리자에게 문의해주세요.</string>
+    <string name="error_server_getRecordList">기록을 불러올 수 없습니다.\n관리자에게 문의해주세요.</string>
+
 </resources>

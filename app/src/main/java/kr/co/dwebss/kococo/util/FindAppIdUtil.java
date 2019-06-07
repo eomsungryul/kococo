@@ -1,6 +1,7 @@
 package kr.co.dwebss.kococo.util;
 
 import android.content.Context;
+import android.widget.Toast;
 
 import com.google.gson.JsonObject;
 
@@ -92,6 +93,7 @@ public class FindAppIdUtil {
                 @Override
                 public void onFailure(Call<JsonObject> call, Throwable t) {
                     //에러 날시에 다시 시작해야됨
+                    Toast.makeText(context, "서버에 접속 할 수 없습니다.\n관리자에게 문의하세요", Toast.LENGTH_SHORT).show();
                 }
             });
             return APP_ID;
@@ -163,6 +165,7 @@ public class FindAppIdUtil {
                 @Override
                 public void onFailure(Call<JsonObject> call, Throwable t) {
                     //에러 날시에 다시 시작해야됨
+                    Toast.makeText(context, "서버에 접속 할 수 없습니다.\n관리자에게 문의하세요", Toast.LENGTH_SHORT).show();
                 }
             });
 

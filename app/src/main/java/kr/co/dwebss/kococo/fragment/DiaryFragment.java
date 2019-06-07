@@ -68,7 +68,7 @@ public class DiaryFragment extends Fragment {
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
                 System.out.println(" ============getRecordList============response: "+response);
                 //저장 시에 뒤로가기
-//                Toast.makeText(v.getContext(),response.body().toString(),Toast.LENGTH_LONG).show();
+//                Toast.makeText(v.getContext(),response.body(),Toast.LENGTH_LONG).show();
                 Gson gson = new Gson();
                 JsonObject jsonObject = response.body();
                 JsonObject resultData = jsonObject.getAsJsonObject("_embedded");
@@ -79,12 +79,13 @@ public class DiaryFragment extends Fragment {
                 ListView listview = (ListView) v.findViewById(R.id.diaryListview);
                 listview.setAdapter(adapter);
                 adapter.addItems(recordList) ;
+
                 adapter.notifyDataSetChanged();
             }
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {
 //                System.out.println(" ========================Throwable: "+ t);
-                Toast.makeText(v.getContext(),"에러입니다.",Toast.LENGTH_LONG).show();
+                Toast.makeText(v.getContext(),R.string.error_server_getRecordList,Toast.LENGTH_LONG).show();
             }
         });
 

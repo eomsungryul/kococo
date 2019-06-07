@@ -170,7 +170,7 @@ public class RecodeFragment_BK_coupling extends Fragment  {
 ////                        public void onResponse(Call<RequestBody> call, Response<RequestBody> response) {
 ////                            // 5.  리턴 후에 녹음 결과창을 띄움
 ////                            startActivity(new Intent(getActivity(), ResultActivity.class));
-////                            System.out.println(" ================녹음종료=======response: "+response.body().toString());
+////                            System.out.println(" ================녹음종료=======response: "+response.body());
 ////                        }
 ////                        @Override
 ////                        public void onFailure(Call<RequestBody> call, Throwable t) {

@@ -15,9 +15,9 @@ import retrofit2.http.Query;
 public interface ApiService {
     //API url
     //회사 내컴
-//    public static final String API_URL = "http://192.168.0.2:8080/";
+    public static final String API_URL = "http://192.168.0.2:8080/";
     //aws 주소
-    public static final String API_URL = "http://52.79.88.47:8080/kococo/";
+//    public static final String API_URL = "http://52.79.88.47:8080/kococo/";
 
     //json으로도 받을 수 있는 형태
     @Headers({

@@ -443,7 +443,7 @@ public class AudioAnalysisThread extends Thread{
 //                            apiService.addRecord(requestData).enqueue(new Callback<RequestBody>() {
 //                                @Override
 //                                public void onResponse(Call<RequestBody> call, Response<RequestBody> response) {
-//                                    System.out.println(" ========================response: "+response.body().toString());
+//                                    System.out.println(" ========================response: "+response.body());
 //                                }
 //
 //                                @Override

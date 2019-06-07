@@ -504,7 +504,7 @@ public class RecodeFragment_BK_nonDecoupling extends Fragment  {
 //                                public void onResponse(Call<RequestBody> call, Response<RequestBody> response) {
 //                                    Toast.makeText(getActivity(), "sucess"+response,
 //                                            Toast.LENGTH_SHORT).show();
-//                                    System.out.println(" ========================response: "+response.body().toString());
+//                                    System.out.println(" ========================response: "+response.body());
 //                                }
 //
 //                                @Override
@@ -626,7 +626,7 @@ public class RecodeFragment_BK_nonDecoupling extends Fragment  {
 //                                public void onResponse(Call<RequestBody> call, Response<RequestBody> response) {
 //                                    Toast.makeText(getActivity(), "sucess"+response,
 //                                            Toast.LENGTH_SHORT).show();
-////                                    System.out.println(" ========================response: "+response.body().toString());
+////                                    System.out.println(" ========================response: "+response.body());
 //                                }
 //
 //                                @Override
