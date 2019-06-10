@@ -152,7 +152,7 @@ public class DiaryListAdapter extends BaseAdapter {
         if(resultDataList.size()>0){
             for(int i=0; i<resultDataList.size(); i++){
                 JsonObject recordObj = (JsonObject) resultDataList.get(i);
-                System.out.println("============addItems======recordObj=================="+recordObj);
+                System.out.println("=====Diary=======addItems======recordObj=================="+recordObj);
                 item = new Record(
                         recordObj.get("recordId").getAsInt()
                         ,recordObj.get("recordStartD").toString()
@@ -161,6 +161,9 @@ public class DiaryListAdapter extends BaseAdapter {
                         ,recordObj.get("recordEndDt").toString()
                 );
                 listViewItemList.add(item);
+
+//                {"recordId":41,"consultingYn":"N","consultingReplyYn":"N","analysisList":[],"_links":{"self":{"href":"http://192.168.0.2:8080/api/record/41"},"record":{"href":"http://192.168.0.2:8080/api/record/41"},"admin":{"href":"http://192.168.0.2:8080/api/record/41/admin"},"sleepStatusCd":{"href":"http://192.168.0.2:8080/api/record/41/sleepStatusCd"},"user":{"href":"http://192.168.0.2:8080/api/record/41/user"}}}
+
             }
         }
     }

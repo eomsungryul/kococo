@@ -59,53 +59,55 @@ public class DiaryFragment extends Fragment {
         FindAppIdUtil fau = new FindAppIdUtil();
         String userAppId=fau.getAppid(v.getContext());
         System.out.println("DiaryFragment"+" ===============start=========response: "+userAppId);
+        if(userAppId!=null){
+            retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();
+            apiService = retrofit.create(ApiService.class);
 
-        retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();
-        apiService = retrofit.create(ApiService.class);
-
-        apiService.getRecordList(userAppId,"recordId,desc").enqueue(new Callback<JsonObject>() {
-            @Override
-            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                System.out.println(" ============getRecordList============response: "+response);
-                //저장 시에 뒤로가기
+            apiService.getRecordList(userAppId,"recordId,desc").enqueue(new Callback<JsonObject>() {
+                @Override
+                public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                    System.out.println(" ============getRecordList============response: "+response);
+                    //저장 시에 뒤로가기
 //                Toast.makeText(v.getContext(),response.body(),Toast.LENGTH_LONG).show();
-                Gson gson = new Gson();
-                JsonObject jsonObject = response.body();
-                JsonObject resultData = jsonObject.getAsJsonObject("_embedded");
-                JsonArray recordList = resultData.getAsJsonArray("record");
-                // Adapter 생성
-                adapter = new DiaryListAdapter() ;
-                //listView 생성
-                ListView listview = (ListView) v.findViewById(R.id.diaryListview);
-                listview.setAdapter(adapter);
-                adapter.addItems(recordList) ;
+                    Gson gson = new Gson();
+                    JsonObject jsonObject = response.body();
+                    JsonObject resultData = jsonObject.getAsJsonObject("_embedded");
+                    JsonArray recordList = resultData.getAsJsonArray("record");
+                    // Adapter 생성
+                    adapter = new DiaryListAdapter() ;
+                    //listView 생성
+                    ListView listview = (ListView) v.findViewById(R.id.diaryListview);
+                    listview.setAdapter(adapter);
+                    adapter.addItems(recordList) ;
 
-                adapter.notifyDataSetChanged();
-            }
-            @Override
-            public void onFailure(Call<JsonObject> call, Throwable t) {
+                    adapter.notifyDataSetChanged();
+                }
+                @Override
+                public void onFailure(Call<JsonObject> call, Throwable t) {
 //                System.out.println(" ========================Throwable: "+ t);
-                Toast.makeText(v.getContext(),R.string.error_server_getRecordList,Toast.LENGTH_LONG).show();
-            }
-        });
+                    Toast.makeText(v.getContext(),R.string.error_server_getRecordList,Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+
 
         return v;
     }
 
-//    @Override
-//    public void setUserVisibleHint(boolean isVisibleToUser) {
-//        System.out.println("=============="+LOG_TAG+"================"+isVisibleToUser);
-//        super.setUserVisibleHint(isVisibleToUser);
-//        if (isVisibleToUser) {
-//            // Refresh your fragment here
-//            refresh();
-//        }
-//    }
-//
-//    //프래그먼트 초기화 방법
-//    private  void refresh(){
-//        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-//        transaction.detach(this).attach(this).commit();
-//    }
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        System.out.println("=============="+LOG_TAG+"================"+isVisibleToUser);
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            // Refresh your fragment here
+            refresh();
+        }
+    }
+
+    //프래그먼트 초기화 방법
+    private  void refresh(){
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.detach(this).attach(this).commit();
+    }
 
 }
