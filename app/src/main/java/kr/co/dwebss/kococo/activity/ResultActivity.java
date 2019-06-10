@@ -18,6 +18,7 @@ package kr.co.dwebss.kococo.activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -39,7 +40,10 @@ import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -55,6 +59,7 @@ import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.adapter.RecordListAdapter;
 import kr.co.dwebss.kococo.model.RecordData;
 import kr.co.dwebss.kococo.util.JsonNullCheckUtil;
+import kr.co.dwebss.kococo.util.MyXAxisValueFormatter;
 
 public class ResultActivity extends AppCompatActivity implements OnSeekBarChangeListener {
 
@@ -78,6 +83,10 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
     RecordData recordData;
     JsonNullCheckUtil jncu;
+
+    List<BarEntry> entries = new ArrayList<>();
+    long referenceTimestamp; // minimum timestamp in your data set;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,7 +146,6 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 //        String recordEndD =  responseData.get("recordEndD").toString().replace("\"","");
             if(recordStartD.equals(recordEndD)){
                 dateTxtHeader.setText(transFormat.format(recordStartD));
-
             }else{
                 dateTxtHeader.setText(transFormat.format(recordStartD)+"~"+transFormat.format(recordEndD));
             }
@@ -184,7 +192,24 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                             recordData.setTermTypeCd(termTypeCd);
                             adapter.addItem(recordData) ;
 
+                            long date = 0;
                             try {
+                                date = stringtoDateTimeFormat.parse(recordData.getTermEndDt()).getTime();
+
+                                System.out.println("==========date========="+date);
+                                System.out.println("====date==Date========="+new Date(date));
+
+                                referenceTimestamp = stringtoDateTimeFormat.parse(jncu.JsonStringNullCheck(analysisObj,"analysisStartDt")).getTime();
+                                System.out.println("=====date=====referenceTimestamp========="+referenceTimestamp);
+                                System.out.println("==date====referenceTimestamp===Date======"+new Date(referenceTimestamp));
+
+                                System.out.println("==date====referenceTimestamp-Date======"+new Date(date-referenceTimestamp));
+                                System.out.println("==date====date-referenceTimestamp-Date======"+(date-referenceTimestamp));
+
+                                entries.add(new BarEntry((float)(date-referenceTimestamp), 50,"데이터넣ㅎ을 수있음 "+recordData.getTitle()));
+//                                entries.add(new BarEntry((float)date, 50));
+
+
                                 kococoTerm += (stringtoDateTimeFormat.parse(recordData.getTermEndDt()).getTime()
                                         -stringtoDateTimeFormat.parse(recordData.getTermStartDt()).getTime());
                             } catch (ParseException e) {
@@ -211,7 +236,6 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
             //시간 HH:mm ~ HH:mm
 //        System.out.println("=============레알 kococoTerm=========="+kococoTerm);
-//        System.out.println("=============레알 recordTerm=========="+recordTerm);
             String recodeText = DateTimeToStringFormat.format(recordStartDT)+"~"+DateTimeToStringFormat.format(recordEndDT);
             TextView recodeTextView = findViewById(R.id.recodeTextView);
             recodeTextView.setText(recodeText);
@@ -229,12 +253,40 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
             chart.setDrawBarShadow(false);
             chart.setDrawGridBackground(false);
+            chart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+                @Override
+                public void onValueSelected(Entry e, Highlight h) {
+                    System.out.println("=========클릭했다~~~"+e.getData());
 
+                }
+
+                @Override
+                public void onNothingSelected() {
+
+                }
+            });
+            System.out.println("======referenceTimestamp========="+referenceTimestamp);
+            System.out.println("======referenceTimestamp========="+new Date(referenceTimestamp));
+            String[] values;
+            values = new String[2];
+            values[0] = String.valueOf(referenceTimestamp);
+            values[1] = String.valueOf(referenceTimestamp+10000);
+
+
+//            MyXAxisValueFormatter xAxisFormatter = new MyXAxisValueFormatter(values);
+            MyXAxisValueFormatter xAxisFormatter = new MyXAxisValueFormatter(referenceTimestamp);
             XAxis xAxis = chart.getXAxis();
             xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
             xAxis.setDrawGridLines(false);
+            //X좌표 폰트
+            xAxis.setTextColor(Color.WHITE);
+            xAxis.setValueFormatter(xAxisFormatter);
 
             chart.getAxisLeft().setDrawGridLines(false);
+            //Y좌표 폰트
+            chart.getAxisLeft().setTextColor(Color.WHITE);
+            //Y좌표 오른쪽 안보이게 처리
+            chart.getAxisRight().setEnabled(false);
             // setting data
             // add a nice and smooth animation
             chart.animateY(1500);
@@ -242,21 +294,22 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
             chart = (BarChart)findViewById(R.id.chart1);
 
-            List<BarEntry> entries = new ArrayList<>();
-            for (int i = 0; i < 100; i++) {
-                float multi = (100 + 1);
-                float val = (float) (Math.random() * multi) + multi / 3;
-                entries.add(new BarEntry(i, val));
-            }
+//            List<BarEntry> entries = new ArrayList<>();
+
+            System.out.println("=================entries.size()================="+entries.size());
             BarDataSet set1;
             set1 = new BarDataSet(entries, "Data Set");
-            set1.setColors(ColorTemplate.VORDIPLOM_COLORS);
-            set1.setDrawValues(false);
+//            set1.setColors(ColorTemplate.VORDIPLOM_COLORS);
+//            set1.setDrawValues(false);
+            set1.setColors(ColorTemplate.COLORFUL_COLORS);
+            set1.setDrawValues(true);
 
             ArrayList<IBarDataSet> dataSets = new ArrayList<>();
             dataSets.add(set1);
 
             BarData data = new BarData(dataSets);
+            //바의 두께를 바꿀수 있는
+            data.setBarWidth(300f);
             chart.setData(data);
             chart.setFitBars(true);
             chart.invalidate();

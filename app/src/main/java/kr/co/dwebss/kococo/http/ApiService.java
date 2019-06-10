@@ -15,9 +15,9 @@ import retrofit2.http.Query;
 public interface ApiService {
     //API url
     //회사 내컴
-    public static final String API_URL = "http://192.168.0.2:8080/";
+//    public static final String API_URL = "http://192.168.0.2:8080/";
     //aws 주소
-//    public static final String API_URL = "http://52.79.88.47:8080/kococo/";
+    public static final String API_URL = "http://52.79.88.47:8080/kococo/";
 
     //json으로도 받을 수 있는 형태
     @Headers({
@@ -55,6 +55,8 @@ public interface ApiService {
     //@Path 를 이용하면 Rest 방식으로 호출 할 수 있다.
     @GET("api/record/{recordId}")
     Call<JsonObject> getRecord(@Path("recordId") Integer recordId);
+
+    Call<JsonObject> getClaimList(String userAppId);
 
 //    Call<JSONObject> addRecord(@Body JSONObject data);
 //    Call<JsonObject> addRecord(JsonObject data);
