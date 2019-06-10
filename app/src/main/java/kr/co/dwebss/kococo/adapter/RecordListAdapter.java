@@ -32,6 +32,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -49,11 +50,12 @@ public class RecordListAdapter extends BaseAdapter {
     // Adapter에 추가된 데이터를 저장하기 위한 ArrayList
     private ArrayList<RecordData> listViewItemList = new ArrayList<RecordData>() ;
     Boolean playBtnFlag = false;
-    ImageButton playBtn;
+    Boolean isPlaying = false;
+    int playPosition;
 
     //재생할때 필요한
-    MediaPlayer mediaPlayer;
-
+    MediaPlayer mediaPlayer = new MediaPlayer();
+    CountDownTimer cdt;
     // ListViewAdapter의 생성자
     public RecordListAdapter() {
     }
@@ -91,7 +93,7 @@ public class RecordListAdapter extends BaseAdapter {
 
         playBtnFlag = false;
         //lisrViews내의 아이콘 버튼 참조 및 onclick추가
-        playBtn = (ImageButton) convertView.findViewById(R.id.recordPlay);
+        ImageButton playBtn = (ImageButton) convertView.findViewById(R.id.recordPlay);
 
         System.out.println("===============이게 왜?0000====filePath = :"+listViewItem.getAnalysisFileAppPath()+"/"+listViewItem.getAnalysisFileNm());
 
@@ -99,31 +101,49 @@ public class RecordListAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
 //                Toast.makeText(context, "파일정보 : "+position+" : "+listViewItem.getAnalysisFileAppPath()+"/"+listViewItem.getAnalysisFileNm(), Toast.LENGTH_SHORT).show();
+
                 //재생버튼 누를 시 정지버튼으로 변경하는 메소드
+                //재생중이거나 해당버튼이 재생position 값과 다른 경우에만 초기화를 해줌
+                if(isPlaying && playPosition != position){
+                    //재생 중지 버튼
+                    for(int i=0; i<getCount();i++){
+                        View v2 = parent.getChildAt(i);
+                        ImageButton playBtn2 = (ImageButton) v2.findViewById(R.id.recordPlay);
+                        playBtn2.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
+                    }
+                    if(mediaPlayer.isPlaying()){
+                        mediaPlayer.stop();
+                        mediaPlayer.reset();
+                    }
+                    cdt.cancel();
+                    playBtnFlag = false;
+                    isPlaying = false;
+                }
                 if(!playBtnFlag){
                     //재생일 시에
                     playBtn.setImageResource(R.drawable.baseline_pause_white_48dp);
                     playBtnFlag = true;
+                    playPosition = position;
                     SimpleDateFormat stringtoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
                     long startTerm = 0L;
                     long endTerm = 0L;
                     try {
                         Date analysisStartDt =  stringtoDateFormat.parse(listViewItem.getAnalysisStartDt().toString());
-
                         Date termStartDt =  stringtoDateFormat.parse(listViewItem.getTermStartDt().toString());
                         Date termEndDt =  stringtoDateFormat.parse(listViewItem.getTermEndDt().toString());
                         startTerm = termStartDt.getTime()-analysisStartDt.getTime();
                         endTerm = termEndDt.getTime()-analysisStartDt.getTime();
-//                        System.out.println("================끝나자:"+listViewItem.getTermStartDt().toString());
+//                        System.out.println("================termEndDt:"+termEndDt);
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
-                    play((int)startTerm,(int)endTerm,listViewItem.getAnalysisFileAppPath()+"/"+listViewItem.getAnalysisFileNm(),context);
-
+                    try {
+                        playMp((int)startTerm,(int)endTerm,listViewItem.getAnalysisFileAppPath()+"/"+listViewItem.getAnalysisFileNm(),context,playBtn);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }else{
-                    playBtn.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
-                    playBtnFlag = false;
-                    stopPlayer();
+                    stopMp(playBtn);
                 }
             }
         });
@@ -169,34 +189,37 @@ public class RecordListAdapter extends BaseAdapter {
         listViewItemList.add(date);
     }
 
-    public void play(int startTime, int endTime , String filePath, Context context){
+    public void playMp(int startTime, int endTime , String filePath, Context context,ImageButton playBtn) throws IOException {
 //        mediaPlayer = MediaPlayer.create(context, Uri.parse("/data/data/kr.co.dwebss.kococo/files/rec_data/23/snoring-20191029_0410-29_0410_1559113854914.wav"));
 //        mediaPlayer = MediaPlayer.create(context, R.raw.queen);
         Log.v(LOG_TAG,( "======== play() startTime : " +startTime+" /endTime : "+endTime+"/filePath : "+filePath));
 
         File file = new File(filePath);
         if(file.exists()){
-            mediaPlayer = MediaPlayer.create(context, Uri.parse(filePath));
-            //구간 재생
-            mediaPlayer.seekTo(startTime);
-            mediaPlayer.getCurrentPosition();
-            mediaPlayer.start();
-            //카운트 다운
-            new CountDownTimer(endTime, 100) {
-                public void onTick(long millisUntilFinished) {
-                    if(MediaPlayerUtility.getTime(mediaPlayer)>=endTime){
-                        mediaPlayer.stop();
-                        // 초기화
-                        mediaPlayer.reset();
-//                    testFlag = false;
-//                    testBtn.setText("시작");
+            //만일 지금 재생중이라면 멈추고 버튼도 재생버튼으로 바꾼다
+                mediaPlayer = MediaPlayer.create(context, Uri.parse(filePath));
+                //구간 재생
+                mediaPlayer.seekTo(startTime);
+                mediaPlayer.getCurrentPosition();
+                mediaPlayer.start();
+
+                //구간 재생을 위한 카운트 다운 타이머
+                cdt = new CountDownTimer(endTime-startTime, 100) {
+                    public void onTick(long millisUntilFinished) {
+//                        System.out.println("=============================onTick"+millisUntilFinished);
+                        if(MediaPlayerUtility.getTime(mediaPlayer)>=endTime){
+                            stopMp(playBtn);
+                        }
+                        if(!isPlaying){
+//                            System.out.println("============cancel=================onTick");
+                            cancel();
+                        }
                     }
-                }
-                public void onFinish() {
-                    playBtn.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
-                    playBtnFlag = false;
-                }
-            }.start();
+                    public void onFinish() {
+                        stopMp(playBtn);
+                    }
+                }.start();
+            isPlaying=true;
         }else{
             Toast.makeText(context,"파일이 존재하지않습니다.",Toast.LENGTH_SHORT).show();
             playBtn.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
@@ -204,11 +227,12 @@ public class RecordListAdapter extends BaseAdapter {
         }
     }
 
-    public void stopPlayer(){
+    public void stopMp(ImageButton playBtn){
         mediaPlayer.stop();
         mediaPlayer.reset();
+        playBtn.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
+        playBtnFlag = false;
+        isPlaying=false;
     }
-
-
 
 }

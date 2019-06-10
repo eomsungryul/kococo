@@ -155,17 +155,21 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                 for(int i=0; i<analysisList.size(); i++){
                     JsonObject analysisObj = (JsonObject) analysisList.get(i);
                     analysisObj.get("analysisStartDt");
-                    recordData = new RecordData();
-
-                    recordData.setAnalysisFileNm(jncu.JsonStringNullCheck(analysisObj,"analysisFileNm"));
-                    recordData.setAnalysisFileAppPath(jncu.JsonStringNullCheck(analysisObj,"analysisFileAppPath"));
-                    recordData.setAnalysisId(analysisObj.get("analysisId").getAsInt());
-                    recordData.setAnalysisStartDt(jncu.JsonStringNullCheck(analysisObj,"analysisStartDt"));
-                    recordData.setAnalysisEndDt(jncu.JsonStringNullCheck(analysisObj,"analysisEndDt"));
                     JsonArray analysisDetailsList = analysisObj.getAsJsonArray("analysisDetailsList");
                     if(analysisDetailsList.size()>0){
                         for(int j=0; j<analysisDetailsList.size(); j++){
-                            JsonObject analysisDetailsObj = (JsonObject) analysisDetailsList.get(i);
+                            recordData = new RecordData();
+                            recordData.setAnalysisFileNm(jncu.JsonStringNullCheck(analysisObj,"analysisFileNm"));
+                            recordData.setAnalysisFileAppPath(jncu.JsonStringNullCheck(analysisObj,"analysisFileAppPath"));
+                            recordData.setAnalysisId(analysisObj.get("analysisId").getAsInt());
+                            recordData.setAnalysisStartDt(jncu.JsonStringNullCheck(analysisObj,"analysisStartDt"));
+                            recordData.setAnalysisEndDt(jncu.JsonStringNullCheck(analysisObj,"analysisEndDt"));
+
+
+                            JsonObject analysisDetailsObj = (JsonObject) analysisDetailsList.get(j);
+
+
+                            System.out.println("================analysisDetailsObj==========================="+analysisDetailsObj);
                             int termTypeCd =  analysisDetailsObj.get("termTypeCd").getAsInt();
                             if(termTypeCd==200101){
                                 recordData.setTitle("코골이"+(i+j+1));
@@ -188,9 +192,9 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                             }
                         }
                     }
-//                System.out.println("=============레알 analysisStartDt=========="+analysisObj.get("analysisStartDt"));
                 }
             }
+
 
             //test용
 //        dateTxtHeader.setText(transFormat.format(recordStartD)+"===="+recordData.getAnalysisId());
