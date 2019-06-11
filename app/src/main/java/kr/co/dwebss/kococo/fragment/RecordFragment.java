@@ -501,6 +501,7 @@ public class RecordFragment extends Fragment  {
                         JsonArray ansDList = new JsonArray();
                         JsonObject ansd = new JsonObject();
                         for(StartEnd se : snoringTermList) {
+                            Log.v(LOG_TAG2,se.getTerm());
                             ansd = new JsonObject();
                             ansd.addProperty("termTypeCd",200101);
                             ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
@@ -508,6 +509,7 @@ public class RecordFragment extends Fragment  {
                             try {
                                 Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                                 String andRList = gson.toJson(se.printAnalysisRawDataList());
+                                Log.v(LOG_TAG2,andRList);
                                 ansd.addProperty("analysisData", andRList);
 
                             }catch(NullPointerException e){
@@ -516,7 +518,7 @@ public class RecordFragment extends Fragment  {
                             ansDList.add(ansd);
                         }
                         for(StartEnd se : grindingTermList) {
-//                            if(se.end!=0){
+                            Log.v(LOG_TAG2,se.getTerm());
                                 ansd = new JsonObject();
                                 ansd.addProperty("termTypeCd",200102);
                                 ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
@@ -524,16 +526,16 @@ public class RecordFragment extends Fragment  {
                                 try {
                                     Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                                     String andRList = gson.toJson(se.printAnalysisRawDataList());
+                                    Log.v(LOG_TAG2,andRList);
                                     ansd.addProperty("analysisData", andRList);
 
                                 }catch(NullPointerException e){
                                     e.getMessage();
                                 }
                                 ansDList.add(ansd);
-//                            }
                         }
                         for(StartEnd se : osaTermList) {
-//                            if(se.end!=0){
+                            Log.v(LOG_TAG2,se.getTerm());
                                 ansd = new JsonObject();
                                 ansd.addProperty("termTypeCd",200103);
                                 ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
@@ -541,13 +543,13 @@ public class RecordFragment extends Fragment  {
                                 try {
                                     Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                                     String andRList = gson.toJson(se.printAnalysisRawDataList());
+                                    Log.v(LOG_TAG2,andRList);
                                     ansd.addProperty("analysisData", andRList);
 
                                 }catch(NullPointerException e){
                                     e.getMessage();
                                 }
                                 ansDList.add(ansd);
-//                            }
                         }
                         ans.add("analysisDetailsList", ansDList);
                         ansList.add(ans);
@@ -616,31 +618,6 @@ public class RecordFragment extends Fragment  {
                     Log.v(LOG_TAG2,(String.format("%.2f", times)+"s ");
                     */
 
-                    if(maxARD!=null){
-                        if(decibel > maxARD.getDecibel()){
-                            maxARD = new AnalysisRawData(times, amplitude, tmpMaxDb, frequency);
-                        }
-                    }else{
-                        maxARD = new AnalysisRawData(times, amplitude, tmpMaxDb, frequency);
-                        timesForMaxArd = Math.floor(times);
-                    }
-                    if(Math.floor(times) > timesForMaxArd){
-                        //코골이 기록용 vo 생성
-                        if(maxARD.getDecibel()==0){
-                            maxARD.setDecibel(tmpMaxDb);
-                        }
-                        if(snoringTermList.size()>0 && isRecording == true){
-                            snoringTermList.get(snoringTermList.size() - 1).AnalysisRawDataList.add(maxARD);
-                        }
-                        if(osaTermList.size()>0 && isRecording == false && osaStart==true){
-                            osaTermList.get(osaTermList.size() - 1).AnalysisRawDataList.add(maxARD);
-                        }
-                        maxARD = new AnalysisRawData(times, amplitude, decibel, frequency);
-                        timesForMaxArd = Math.floor(times);
-                        Log.v(LOG_TAG2,((int)times+" "+ timesForMaxArd+" "+(int)maxARD.getTimes() +" "+maxARD.getAmplitude() +" "+maxARD.getFrequency()+" "+maxARD.getDecibel())+" "+tmpMaxDb);
-                        tmpMaxDb = 0;
-                        tmpMinDb = 99999;
-                    }
                     //이갈이 음파가 매우 짧기 때문에, 코골이의 로직과 분리해야한다. 코골이는 0.16초 단위로 분석, 이갈이는 0.01초로 분석해야함
                     //코골이의 음파 길이 및 음파가 아닌 경우의 1초 범위까지 기록 하고 있음으로, 코골이가 아닌 경우에 이갈이인지 체크하도록 한다.
                     //이갈이는 1초 이내에 여러번 발생하며, 발생시에 0.02~0.03초의 연속된 짧고 높은 진폭이 발생한다.이 카운트가 1초에 5회 미만인 것만 뽑아낸다. //
@@ -772,6 +749,20 @@ public class RecordFragment extends Fragment  {
                                         snoringTermList.get(snoringTermList.size()-1).chk = snoringDbChkCnt;
                                         snoringTermList.get(snoringTermList.size()-1).positiveCnt = soundStartAndSnroingCnt;
                                         snoringTermList.get(snoringTermList.size()-1).negitiveCnt = soundStartAndSnroingOppCnt;
+                                        if(snoringTermList.get(snoringTermList.size()-1).AnalysisRawDataList!=null &&
+                                                snoringTermList.get(snoringTermList.size()-1).AnalysisRawDataList.size() >0){
+                                            double tmpTimes1 = snoringTermList.get(snoringTermList.size()-1).AnalysisRawDataList.get(
+                                                    snoringTermList.get(snoringTermList.size()-1).AnalysisRawDataList.size()-1
+                                            ).getTimes();
+                                            tmpTimes1 = Math.floor(tmpTimes1);
+                                            double currentTimes1 = Math.floor(times);
+                                            if(currentTimes1-1 == tmpTimes1){
+                                                snoringTermList.get(snoringTermList.size()-1).AnalysisRawDataList.add(maxARD);
+                                            }else if(currentTimes1-2 == tmpTimes1){
+                                                AnalysisRawData tmpD = new AnalysisRawData(currentTimes1-1, maxARD.getAmplitude(), tmpMaxDb, maxARD.getFrequency());
+                                                snoringTermList.get(snoringTermList.size()-1).AnalysisRawDataList.add(tmpD);
+                                            }
+                                        }
                                     }else {
                                         //코골이 카운트가 증가한 적이 없었다.
                                         //코골이 기록 vo 대신 이갈이 기록 vo로 넣는다.
@@ -794,6 +785,18 @@ public class RecordFragment extends Fragment  {
                                             st.chk = secondDecibelAvg-firstDecibelAvg;
                                             st.positiveCnt = continueCntInChkTermForGrinding;
                                             st.negitiveCnt = continueCntInChkTermForGrindingChange;
+                                            if(st.AnalysisRawDataList!=null &&
+                                                    st.AnalysisRawDataList.size() >0){
+                                                double tmpTimes1 = st.AnalysisRawDataList.get(st.AnalysisRawDataList.size()-1).getTimes();
+                                                tmpTimes1 = Math.floor(tmpTimes1);
+                                                double currentTimes1 = Math.floor(times);
+                                                if(currentTimes1-1 == tmpTimes1){
+                                                    st.AnalysisRawDataList.add(maxARD);
+                                                }else if(currentTimes1-2 == tmpTimes1){
+                                                    AnalysisRawData tmpD = new AnalysisRawData(currentTimes1-1, maxARD.getAmplitude(), tmpMaxDb, maxARD.getFrequency());
+                                                    st.AnalysisRawDataList.add(tmpD);
+                                                }
+                                            }
                                             snoringTermList.remove(snoringTermList.size()-1);
                                             grindingTermList.add(st);
                                         }else {
@@ -942,6 +945,43 @@ public class RecordFragment extends Fragment  {
 
                     }
 
+                    if(maxARD!=null){
+                        if(decibel > maxARD.getDecibel()){
+                            maxARD = new AnalysisRawData(times, amplitude, tmpMaxDb, frequency);
+                        }
+                    }else{
+                        maxARD = new AnalysisRawData(times, amplitude, tmpMaxDb, frequency);
+                        timesForMaxArd = Math.floor(times);
+                    }
+                    if(Math.floor(times) > timesForMaxArd){
+                        //코골이 기록용 vo 생성
+                        if(maxARD.getDecibel()==0){
+                            maxARD.setDecibel(tmpMaxDb);
+                        }
+                        if(snoringTermList.size()>0 && isRecording == true){
+                            if(snoringTermList.get(snoringTermList.size() - 1).end!=0){
+                                if(snoringTermList.get(snoringTermList.size() - 1).end > times){
+                                    snoringTermList.get(snoringTermList.size() - 1).AnalysisRawDataList.add(maxARD);
+                                }
+                            }else {
+                                snoringTermList.get(snoringTermList.size() - 1).AnalysisRawDataList.add(maxARD);
+                            }
+                        }
+                        if(osaTermList.size()>0 && isRecording == false && osaStart==true){
+                            if(osaTermList.get(osaTermList.size() - 1).end!=0){
+                                if(osaTermList.get(osaTermList.size() - 1).end > times){
+                                    osaTermList.get(osaTermList.size() - 1).AnalysisRawDataList.add(maxARD);
+                                }
+                            }else {
+                                osaTermList.get(osaTermList.size() - 1).AnalysisRawDataList.add(maxARD);
+                            }
+                        }
+                        maxARD = new AnalysisRawData(times, amplitude, decibel, frequency);
+                        timesForMaxArd = Math.floor(times);
+                        Log.v(LOG_TAG2,((int)times+" "+ timesForMaxArd+" "+(int)maxARD.getTimes() +" "+maxARD.getAmplitude() +" "+maxARD.getFrequency()+" "+maxARD.getDecibel())+" "+tmpMaxDb);
+                        tmpMaxDb = 0;
+                        tmpMinDb = 99999;
+                    }
                 }
                 if (isRecording == true && recodeFlag==false) {
                     Log.v(LOG_TAG2,(calcTime(times)+"("+String.format("%.2f", times) + "s) 녹음 종료 버튼을 눌러서 현재 진행되던 녹음을 종료!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
@@ -972,6 +1012,7 @@ public class RecordFragment extends Fragment  {
                     JsonObject ansd = new JsonObject();
                     for(StartEnd se : snoringTermList) {
                         if(se.end!=0){
+                            Log.v(LOG_TAG2,se.getTerm());
                             ansd = new JsonObject();
                             ansd.addProperty("termTypeCd",200101);
                             ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
@@ -979,6 +1020,7 @@ public class RecordFragment extends Fragment  {
                             try {
                                 Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                                 String andRList = gson.toJson(se.printAnalysisRawDataList());
+                                Log.v(LOG_TAG2,andRList);
                                 ansd.addProperty("analysisData", andRList);
 
                             }catch(NullPointerException e){
@@ -991,6 +1033,7 @@ public class RecordFragment extends Fragment  {
                     }
                     for(StartEnd se : grindingTermList) {
                         if(se.end!=0){
+                            Log.v(LOG_TAG2,se.getTerm());
                             ansd = new JsonObject();
                             ansd.addProperty("termTypeCd",200102);
                             ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
@@ -998,6 +1041,7 @@ public class RecordFragment extends Fragment  {
                             try {
                                 Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                                 String andRList = gson.toJson(se.printAnalysisRawDataList());
+                                Log.v(LOG_TAG2,andRList);
                                 ansd.addProperty("analysisData", andRList);
 
                             }catch(NullPointerException e){
@@ -1010,6 +1054,7 @@ public class RecordFragment extends Fragment  {
                     }
                     for(StartEnd se : osaTermList) {
                         if(se.end!=0){
+                            Log.v(LOG_TAG2,se.getTerm());
                             ansd = new JsonObject();
                             ansd.addProperty("termTypeCd",200103);
                             ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
@@ -1017,6 +1062,7 @@ public class RecordFragment extends Fragment  {
                             try {
                                 Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                                 String andRList = gson.toJson(se.printAnalysisRawDataList());
+                                Log.v(LOG_TAG2,andRList);
                                 ansd.addProperty("analysisData", andRList);
 
                             }catch(NullPointerException e){
