@@ -14,7 +14,7 @@
     <TextView
         android:id="@+id/recordNameText"
         style="@style/Subtitle1"
-        android:layout_width="100dp"
+        android:layout_width="wrap_content"
         android:layout_height="18dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
@@ -34,8 +34,8 @@
         android:scaleType="fitXY"
         android:src="@drawable/baseline_play_arrow_white_48dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.898"
-        app:layout_constraintStart_toEndOf="@+id/recordNameText"
+        app:layout_constraintHorizontal_bias="0.882"
+        app:layout_constraintStart_toStartOf="@+id/recordNameText"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
@@ -49,8 +49,8 @@
         android:scaleType="fitXY"
         android:src="@drawable/baseline_report_white_48dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/recordPlay"
+        app:layout_constraintHorizontal_bias="0.978"
+        app:layout_constraintStart_toStartOf="@+id/recordNameText"
         app:layout_constraintTop_toTopOf="parent" />
 
 

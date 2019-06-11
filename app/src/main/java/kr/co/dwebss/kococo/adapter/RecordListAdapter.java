@@ -88,6 +88,7 @@ public class RecordListAdapter extends BaseAdapter {
         // 아이템 내 각 위젯에 데이터 반영
 //        iconImageView.setImageDrawable(listViewItem.getIcon());
         titleTextView.setText(listViewItem.getTitle());
+        System.out.println("===========listViewItem.getTitle()==========="+listViewItem.getTitle());
 //        descTextView.setText(listViewItem.getDesc());
 
         playBtnFlag = false;
@@ -184,8 +185,8 @@ public class RecordListAdapter extends BaseAdapter {
     // 아이템 데이터 추가를 위한 함수. 개발자가 원하는대로 작성 가능.
     public void addItem(
     //            Drawable icon, String title,
-    RecordData date) {
-        listViewItemList.add(date);
+    RecordData data) {
+        listViewItemList.add(data);
     }
 
     public void playMp(int startTime, int endTime , String filePath, Context context,ImageButton playBtn) throws IOException {
