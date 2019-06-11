@@ -49,6 +49,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -58,7 +59,9 @@ import java.util.List;
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.adapter.RecordListAdapter;
 import kr.co.dwebss.kococo.model.RecordData;
+import kr.co.dwebss.kococo.util.DateFormatter;
 import kr.co.dwebss.kococo.util.JsonNullCheckUtil;
+import kr.co.dwebss.kococo.util.MediaPlayerUtility;
 import kr.co.dwebss.kococo.util.MyXAxisValueFormatter;
 
 public class ResultActivity extends AppCompatActivity implements OnSeekBarChangeListener {
@@ -87,6 +90,8 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
     List<BarEntry> entries = new ArrayList<>();
     long referenceTimestamp; // minimum timestamp in your data set;
 
+    MediaPlayerUtility mpu = new MediaPlayerUtility();
+    DateFormatter df = new DateFormatter();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,7 +112,6 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 //        fragmentTransaction.remove(fragment);
 //        fragmentTransaction.commit();
 
-
         //데이터 수신
         Intent intent = getIntent();
         if(getIntent().hasExtra("responseData")){
@@ -122,7 +126,6 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                 }
             });
 
-
             //상단 헤더 날짜 텍스트 날짜가 넘어가면 시작~종료 아니면 그냥 시작 날짜로 보여준다.
             TextView dateTxtHeader = (TextView) findViewById(R.id.date_txt_header);
             Date from = new Date();
@@ -130,6 +133,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             SimpleDateFormat transFormat = new SimpleDateFormat("yyyy년 MM월 dd일");
             SimpleDateFormat stringtoDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             SimpleDateFormat DateTimeToStringFormat = new SimpleDateFormat("HH:mm");
+            SimpleDateFormat DateSecondToStringFormat = new SimpleDateFormat("HH:mm:ss");
             try {
                 recordStartD =  stringtoDateFormat.parse(responseData.get("recordStartD").toString().replace("\"",""));
                 recordEndD =  stringtoDateFormat.parse(responseData.get("recordEndD").toString().replace("\"",""));
@@ -143,8 +147,6 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-
-
 
             if(recordStartD.equals(recordEndD)){
                 dateTxtHeader.setText(transFormat.format(recordStartD));
@@ -175,33 +177,43 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                             recordData.setAnalysisStartDt(jncu.JsonStringNullCheck(analysisObj,"analysisStartDt"));
                             recordData.setAnalysisEndDt(jncu.JsonStringNullCheck(analysisObj,"analysisEndDt"));
 
-
                             JsonObject analysisDetailsObj = (JsonObject) analysisDetailsList.get(j);
-
-
                             System.out.println("================analysisDetailsObj==========================="+analysisDetailsObj);
                             int termTypeCd =  analysisDetailsObj.get("termTypeCd").getAsInt();
-                            if(termTypeCd==200101){
-                                recordData.setTitle("코골이"+(i+j+1));
-                            }else if(termTypeCd==200102){
-                                recordData.setTitle("이갈이"+(i+j+1));
-                            }else{
-                                recordData.setTitle("무호흡"+(i+j+1));
-                            }
                             recordData.setAnalysisDetailsId(analysisDetailsObj.get("analysisDetailsId").getAsInt());
                             recordData.setTermStartDt(analysisDetailsObj.get("termStartDt").toString().replace("\"",""));
                             recordData.setTermEndDt(analysisDetailsObj.get("termEndDt").toString().replace("\"",""));
                             recordData.setTermTypeCd(termTypeCd);
+                            //증상 시작시간(HH:mm:ss) ~ 종료시간(HH:mm:ss) 으로 표기
+                            try {
+                            if(termTypeCd==200101){
+                                recordData.setTitle("코골이 :"+df.returnStringISO8601ToHHmmssFormat(recordData.getTermStartDt())
+                                        +" ~ "+ df.returnStringISO8601ToHHmmssFormat(recordData.getTermEndDt()));
+                            }else if(termTypeCd==200102){
+                                recordData.setTitle("이갈이 :"+df.returnStringISO8601ToHHmmssFormat(recordData.getTermStartDt())
+                                        +" ~ "+ df.returnStringISO8601ToHHmmssFormat(recordData.getTermEndDt()));
+                            }else{
+                                recordData.setTitle("무호흡 : "+df.returnStringISO8601ToHHmmssFormat(recordData.getTermStartDt())
+                                        +" ~ "+ df.returnStringISO8601ToHHmmssFormat(recordData.getTermEndDt()));
+                            }
+                            System.out.println("========================recordData===getTitle============="+recordData.getTitle());
+
                             adapter.addItem(recordData) ;
 
+                            //데이터를 넣을때는 발생시간 - 최초시간을 넣어야함
                             long date = 0;
-                            try {
                                 date = stringtoDateTimeFormat.parse(recordData.getTermStartDt()).getTime();
-                                System.out.println("==========date========="+date);
-                                System.out.println("====date==Date========="+new Date(date));
 
                                 //데이터 넣을 시에 재생 파일 패스 및 재생 구간을 넣으면된다.
-                                entries.add(new BarEntry((float)(date-referenceTimestamp), 50,"데이터넣ㅎ을 수있음 "+recordData.getTitle()));
+                                JsonObject recordEntryData = new JsonObject();
+                                Date analysisStartDt =  stringtoDateTimeFormat.parse(recordData.getAnalysisStartDt());
+                                Date termStartDt =  stringtoDateTimeFormat.parse(recordData.getTermStartDt());
+                                Date termEndDt =  stringtoDateTimeFormat.parse(recordData.getTermEndDt());
+
+                                recordEntryData.addProperty("filePath",recordData.getAnalysisFileAppPath()+"/"+recordData.getAnalysisFileNm());
+                                recordEntryData.addProperty("termStartDt",termStartDt.getTime()-analysisStartDt.getTime());
+                                recordEntryData.addProperty("termEndDt",termEndDt.getTime()-analysisStartDt.getTime());
+                                entries.add(new BarEntry((float)(date-referenceTimestamp), 50, recordEntryData));
 //                                entries.add(new BarEntry((float)date, 50));
 
 
@@ -210,6 +222,8 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                             } catch (ParseException e) {
                                 e.printStackTrace();
                             }
+
+
                         }
                     }
                 }
@@ -252,6 +266,13 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                 @Override
                 public void onValueSelected(Entry e, Highlight h) {
                     System.out.println("=========클릭했다~~~"+e.getData());
+                    //데이터 넣을 시에 재생 파일 패스 및 재생 구간을 넣으면된다.
+                    JsonObject graphData= (JsonObject) e.getData();
+                    try {
+                        mpu.playMp(graphData.get("termStartDt").getAsInt(),graphData.get("termEndDt").getAsInt(),graphData.get("filePath").getAsString(),getApplicationContext());
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
 
                 }
                 @Override
