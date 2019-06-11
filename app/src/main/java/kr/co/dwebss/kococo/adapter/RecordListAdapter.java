@@ -51,12 +51,23 @@ public class RecordListAdapter extends BaseAdapter {
     Boolean playBtnFlag = false;
     Boolean isPlaying = false;
     int playPosition;
+    Context context;
+    ViewGroup viewGroup;
 
     //재생할때 필요한
     MediaPlayer mediaPlayer = new MediaPlayer();
     CountDownTimer cdt;
+
+    private GraphClickListener graphClickListener;
+
     // ListViewAdapter의 생성자
-    public RecordListAdapter() {
+    public RecordListAdapter(Context context, GraphClickListener graphClickListener) {
+        this.context = context;
+        this.graphClickListener = graphClickListener;
+    }
+
+    public interface GraphClickListener{
+        void clickBtn();
     }
 
     // Adapter에 사용되는 데이터의 개수를 리턴. : 필수 구현
@@ -70,6 +81,7 @@ public class RecordListAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         final int pos = position;
         final Context context = parent.getContext();
+        viewGroup = parent;
 
         // "listview_item" Layout을 inflate하여 convertView 참조 획득.
         if (convertView == null) {
@@ -101,7 +113,8 @@ public class RecordListAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
 //                Toast.makeText(context, "파일정보 : "+position+" : "+listViewItem.getAnalysisFileAppPath()+"/"+listViewItem.getAnalysisFileNm(), Toast.LENGTH_SHORT).show();
-
+                //후에 액티비티에 접근할때 사용한다.
+                graphClickListener.clickBtn();
                 //재생버튼 누를 시 정지버튼으로 변경하는 메소드
                 //재생중이거나 해당버튼이 재생position 값과 다른 경우에만 초기화를 해줌
                 if(isPlaying && playPosition != position){
@@ -189,6 +202,8 @@ public class RecordListAdapter extends BaseAdapter {
         listViewItemList.add(data);
     }
 
+
+
     public void playMp(int startTime, int endTime , String filePath, Context context,ImageButton playBtn) throws IOException {
 //        mediaPlayer = MediaPlayer.create(context, Uri.parse("/data/data/kr.co.dwebss.kococo/files/rec_data/23/snoring-20191029_0410-29_0410_1559113854914.wav"));
 //        mediaPlayer = MediaPlayer.create(context, R.raw.queen);
@@ -233,6 +248,48 @@ public class RecordListAdapter extends BaseAdapter {
         playBtn.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
         playBtnFlag = false;
         isPlaying=false;
+    }
+
+
+
+    public void playActivityMp(int position,int startTime, int endTime , String filePath, Context context)throws IOException {
+//        View v = viewGroup.getChildAt(position);
+//        ImageButton playBtn = (ImageButton) v.findViewById(R.id.recordPlay);
+
+        View v;
+        ImageButton playBtn;
+
+        for(int i=0; i<getCount();i++){
+            v = viewGroup.getChildAt(i);
+            RecordData rd =listViewItemList.get(i);
+            System.out.println("=============rd.getAnalysisDetailsId()======="+rd.getAnalysisDetailsId()+"====position=="+position);
+            if(rd.getAnalysisDetailsId()==position){
+                playBtn = (ImageButton) v.findViewById(R.id.recordPlay);
+                playBtnFlag = true;
+                playBtn.setImageResource(R.drawable.baseline_pause_white_48dp);
+                playMp(startTime, endTime , filePath, context, playBtn);
+                break;
+            }
+        }
+    }
+
+    public void stopActivityMp(int position){
+        View v;
+        ImageButton playBtn;
+        for(int i=0; i<getCount();i++){
+            v = viewGroup.getChildAt(i);
+            RecordData rd =listViewItemList.get(i);
+            if(rd.getAnalysisDetailsId()==position){
+                playBtn = (ImageButton) v.findViewById(R.id.recordPlay);
+                playBtnFlag = true;
+                stopMp(playBtn);
+                break;
+            }
+        }
+    }
+
+    public boolean getPlayBtnFlag(){
+        return playBtnFlag;
     }
 
 }
