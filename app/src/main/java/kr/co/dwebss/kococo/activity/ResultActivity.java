@@ -45,6 +45,7 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -90,7 +91,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
     List<BarEntry> entries = new ArrayList<>();
     long referenceTimestamp; // minimum timestamp in your data set;
 
-    MediaPlayerUtility mpu = new MediaPlayerUtility();
+    MediaPlayerUtility mpu;
     DateFormatter df = new DateFormatter();
 
     int playingDetailId;
@@ -100,6 +101,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
         setTheme(R.style.AppTheme);
         //세로모드에서 가로모드로 전환 시 onCreate함수가 다시 호출
         setContentView(R.layout.activity_result);
+        mpu = new MediaPlayerUtility();
 
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         float density = metrics.density;
@@ -223,8 +225,24 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                                 recordEntryData.addProperty("termStartDt",termStartDt.getTime()-analysisStartDt.getTime());
                                 recordEntryData.addProperty("termEndDt",termEndDt.getTime()-analysisStartDt.getTime());
                                 recordEntryData.addProperty("analysisDetailsId",recordData.getAnalysisDetailsId());
-                                entries.add(new BarEntry((float)(date-referenceTimestamp), 50, recordEntryData));
+
+                                if(analysisDetailsObj.has("analysisData")){
+                                    String analysisRawStr =analysisDetailsObj.get("analysisData").getAsString();
+                                    JsonArray analysisRawDataArr = new JsonParser().parse(analysisRawStr).getAsJsonArray();
+                                    if(analysisRawDataArr.size()>0){
+                                        for(int k =0; k<analysisRawDataArr.size(); k++){
+                                            JsonObject analysisRawData = (JsonObject) analysisRawDataArr.get(k);
+                                            //데이터 넣는 부분
+                                            entries.add(new BarEntry(analysisRawData.get("TIME").getAsInt()*1000, analysisRawData.get("DB").getAsFloat(), recordEntryData));
+                                        }
+                                    }
+                                }
+                                //데이터 넣는 부분
+//                                entries.add(new BarEntry((float)(date-referenceTimestamp), 50, recordEntryData));
 //                                entries.add(new BarEntry((float)date, 50));
+
+
+//                                {"analysisId":225,"analysisDetailsId":241,"termTypeCd":200101,"termStartDt":"2019-06-11T15:04:35","termEndDt":"2019-06-11T15:04:37","claimYn":"N","analysisData":"[{\"TIME\":\"46\",\"DB\":37.19878832839144,\"HZ\":112.8,\"AMP\":2271},{\"TIME\":\"47\",\"DB\":25.64299905835125,\"HZ\":105.3,\"AMP\":368},{\"TIME\":\"49\",\"DB\":27.264555962474574,\"HZ\":337.5,\"AMP\":422},{\"TIME\":\"50\",\"DB\":38.348498303132345,\"HZ\":1192.1,\"AMP\":4468},{\"TIME\":\"51\",\"DB\":24.559377698807996,\"HZ\":111.8,\"AMP\":1036}]"}
 
 
                                 kococoTerm += (stringtoDateTimeFormat.parse(recordData.getTermEndDt()).getTime()
@@ -309,9 +327,12 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             xAxis.setTextColor(Color.WHITE);
             xAxis.setValueFormatter(xAxisFormatter);
 
+
             //시작과 끝점을 정해줘야 그래프가 제대로잘 나옴
             xAxis.setAxisMinimum(0);
             xAxis.setAxisMaximum((float)recordEndDT.getTime()-referenceTimestamp);
+
+            System.out.println("=========recordEndDT.getTime()-referenceTimestamp==============="+(recordEndDT.getTime()-referenceTimestamp));
 
             chart.getAxisLeft().setDrawGridLines(false);
             //Y좌표 폰트
@@ -334,6 +355,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 //            set1.setDrawValues(false);
             set1.setColors(ColorTemplate.COLORFUL_COLORS);
             set1.setDrawValues(true);
+            set1.getValueTextColor(Color.WHITE);
 
             ArrayList<IBarDataSet> dataSets = new ArrayList<>();
             dataSets.add(set1);
@@ -343,6 +365,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             data.setBarWidth(100f);
             chart.setData(data);
             chart.setFitBars(true);
+
             chart.invalidate();
 
 
