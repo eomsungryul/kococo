@@ -67,7 +67,9 @@ public class MediaPlayerUtility {
     }
 
     public void endMp(){
-        cdt.cancel();
+        if(cdt!=null){
+            cdt.cancel();
+        }
         mediaPlayer.release();
         mediaPlayer=null;
     }
