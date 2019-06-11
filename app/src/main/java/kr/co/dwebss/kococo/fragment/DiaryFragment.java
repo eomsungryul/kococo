@@ -85,7 +85,8 @@ public class DiaryFragment extends Fragment {
                 @Override
                 public void onFailure(Call<JsonObject> call, Throwable t) {
 //                System.out.println(" ========================Throwable: "+ t);
-                    Toast.makeText(v.getContext(),R.string.error_server_getRecordList,Toast.LENGTH_LONG).show();
+//                    Toast.makeText(v.getContext(),R.string.error_server_getRecordList"+t,Toast.LENGTH_LONG).show();
+                    Toast.makeText(v.getContext(),t.getMessage(),Toast.LENGTH_LONG).show();
                 }
             });
         }
