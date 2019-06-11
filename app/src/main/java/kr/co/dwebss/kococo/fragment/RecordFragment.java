@@ -626,6 +626,9 @@ public class RecordFragment extends Fragment  {
                     }
                     if(Math.floor(times) > timesForMaxArd){
                         //코골이 기록용 vo 생성
+                        if(maxARD.getDecibel()==0){
+                            maxARD.setDecibel(tmpMaxDb);
+                        }
                         if(snoringTermList.size()>0 && isRecording == true){
                             snoringTermList.get(snoringTermList.size() - 1).AnalysisRawDataList.add(maxARD);
                         }
