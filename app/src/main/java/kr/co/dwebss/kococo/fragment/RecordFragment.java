@@ -84,8 +84,8 @@ public class RecordFragment extends Fragment  {
     private static final int REQUEST_CAMERA = 1;
 
     //녹음 관련
-    private String LOG_TAG2 = "Audio_Recording";
-    private String LOG_TAG3 = "Audio_Recording2";
+    private String LOG_TAG2 = "Audio_Recording2";
+    private String LOG_TAG3 = "Audio_Recording3";
     int state = 0;
     private boolean mShouldContinue = true;
     private AudioCalculator audioCalculator;
@@ -941,6 +941,30 @@ public class RecordFragment extends Fragment  {
                     }else {
                         //System.out.println(times);
                     }
+
+                    //무호흡의 앞뒤 구간에 코골이가 있는지 체크해서 없으면 삭제
+                    if(osaTermList.size()>0){
+                        if(snoringTermList.size()<2){
+                            //코골이가 2개가 아니고 무호흡 종료 시간으로 부터 5초가 지났으면 일단 삭제
+                            double tmpOsaEndTimes = osaTermList.get(osaTermList.size()-1).end;
+                            if(times - tmpOsaEndTimes > 5) {
+                                osaTermList.remove(osaTermList.get(osaTermList.size() - 1));
+                            }
+                        }else{
+                            //코골이가 2개 이상이라면 무호흡의 시작과 끝에 코골이 분석이 걸리는지 체크
+                            double tmpOsaStartTimes = osaTermList.get(osaTermList.size()-1).start;
+                            double tmpOsaEndTimes = osaTermList.get(osaTermList.size()-1).end;
+                            double tmpBeforeSnoringTImes = snoringTermList.get(snoringTermList.size()-1).end;
+                            double tmpAfterSnoringTImes = snoringTermList.get(snoringTermList.size()-1).start;
+                            if(tmpOsaStartTimes - tmpBeforeSnoringTImes < 5 && tmpAfterSnoringTImes - tmpOsaEndTimes < 5 ){
+                                //무호흡 시작시간 5초 이내에 코골이가 종료가 발생하고, 무호흡 종료시간 5초 이내에 코골이가 시작이 발생했어야 한다.
+                            }else{
+                                //아니면 삭제
+                                osaTermList.remove(osaTermList.get(osaTermList.size()-1));
+                            }
+                        }
+
+                    }
                     SleepCheck.curTermTime = times;
                     SleepCheck.curTermDb = decibel;
                     SleepCheck.curTermAmp = amplitude;
@@ -981,19 +1005,23 @@ public class RecordFragment extends Fragment  {
                     JsonArray ansDList = new JsonArray();
                     JsonObject ansd = new JsonObject();
                     for(StartEnd se : snoringTermList) {
-                        ansd = new JsonObject();
-                        ansd.addProperty("termTypeCd",200101);
-                        ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
-                        ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
-                        try {
-                            Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-                            String andRList = gson.toJson(se.printAnalysisRawDataList());
-                            ansd.addProperty("analysisData", andRList);
+                        if(se.end!=0){
+                            ansd = new JsonObject();
+                            ansd.addProperty("termTypeCd",200101);
+                            ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
+                            ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+                            try {
+                                Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+                                String andRList = gson.toJson(se.printAnalysisRawDataList());
+                                ansd.addProperty("analysisData", andRList);
 
-                        }catch(NullPointerException e){
-                            e.getMessage();
+                            }catch(NullPointerException e){
+                                e.getMessage();
+                            }
+                            ansDList.add(ansd);
+                        }else{
+                            snoringTermList.remove(se);
                         }
-                        ansDList.add(ansd);
                     }
                     for(StartEnd se : grindingTermList) {
                         if(se.end!=0){
@@ -1010,6 +1038,8 @@ public class RecordFragment extends Fragment  {
                                 e.getMessage();
                             }
                             ansDList.add(ansd);
+                        }else{
+                            grindingTermList.remove(se);
                         }
                     }
                     for(StartEnd se : osaTermList) {
@@ -1027,6 +1057,8 @@ public class RecordFragment extends Fragment  {
                                 e.getMessage();
                             }
                             ansDList.add(ansd);
+                        }else{
+                            osaTermList.remove(se);
                         }
                     }
                     ans.add("analysisDetailsList", ansDList);
