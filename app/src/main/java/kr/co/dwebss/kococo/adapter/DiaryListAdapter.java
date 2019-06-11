@@ -22,32 +22,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Map;
-import java.util.TreeMap;
 
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.activity.ResultActivity;
 import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.model.Record;
-import kr.co.dwebss.kococo.model.RecordData;
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -152,7 +137,7 @@ public class DiaryListAdapter extends BaseAdapter {
         if(resultDataList.size()>0){
             for(int i=0; i<resultDataList.size(); i++){
                 JsonObject recordObj = (JsonObject) resultDataList.get(i);
-                System.out.println("=====Diary=======addItems======recordObj=================="+recordObj);
+//                System.out.println("=====Diary=======addItems======recordObj=================="+recordObj);
                 item = new Record(
                         recordObj.get("recordId").getAsInt()
                         ,recordObj.get("recordStartD").toString()
@@ -161,9 +146,6 @@ public class DiaryListAdapter extends BaseAdapter {
                         ,recordObj.get("recordEndDt").toString()
                 );
                 listViewItemList.add(item);
-
-//                {"recordId":41,"consultingYn":"N","consultingReplyYn":"N","analysisList":[],"_links":{"self":{"href":"http://192.168.0.2:8080/api/record/41"},"record":{"href":"http://192.168.0.2:8080/api/record/41"},"admin":{"href":"http://192.168.0.2:8080/api/record/41/admin"},"sleepStatusCd":{"href":"http://192.168.0.2:8080/api/record/41/sleepStatusCd"},"user":{"href":"http://192.168.0.2:8080/api/record/41/user"}}}
-
             }
         }
     }

@@ -20,7 +20,6 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.CountDownTimer;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -95,7 +94,7 @@ public class RecordListAdapter extends BaseAdapter {
         //lisrViews내의 아이콘 버튼 참조 및 onclick추가
         ImageButton playBtn = (ImageButton) convertView.findViewById(R.id.recordPlay);
 
-        System.out.println("===============이게 왜?0000====filePath = :"+listViewItem.getAnalysisFileAppPath()+"/"+listViewItem.getAnalysisFileNm());
+        System.out.println("===================filePath = :"+listViewItem.getAnalysisFileAppPath()+"/"+listViewItem.getAnalysisFileNm());
 
         playBtn.setOnClickListener(new Button.OnClickListener() {
             @Override

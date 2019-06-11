@@ -12,15 +12,16 @@ import android.widget.ListView;
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.adapter.DiaryListAdapter;
 import kr.co.dwebss.kococo.adapter.SettingListAdapter;
+import kr.co.dwebss.kococo.util.FindAppIdUtil;
 
 public class SettingFragment extends Fragment {
     private String LOG_TAG = "SettingFragment";
-
     Resources res;
 
     public SettingFragment() {
         // Required empty public constructor
     }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -36,15 +37,16 @@ public class SettingFragment extends Fragment {
         //res/string.xml을 사용하기 위한
         res = getResources();
 
+
         // Adapter 생성
-        SettingListAdapter adapter = new SettingListAdapter() ;
+        SettingListAdapter adapter = new SettingListAdapter(getContext()) ;
         //listView 생성
         ListView listview = (ListView) v.findViewById(R.id.settingListview);
         listview.setAdapter(adapter);
         // 첫 번째 아이템 추가.
         adapter.addItem(res.getString(R.string.profile),1) ;
 
-        SettingListAdapter adapter2 = new SettingListAdapter() ;
+        SettingListAdapter adapter2 = new SettingListAdapter(getContext()) ;
         ListView listview2 = (ListView) v.findViewById(R.id.settingListview2);
         listview2.setAdapter(adapter2);
         adapter2.addItem(res.getString(R.string.expertConsultationHistory),2) ;
@@ -52,7 +54,6 @@ public class SettingFragment extends Fragment {
         // 두 번째 아이템 추가.
 //        adapter.addItem(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_36dp),
 //                "Circle", "Account Circle Black 36dp") ;
-
         return v;
     }
 

@@ -89,8 +89,6 @@ public class DiaryFragment extends Fragment {
                 }
             });
         }
-
-
         return v;
     }
 

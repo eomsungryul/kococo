@@ -16,23 +16,22 @@
 package kr.co.dwebss.kococo.adapter;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.constraint.ConstraintLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 
 import kr.co.dwebss.kococo.R;
-import kr.co.dwebss.kococo.activity.ResultActivity;
 import kr.co.dwebss.kococo.http.ApiService;
-import kr.co.dwebss.kococo.model.Record;
 import kr.co.dwebss.kococo.model.Setting;
+import kr.co.dwebss.kococo.util.FindAppIdUtil;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -42,15 +41,16 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class SettingListAdapter extends BaseAdapter {
     // Adapter에 추가된 데이터를 저장하기 위한 ArrayList
     private ArrayList<Setting> listViewItemList = new ArrayList<Setting>() ;
-    Boolean playBtnFlag = false;
 
     Retrofit retrofit;
     ApiService apiService;
-
+    String userAppId;
     Setting listViewItem;
 
     // ListViewAdapter의 생성자
-    public SettingListAdapter() {
+    public SettingListAdapter(Context context) {
+        FindAppIdUtil fau = new FindAppIdUtil();
+        userAppId=fau.getAppid(context);
     }
 
     // Adapter에 사용되는 데이터의 개수를 리턴. : 필수 구현
@@ -64,6 +64,7 @@ public class SettingListAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         final int pos = position;
         final Context context = parent.getContext();
+
 
         // "listview_item" Layout을 inflate하여 convertView 참조 획득.
         if (convertView == null) {
@@ -93,23 +94,35 @@ public class SettingListAdapter extends BaseAdapter {
         diaryRow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getRecord(context,position);
+
+                if(position==0){
+                    //프로필 페이지
+                    Toast.makeText(context,"페이지 준비중입니다. ",Toast.LENGTH_SHORT).show();
+
+                }else if(position==1){
+                    //전문가 상담내역 페이지
+                    Toast.makeText(context,"페이지 준비중입니다. ",Toast.LENGTH_SHORT).show();
+
+                }else if(position==2){
+                    //사용자 신고 내역
+                    Toast.makeText(context,"준비중입니다. ",Toast.LENGTH_SHORT).show();
+//                    getClaimList(context,userAppId);
+                }
+
+
+
+
             }
         });
 
         return convertView;
     }
 
-    private void getRecord(Context context,int position) {
-        Record data = (Record) getItem(position);
-        apiService.getRecord(data.getRecordId()).enqueue(new Callback<JsonObject>() {
+    private void getClaimList(Context context,String userAppId) {
+        apiService.getClaimList(userAppId).enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                System.out.println(data.getRecordId()+" ========================response: "+response.body());
-                //창 띄우기
-                Intent intent = new Intent(context, ResultActivity.class);
-                intent.putExtra("responseData",response.body().toString()); /*송신*/
-                context.startActivity(intent);
+                System.out.println(userAppId+" =============getClaimList===========response: "+response.body());
             }
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {
@@ -117,6 +130,7 @@ public class SettingListAdapter extends BaseAdapter {
             }
         });
     }
+
 
     // 지정한 위치(position)에 있는 데이터와 관계된 아이템(row)의 ID를 리턴. : 필수 구현
     @Override
