@@ -725,6 +725,10 @@ public class RecordFragment extends Fragment  {
                         }else {
                             //소리가 발생하지 않았으면, 현재 코골이 음파 발생중인지 체크 한다.
                             if(soundStartInRecording==true) {
+                                if(snoringTermList == null || snoringTermList.size()==0){
+                                    soundStartInRecording = false;
+                                    continue;
+                                }
                                 //음파 진행 중이라면, 지금 체크중인 체크 시작시간이 1초를 넘었는지 체크한다.
                                 if(times-snoringTermList.get(snoringTermList.size()-1).start>0.16*7){
                                     //음파시작시간과는 1초가 벌어졌다면 , 분석을 중단하고, 이후 코골이 발생 카운트를 체크하여 기록한다.
