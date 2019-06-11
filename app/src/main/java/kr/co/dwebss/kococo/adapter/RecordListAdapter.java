@@ -58,6 +58,8 @@ public class RecordListAdapter extends BaseAdapter {
     MediaPlayer mediaPlayer = new MediaPlayer();
     CountDownTimer cdt;
 
+    int analysisDetailsId;
+
     private GraphClickListener graphClickListener;
 
     // ListViewAdapter의 생성자
@@ -252,20 +254,35 @@ public class RecordListAdapter extends BaseAdapter {
 
 
 
-    public void playActivityMp(int position,int startTime, int endTime , String filePath, Context context)throws IOException {
+    public void playActivityMp(int adi,int startTime, int endTime , String filePath, Context context)throws IOException {
 //        View v = viewGroup.getChildAt(position);
 //        ImageButton playBtn = (ImageButton) v.findViewById(R.id.recordPlay);
 
         View v;
         ImageButton playBtn;
-
+        if(isPlaying && analysisDetailsId != adi){
+            //재생 중지 버튼
+            for(int i=0; i<getCount();i++){
+                View v2 = viewGroup.getChildAt(i);
+                ImageButton playBtn2 = (ImageButton) v2.findViewById(R.id.recordPlay);
+                playBtn2.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
+            }
+            if(mediaPlayer.isPlaying()){
+                mediaPlayer.stop();
+                mediaPlayer.reset();
+            }
+            cdt.cancel();
+            playBtnFlag = false;
+            isPlaying = false;
+        }
         for(int i=0; i<getCount();i++){
             v = viewGroup.getChildAt(i);
             RecordData rd =listViewItemList.get(i);
-            System.out.println("=============rd.getAnalysisDetailsId()======="+rd.getAnalysisDetailsId()+"====position=="+position);
-            if(rd.getAnalysisDetailsId()==position){
+            System.out.println("=============rd.getAnalysisDetailsId()======="+rd.getAnalysisDetailsId()+"====position=="+adi);
+            if(rd.getAnalysisDetailsId()==adi){
                 playBtn = (ImageButton) v.findViewById(R.id.recordPlay);
                 playBtnFlag = true;
+                analysisDetailsId = adi;
                 playBtn.setImageResource(R.drawable.baseline_pause_white_48dp);
                 playMp(startTime, endTime , filePath, context, playBtn);
                 break;

@@ -355,7 +355,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 //            set1.setDrawValues(false);
             set1.setColors(ColorTemplate.COLORFUL_COLORS);
             set1.setDrawValues(true);
-            set1.getValueTextColor(Color.WHITE);
+            set1.setValueTextColor(Color.WHITE);
 
             ArrayList<IBarDataSet> dataSets = new ArrayList<>();
             dataSets.add(set1);
