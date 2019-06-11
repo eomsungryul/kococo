@@ -501,55 +501,67 @@ public class RecordFragment extends Fragment  {
                         JsonArray ansDList = new JsonArray();
                         JsonObject ansd = new JsonObject();
                         for(StartEnd se : snoringTermList) {
-                            Log.v(LOG_TAG2,se.getTerm());
-                            ansd = new JsonObject();
-                            ansd.addProperty("termTypeCd",200101);
-                            ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
-                            ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
-                            try {
-                                Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-                                String andRList = gson.toJson(se.printAnalysisRawDataList());
-                                Log.v(LOG_TAG2,andRList);
-                                ansd.addProperty("analysisData", andRList);
+                            if(se.end!=0 && se.end>se.start){
+                                Log.v(LOG_TAG2,se.getTerm());
+                                ansd = new JsonObject();
+                                ansd.addProperty("termTypeCd",200101);
+                                ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
+                                ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+                                try {
+                                    Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+                                    String andRList = gson.toJson(se.printAnalysisRawDataList());
+                                    Log.v(LOG_TAG2,andRList);
+                                    ansd.addProperty("analysisData", andRList);
 
-                            }catch(NullPointerException e){
-                                e.getMessage();
+                                }catch(NullPointerException e){
+                                    e.getMessage();
+                                }
+                                ansDList.add(ansd);
+                            }else{
+                                snoringTermList.remove(snoringTermList.size()-1);
                             }
-                            ansDList.add(ansd);
                         }
                         for(StartEnd se : grindingTermList) {
-                            Log.v(LOG_TAG2,se.getTerm());
-                                ansd = new JsonObject();
-                                ansd.addProperty("termTypeCd",200102);
-                                ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
-                                ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
-                                try {
-                                    Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-                                    String andRList = gson.toJson(se.printAnalysisRawDataList());
-                                    Log.v(LOG_TAG2,andRList);
-                                    ansd.addProperty("analysisData", andRList);
+                            if(se.end!=0 && se.end>se.start){
+                                Log.v(LOG_TAG2,se.getTerm());
+                                    ansd = new JsonObject();
+                                    ansd.addProperty("termTypeCd",200102);
+                                    ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
+                                    ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+                                    try {
+                                        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+                                        String andRList = gson.toJson(se.printAnalysisRawDataList());
+                                        Log.v(LOG_TAG2,andRList);
+                                        ansd.addProperty("analysisData", andRList);
 
-                                }catch(NullPointerException e){
-                                    e.getMessage();
-                                }
-                                ansDList.add(ansd);
+                                    }catch(NullPointerException e){
+                                        e.getMessage();
+                                    }
+                                    ansDList.add(ansd);
+                            }else{
+                                grindingTermList.remove(grindingTermList.size()-1);
+                            }
                         }
                         for(StartEnd se : osaTermList) {
-                            Log.v(LOG_TAG2,se.getTerm());
-                                ansd = new JsonObject();
-                                ansd.addProperty("termTypeCd",200103);
-                                ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
-                                ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
-                                try {
-                                    Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-                                    String andRList = gson.toJson(se.printAnalysisRawDataList());
-                                    Log.v(LOG_TAG2,andRList);
-                                    ansd.addProperty("analysisData", andRList);
+                            if(se.end!=0 && se.end>se.start){
+                                Log.v(LOG_TAG2,se.getTerm());
+                                    ansd = new JsonObject();
+                                    ansd.addProperty("termTypeCd",200103);
+                                    ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
+                                    ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+                                    try {
+                                        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+                                        String andRList = gson.toJson(se.printAnalysisRawDataList());
+                                        Log.v(LOG_TAG2,andRList);
+                                        ansd.addProperty("analysisData", andRList);
 
-                                }catch(NullPointerException e){
-                                    e.getMessage();
-                                }
-                                ansDList.add(ansd);
+                                    }catch(NullPointerException e){
+                                        e.getMessage();
+                                    }
+                                    ansDList.add(ansd);
+                            }else{
+                                osaTermList.remove(osaTermList.size()-1);
+                            }
                         }
                         ans.add("analysisDetailsList", ansDList);
                         ansList.add(ans);
@@ -1018,7 +1030,7 @@ public class RecordFragment extends Fragment  {
                     JsonArray ansDList = new JsonArray();
                     JsonObject ansd = new JsonObject();
                     for(StartEnd se : snoringTermList) {
-                        if(se.end!=0){
+                        if(se.end!=0 && se.end>se.start){
                             Log.v(LOG_TAG2,se.getTerm());
                             ansd = new JsonObject();
                             ansd.addProperty("termTypeCd",200101);
@@ -1039,7 +1051,7 @@ public class RecordFragment extends Fragment  {
                         }
                     }
                     for(StartEnd se : grindingTermList) {
-                        if(se.end!=0){
+                        if(se.end!=0 && se.end>se.start){
                             Log.v(LOG_TAG2,se.getTerm());
                             ansd = new JsonObject();
                             ansd.addProperty("termTypeCd",200102);
@@ -1060,7 +1072,7 @@ public class RecordFragment extends Fragment  {
                         }
                     }
                     for(StartEnd se : osaTermList) {
-                        if(se.end!=0){
+                        if(se.end!=0 && se.end>se.start){
                             Log.v(LOG_TAG2,se.getTerm());
                             ansd = new JsonObject();
                             ansd.addProperty("termTypeCd",200103);
