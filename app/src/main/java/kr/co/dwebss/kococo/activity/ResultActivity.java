@@ -93,6 +93,8 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
     MediaPlayerUtility mpu = new MediaPlayerUtility();
     DateFormatter df = new DateFormatter();
 
+    int playingDetailId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
@@ -155,7 +157,14 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             }
 
             // 하단에 녹음 검출리스트 파일 리스트  Adapter 생성
-            RecordListAdapter adapter = new RecordListAdapter() ;
+            RecordListAdapter adapter = new RecordListAdapter(this, new RecordListAdapter.GraphClickListener() {
+                @Override
+                public void clickBtn() {
+                    System.out.println("===============된다...");
+                }
+            }) ;
+
+
             //listView 생성
             ListView listview = (ListView) findViewById(R.id.recordListview);
             listview.setAdapter(adapter);
@@ -187,10 +196,10 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                             //증상 시작시간(HH:mm:ss) ~ 종료시간(HH:mm:ss) 으로 표기
                             try {
                             if(termTypeCd==200101){
-                                recordData.setTitle("코골이 :"+df.returnStringISO8601ToHHmmssFormat(recordData.getTermStartDt())
+                                recordData.setTitle("코골이 : "+df.returnStringISO8601ToHHmmssFormat(recordData.getTermStartDt())
                                         +" ~ "+ df.returnStringISO8601ToHHmmssFormat(recordData.getTermEndDt()));
                             }else if(termTypeCd==200102){
-                                recordData.setTitle("이갈이 :"+df.returnStringISO8601ToHHmmssFormat(recordData.getTermStartDt())
+                                recordData.setTitle("이갈이 : "+df.returnStringISO8601ToHHmmssFormat(recordData.getTermStartDt())
                                         +" ~ "+ df.returnStringISO8601ToHHmmssFormat(recordData.getTermEndDt()));
                             }else{
                                 recordData.setTitle("무호흡 : "+df.returnStringISO8601ToHHmmssFormat(recordData.getTermStartDt())
@@ -213,6 +222,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                                 recordEntryData.addProperty("filePath",recordData.getAnalysisFileAppPath()+"/"+recordData.getAnalysisFileNm());
                                 recordEntryData.addProperty("termStartDt",termStartDt.getTime()-analysisStartDt.getTime());
                                 recordEntryData.addProperty("termEndDt",termEndDt.getTime()-analysisStartDt.getTime());
+                                recordEntryData.addProperty("analysisDetailsId",recordData.getAnalysisDetailsId());
                                 entries.add(new BarEntry((float)(date-referenceTimestamp), 50, recordEntryData));
 //                                entries.add(new BarEntry((float)date, 50));
 
@@ -268,8 +278,15 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                     System.out.println("=========클릭했다~~~"+e.getData());
                     //데이터 넣을 시에 재생 파일 패스 및 재생 구간을 넣으면된다.
                     JsonObject graphData= (JsonObject) e.getData();
+                    playingDetailId = graphData.get("analysisDetailsId").getAsInt();
                     try {
-                        mpu.playMp(graphData.get("termStartDt").getAsInt(),graphData.get("termEndDt").getAsInt(),graphData.get("filePath").getAsString(),getApplicationContext());
+//                        mpu.playMp(graphData.get("termStartDt").getAsInt(),graphData.get("termEndDt").getAsInt(),graphData.get("filePath").getAsString(),getApplicationContext());
+//                        if(!adapter.getPlayBtnFlag()){
+                            adapter.playActivityMp(graphData.get("analysisDetailsId").getAsInt(),graphData.get("termStartDt").getAsInt(),graphData.get("termEndDt").getAsInt(),graphData.get("filePath").getAsString(),getApplicationContext());
+//                        }else{
+//                            adapter.stopActivityMp(graphData.get("analysisDetailsId").getAsInt());
+//                        }
+
                     } catch (IOException e1) {
                         e1.printStackTrace();
                     }
@@ -277,6 +294,10 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                 }
                 @Override
                 public void onNothingSelected() {
+                    if(adapter.getPlayBtnFlag()){
+                        adapter.stopActivityMp(playingDetailId);
+                    }
+
                 }
             });
 
@@ -391,10 +412,8 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
     @Override
     public void onDestroy() {
         super.onDestroy();
-        // MediaPlayer 해지
-//        if (mediaPlayer != null) {
-//            mediaPlayer.release();
-//            mediaPlayer = null;
-//        }
+//         MediaPlayer 해지
+        mpu.endMp();
     }
+
 }

@@ -16,8 +16,12 @@ import kr.co.dwebss.kococo.R;
 public class MediaPlayerUtility {
 
     private String LOG_TAG = "MediaPlayerUtility";
-    MediaPlayer mediaPlayer = new MediaPlayer();
+    MediaPlayer mediaPlayer;
     CountDownTimer cdt;
+
+    public MediaPlayerUtility(){
+        mediaPlayer = new MediaPlayer();
+    }
 
     public static long getTime(MediaPlayer mediaPlayer) {
         long totalDuration = mediaPlayer.getDuration(); // to get total duration in milliseconds
@@ -56,9 +60,16 @@ public class MediaPlayerUtility {
             Toast.makeText(context,"파일이 존재하지않습니다.",Toast.LENGTH_SHORT).show();
         }
     }
+
     public void stopMp(){
         mediaPlayer.stop();
         mediaPlayer.reset();
+    }
+
+    public void endMp(){
+        cdt.cancel();
+        mediaPlayer.release();
+        mediaPlayer=null;
     }
 
 }
