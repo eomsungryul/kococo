@@ -49,7 +49,7 @@ public class SleepCheck {
 	static int EXCEPTION_DB_FOR_AVR_DB = -10;
 	static int AVR_DB_CHECK_TERM = 2000;
 	static double MAX_DB_CRIT_VALUE = -31.5;
-	static double MIN_DB_CRIT_VALUE = -30;
+	static double MIN_DB_CRIT_VALUE = -(31.5-(31.5*35/100)); //http://www.noiseinfo.or.kr/about/info.jsp?pageNo=942 조용한 공원(수면에 거의 영향 없음) 35, 40부터 낮아진다
 	static int NOISE_DB_INIT_VALUE = -10;
 	static int NOISE_DB_CHECK_TERM = 1*100*60;
 
