@@ -241,9 +241,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 //                                entries.add(new BarEntry((float)(date-referenceTimestamp), 50, recordEntryData));
 //                                entries.add(new BarEntry((float)date, 50));
 
-
 //                                {"analysisId":225,"analysisDetailsId":241,"termTypeCd":200101,"termStartDt":"2019-06-11T15:04:35","termEndDt":"2019-06-11T15:04:37","claimYn":"N","analysisData":"[{\"TIME\":\"46\",\"DB\":37.19878832839144,\"HZ\":112.8,\"AMP\":2271},{\"TIME\":\"47\",\"DB\":25.64299905835125,\"HZ\":105.3,\"AMP\":368},{\"TIME\":\"49\",\"DB\":27.264555962474574,\"HZ\":337.5,\"AMP\":422},{\"TIME\":\"50\",\"DB\":38.348498303132345,\"HZ\":1192.1,\"AMP\":4468},{\"TIME\":\"51\",\"DB\":24.559377698807996,\"HZ\":111.8,\"AMP\":1036}]"}
-
 
                                 kococoTerm += (stringtoDateTimeFormat.parse(recordData.getTermEndDt()).getTime()
                                         -stringtoDateTimeFormat.parse(recordData.getTermStartDt()).getTime());
