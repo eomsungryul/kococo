@@ -186,7 +186,7 @@ public class RecordFragment extends Fragment  {
                             Log.v(LOG_TAG2,(" ================녹음 종료 시 DB 저장========requestData: "+requestData.toString()));
                             addRecord(requestData);
                         }
-                    }, 3000);
+                    }, 5000);
                     recodeBtn.setText("녹음 시작");
                 }
             }

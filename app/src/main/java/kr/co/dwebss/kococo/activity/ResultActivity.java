@@ -138,12 +138,14 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                 recordEndDT =  stringtoDateTimeFormat.parse(responseData.get("recordEndDt").toString().replace("\"",""));
                 recordTerm = recordEndDT.getTime()-recordStartDT.getTime();
 
+                referenceTimestamp = recordStartDT.getTime();
+
             } catch (ParseException e) {
                 e.printStackTrace();
             }
 
-//        String recordStartD =  responseData.get("recordStartD").toString().replace("\"","");
-//        String recordEndD =  responseData.get("recordEndD").toString().replace("\"","");
+
+
             if(recordStartD.equals(recordEndD)){
                 dateTxtHeader.setText(transFormat.format(recordStartD));
             }else{
@@ -194,18 +196,11 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
                             long date = 0;
                             try {
-                                date = stringtoDateTimeFormat.parse(recordData.getTermEndDt()).getTime();
-
+                                date = stringtoDateTimeFormat.parse(recordData.getTermStartDt()).getTime();
                                 System.out.println("==========date========="+date);
                                 System.out.println("====date==Date========="+new Date(date));
 
-                                referenceTimestamp = stringtoDateTimeFormat.parse(jncu.JsonStringNullCheck(analysisObj,"analysisStartDt")).getTime();
-                                System.out.println("=====date=====referenceTimestamp========="+referenceTimestamp);
-                                System.out.println("==date====referenceTimestamp===Date======"+new Date(referenceTimestamp));
-
-                                System.out.println("==date====referenceTimestamp-Date======"+new Date(date-referenceTimestamp));
-                                System.out.println("==date====date-referenceTimestamp-Date======"+(date-referenceTimestamp));
-
+                                //데이터 넣을 시에 재생 파일 패스 및 재생 구간을 넣으면된다.
                                 entries.add(new BarEntry((float)(date-referenceTimestamp), 50,"데이터넣ㅎ을 수있음 "+recordData.getTitle()));
 //                                entries.add(new BarEntry((float)date, 50));
 
@@ -259,21 +254,11 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                     System.out.println("=========클릭했다~~~"+e.getData());
 
                 }
-
                 @Override
                 public void onNothingSelected() {
-
                 }
             });
-            System.out.println("======referenceTimestamp========="+referenceTimestamp);
-            System.out.println("======referenceTimestamp========="+new Date(referenceTimestamp));
-            String[] values;
-            values = new String[2];
-            values[0] = String.valueOf(referenceTimestamp);
-            values[1] = String.valueOf(referenceTimestamp+10000);
 
-
-//            MyXAxisValueFormatter xAxisFormatter = new MyXAxisValueFormatter(values);
             MyXAxisValueFormatter xAxisFormatter = new MyXAxisValueFormatter(referenceTimestamp);
             XAxis xAxis = chart.getXAxis();
             xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
@@ -281,6 +266,10 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             //X좌표 폰트
             xAxis.setTextColor(Color.WHITE);
             xAxis.setValueFormatter(xAxisFormatter);
+
+            //시작과 끝점을 정해줘야 그래프가 제대로잘 나옴
+            xAxis.setAxisMinimum(0);
+            xAxis.setAxisMaximum((float)recordEndDT.getTime()-referenceTimestamp);
 
             chart.getAxisLeft().setDrawGridLines(false);
             //Y좌표 폰트
@@ -309,7 +298,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
             BarData data = new BarData(dataSets);
             //바의 두께를 바꿀수 있는
-            data.setBarWidth(300f);
+            data.setBarWidth(100f);
             chart.setData(data);
             chart.setFitBars(true);
             chart.invalidate();
