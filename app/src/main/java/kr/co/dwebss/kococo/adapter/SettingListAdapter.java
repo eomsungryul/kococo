@@ -88,7 +88,6 @@ public class SettingListAdapter extends BaseAdapter {
         retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();
         apiService = retrofit.create(ApiService.class);
 
-
         ConstraintLayout diaryRow = (ConstraintLayout) convertView.findViewById(R.id.diaryRow) ;
         //뷰 전체를 클릭 했을 경우 페이지로 넘어간다.
         diaryRow.setOnClickListener(new View.OnClickListener() {
@@ -108,10 +107,6 @@ public class SettingListAdapter extends BaseAdapter {
                     Toast.makeText(context,"준비중입니다. ",Toast.LENGTH_SHORT).show();
 //                    getClaimList(context,userAppId);
                 }
-
-
-
-
             }
         });
 
