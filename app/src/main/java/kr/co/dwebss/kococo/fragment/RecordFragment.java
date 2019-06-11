@@ -1163,11 +1163,22 @@ class StartEnd {
                 + dayTime.format(new Date((long) (recordStartingTIme + this.end * 1000)));
     }
 
-    public String printAnalysisRawDataList() {
-        String rtn = "";
+//    public String printAnalysisRawDataList() {
+//        String rtn = "";
+//        if(this.AnalysisRawDataList!=null) {
+//            for(AnalysisRawData d : this.AnalysisRawDataList) {
+//                rtn+=d.toString()+"\r\n";
+//            }
+//        }
+//        return rtn;
+//    }
+
+    public JsonArray printAnalysisRawDataList() {
+        JsonArray rtn = new JsonArray();
         if(this.AnalysisRawDataList!=null) {
             for(AnalysisRawData d : this.AnalysisRawDataList) {
-                rtn+=d.toString()+"\r\n";
+//                rtn+=d.toString()+"\r\n";
+                rtn.add(d.toString());
             }
         }
         return rtn;

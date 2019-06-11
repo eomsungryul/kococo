@@ -2,12 +2,12 @@ package kr.co.dwebss.kococo.model;
 
 public class AnalysisRawData {
 
+	int sefamplitude;
 	double times;
 	int amplitude;
 	double decibel;
 	double frequency;
 	double sefrequency;
-	int sefamplitude;
 	
 	public AnalysisRawData() {
 		super();
