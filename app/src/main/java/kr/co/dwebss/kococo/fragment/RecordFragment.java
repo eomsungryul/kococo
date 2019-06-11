@@ -85,6 +85,7 @@ public class RecordFragment extends Fragment  {
 
     //녹음 관련
     private String LOG_TAG2 = "Audio_Recording";
+    private String LOG_TAG3 = "Audio_Recording2";
     int state = 0;
     private boolean mShouldContinue = true;
     private AudioCalculator audioCalculator;
@@ -164,7 +165,7 @@ public class RecordFragment extends Fragment  {
                     } else {
                         //녹음 시작 클릭
 //                        Toast.makeText(getActivity(), "permission 승인", Toast.LENGTH_SHORT).show();
-                        Log.e(LOG_TAG, "permission 승인");
+                        Log.e(LOG_TAG2, "permission 승인");
                         recodeBtn.setText("녹음 종료");
                         recodeFlag = true;
                         recordStartDt= dayTimeDefalt.format(new Date(System.currentTimeMillis()));
@@ -182,7 +183,7 @@ public class RecordFragment extends Fragment  {
                         public void run() {
                             // TODO
                             RequestBody requestData = RequestBody.create(MediaType.parse("application/json"), new Gson().toJson(recordData));
-                            System.out.println(" ================녹음 종료 시 DB 저장========requestData: "+requestData.toString());
+                            Log.v(LOG_TAG2,(" ================녹음 종료 시 DB 저장========requestData: "+requestData.toString()));
                             addRecord(requestData);
                         }
                     }, 3000);
@@ -220,7 +221,7 @@ public class RecordFragment extends Fragment  {
         apiService.addRecord(requestData).enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                System.out.println(" ============녹음 종료 시 DB 저장============response: "+response.body());
+                Log.v(LOG_TAG2,(" ============녹음 종료 시 DB 저장============response: "+response.body()));
                 //창 띄우기
 //                                    startActivity(new Intent(getActivity(), ResultActivity.class));
                 Intent intent = new Intent(getActivity(), ResultActivity.class);
@@ -229,7 +230,7 @@ public class RecordFragment extends Fragment  {
             }
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {
-                System.out.println(" ============녹음 종료 시 DB 저장============Throwable: "+ t);
+                Log.v(LOG_TAG2,(" ============녹음 종료 시 DB 저장============Throwable: "+ t));
 
             }
         });
@@ -250,7 +251,7 @@ public class RecordFragment extends Fragment  {
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
-        System.out.println("=============="+LOG_TAG+"================"+isVisibleToUser);
+        Log.v(LOG_TAG2,("=============="+LOG_TAG2+"================"+isVisibleToUser));
         super.setUserVisibleHint(isVisibleToUser);
         if (isVisibleToUser) {
             // Refresh your fragment here
@@ -280,9 +281,9 @@ public class RecordFragment extends Fragment  {
         //record = new AudioRecord(MediaRecorder.AudioSource.DEFAULT, SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
 
         record = new AudioRecord(MediaRecorder.AudioSource.MIC,  sampleRate, channelConfiguration, audioEncoding, recBufSize);
-        Log.e(LOG_TAG, record.getState()+" ");
+        Log.e(LOG_TAG2, record.getState()+" ");
         if (record.getState() != AudioRecord.STATE_INITIALIZED) {
-            Log.e(LOG_TAG, "Audio Cannot be Recorded");
+            Log.e(LOG_TAG2, "Audio Cannot be Recorded");
             return;
         }
         String permission = "android.permission.RECORD_AUDIO";
@@ -294,7 +295,7 @@ public class RecordFragment extends Fragment  {
             Log.e(RecordFragment.class.getSimpleName(), "AudioRecord error has occured. Reopen app.");
             //System.exit(0);
         }
-        Log.v(LOG_TAG, "Recording has started");
+        Log.v(LOG_TAG2, "Recording has started");
         mShouldContinue = true;
 
         Audio_Recording();
@@ -469,7 +470,7 @@ public class RecordFragment extends Fragment  {
                     final String amp = String.valueOf(amplitude + "Amp");
                     final String db = String.valueOf(decibel + "db");
                     final String hz = String.valueOf(frequency + "Hz");
-                    Log.v(LOG_TAG2,(String.format("%.2f", times)+"s "+hz +" "+db+" "+amp+" "+decibel+"vs"+SleepCheck.getMaxDB())+","+SleepCheck.getMinDB());
+                    Log.v(LOG_TAG3,(calcTime(times)+" "+hz +" "+db+" "+amp+" "+decibel+"vs"+SleepCheck.getMaxDB())+","+SleepCheck.getMinDB());
 
                     //실제로는 1초 이후 분석한다.
                     if (i < 100) {
@@ -953,14 +954,13 @@ public class RecordFragment extends Fragment  {
 //                    }
                 }
                 if (isRecording == true && recodeFlag==false) {
-                    Log.v(LOG_TAG2,("녹음 종료! "));
-                    Log.v(LOG_TAG2,(String.format("%.2f", times)+"s "));
-                    SimpleDateFormat dayTime = new SimpleDateFormat("yyyyMMdd_HHmm");
+                    Log.v(LOG_TAG2,(calcTime(times)+"("+String.format("%.2f", times) + "s) 녹음 종료 버튼을 눌러서 현재 진행되던 녹음을 종료!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
+                    SimpleDateFormat dayTime = new SimpleDateFormat("yyyyMM_dd_HHmm");
                     String fileName = dayTime.format(new Date(recordStartingTIme));
                     dayTime = new SimpleDateFormat("dd_HHmm");
                     //long time = System.currentTimeMillis();
-                    long time = recordStartingTIme+(long)times*1000;
-                    fileName += "-" + dayTime.format(new Date(time));
+                    long time = System.currentTimeMillis();
+                    fileName += "~" + dayTime.format(new Date(time));
                     byte[] waveData = baos.toByteArray();
 
                     //TODO 녹음된 파일이 저장되는 시점
@@ -970,6 +970,8 @@ public class RecordFragment extends Fragment  {
 
                     Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
                     Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (waveData.length / (44100d * 16 * 1))) * 8));
+                    Log.v(LOG_TAG2,("tmpMinDb: "+tmpMinDb));
+                    Log.v(LOG_TAG2,("tmpMaxDb: "+tmpMaxDb));
 
                     JsonObject ans = new JsonObject();
                     ans.addProperty("analysisStartDt",dayTimeDefalt.format(new Date(recordStartingTIme)));
@@ -983,6 +985,14 @@ public class RecordFragment extends Fragment  {
                         ansd.addProperty("termTypeCd",200101);
                         ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
                         ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+                        try {
+                            Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+                            String andRList = gson.toJson(se.printAnalysisRawDataList());
+                            ansd.addProperty("analysisData", andRList);
+
+                        }catch(NullPointerException e){
+                            e.getMessage();
+                        }
                         ansDList.add(ansd);
                     }
                     for(StartEnd se : grindingTermList) {
@@ -991,6 +1001,14 @@ public class RecordFragment extends Fragment  {
                             ansd.addProperty("termTypeCd",200102);
                             ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
                             ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+                            try {
+                                Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+                                String andRList = gson.toJson(se.printAnalysisRawDataList());
+                                ansd.addProperty("analysisData", andRList);
+
+                            }catch(NullPointerException e){
+                                e.getMessage();
+                            }
                             ansDList.add(ansd);
                         }
                     }
@@ -1000,6 +1018,14 @@ public class RecordFragment extends Fragment  {
                             ansd.addProperty("termTypeCd",200103);
                             ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
                             ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+                            try {
+                                Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+                                String andRList = gson.toJson(se.printAnalysisRawDataList());
+                                ansd.addProperty("analysisData", andRList);
+
+                            }catch(NullPointerException e){
+                                e.getMessage();
+                            }
                             ansDList.add(ansd);
                         }
                     }
@@ -1007,6 +1033,7 @@ public class RecordFragment extends Fragment  {
                     ansList.add(ans);
 
                     Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 끝====="));
+                    recordStartingTIme = 0;
                     isRecording = false;
                 }
 
@@ -1016,26 +1043,31 @@ public class RecordFragment extends Fragment  {
                 recordData.addProperty("recordEndDt",recordEndDt);
                 recordData.add("analysisList", ansList);
 
-                System.out.println(" =============녹음 종료버튼  ===========recordData: "+recordData.toString());
+                Log.v(LOG_TAG2,(" =============녹음 종료버튼  ===========recordData: "+recordData.toString()));
 
                 //Log.v(LOG_TAG2,("audio length(s): " + ((double) (audioData.length / (44100d * 16 * 1))) * 8));
                 Log.v(LOG_TAG2,("녹음시작-종료(s): " + String.format("%.2f", times)));
 
-                Log.v(LOG_TAG2,( "코골이 여부 " + SleepCheck.snoringContinue));
+                Log.v(LOG_TAG2,( "코골이 구간 시작=========="));
+                Log.v(LOG_TAG2,( "코골이 " + snoringTermList.size()+"회 발생 "));
+                for(StartEnd se : snoringTermList) {
+                    Log.v(LOG_TAG2,(se.getTerm()));
+                }
+                Log.v(LOG_TAG2,( "코골이 구간 끝=========="));
+                Log.v(LOG_TAG2,( "이갈이 구간 시작=========="));
                 Log.v(LOG_TAG2,( "이갈이 " + grindingTermList.size()+"회 발생 "));
-                Log.v(LOG_TAG2,( "이갈이 구간=========="));
                 for(StartEnd se : grindingTermList) {
                     Log.v(LOG_TAG2,(se.getTerm()));
                 }
-                Log.v(LOG_TAG2,( "=================="));
+                Log.v(LOG_TAG2,( "이갈이 구간 끝=========="));
+                Log.v(LOG_TAG2,( "이갈이 구간 시작=========="));
                 Log.v(LOG_TAG2,( "무호흡" + osaTermList.size()+"회 발생 "));
-                Log.v(LOG_TAG2,( "무호흡 구간=========="));
                 for(StartEnd se : osaTermList) {
                     Log.v(LOG_TAG2,(se.getTerm()));
                 }
-                Log.v(LOG_TAG2,( "=================="));
+                Log.v(LOG_TAG2,( "이갈이 구간 끝=========="));
 
-                Log.v(LOG_TAG, String.format("Recording  has stopped. Samples read: %d", shortsRead));
+                Log.v(LOG_TAG2, String.format("Recording  has stopped. Samples read: %d", shortsRead));
             }
         }).start();
     }
