@@ -330,7 +330,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
             //시작과 끝점을 정해줘야 그래프가 제대로잘 나옴
             xAxis.setAxisMinimum(0);
-            xAxis.setAxisMaximum((float)recordEndDT.getTime()-referenceTimestamp);
+            xAxis.setAxisMaximum((float)(recordEndDT.getTime()-referenceTimestamp));
 
             System.out.println("=========recordEndDT.getTime()-referenceTimestamp==============="+(recordEndDT.getTime()-referenceTimestamp));
 

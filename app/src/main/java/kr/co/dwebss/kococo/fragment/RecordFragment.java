@@ -173,7 +173,7 @@ public class RecordFragment extends Fragment  {
                     }
                 }else{
                     Toast.makeText(getActivity(), "분석중입니다 잠시만 기다려주세요...", Toast.LENGTH_LONG).show();
-                    recordEndDt= dayTimeDefalt.format(new Date(System.currentTimeMillis()));
+//                    recordEndDt= dayTimeDefalt.format(new Date(System.currentTimeMillis()));
                     recodeFlag = false;
                     stop(v);
 
@@ -1084,7 +1084,8 @@ public class RecordFragment extends Fragment  {
                 recordData = new JsonObject();
                 recordData.addProperty("userAppId",userAppId);
                 recordData.addProperty("recordStartDt",recordStartDt);
-                recordData.addProperty("recordEndDt",recordEndDt);
+//                recordData.addProperty("recordEndDt",recordEndDt);
+                recordData.addProperty("recordEndDt",dayTimeDefalt.format(new Date(System.currentTimeMillis())));
                 recordData.add("analysisList", ansList);
 
                 Log.v(LOG_TAG2,(" =============녹음 종료버튼  ===========recordData: "+recordData.toString()));
