@@ -629,7 +629,7 @@ public class RecordFragment extends Fragment  {
                         if(snoringTermList.size()>0 && isRecording == true){
                             snoringTermList.get(snoringTermList.size() - 1).AnalysisRawDataList.add(maxARD);
                         }
-                        if(osaTermList.size()>0 && isRecording == false && SleepCheck.isOSAAnsStart==true){
+                        if(osaTermList.size()>0 && isRecording == false && osaStart==true){
                             osaTermList.get(osaTermList.size() - 1).AnalysisRawDataList.add(maxARD);
                         }
                         maxARD = new AnalysisRawData(times, amplitude, decibel, frequency);
@@ -716,7 +716,7 @@ public class RecordFragment extends Fragment  {
                                 StartEnd st = new StartEnd();
                                 st.start = times;
                                 st.AnalysisRawDataList = new ArrayList<AnalysisRawData>();
-                                st.AnalysisRawDataList.add(maxARD);
+                                //st.AnalysisRawDataList.add(maxARD);
                                 snoringTermList.add(st);
                                 //음파가 진행되는 동안 최대 데시벨과 저주파수의 데시벨의 평균을 계산하기 위해 값을 초기화 한다.
                                 //최대 데시벨 값과 저주파수 데시벨 값을 저장한다.(초기화)
@@ -823,7 +823,7 @@ public class RecordFragment extends Fragment  {
                     if (osaRecordingExit > 0) {
                         osaRecordingExit--;
                     }
-                    if (osaCnt > 0 && osaStart == false) {
+                    if (osaCnt > 0 && osaStart == false && isRecording == false) {
                         /*
                         System.out.print("무호흡 체크를 시작한다.");
                         Log.v(LOG_TAG2,(String.format("%.2f", times) + "s~" + SleepCheck.isOSATerm + " "
