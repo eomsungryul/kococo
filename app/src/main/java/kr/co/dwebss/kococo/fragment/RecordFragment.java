@@ -661,6 +661,9 @@ public class RecordFragment extends Fragment  {
                         for(int m = 0 ; m < allFHAndDB.length ; m++){
                             if(allFHAndDB[m] > tmpMaxDb){
                                 tmpMaxDb = allFHAndDB[m];
+                                if(tmpMaxDb<0){
+                                    tmpMaxDb = Math.abs(tmpMaxDb);
+                                }
                             }
                             if(allFHAndDB[m] < tmpMinDb){
                                 tmpMinDb = allFHAndDB[m];
@@ -976,7 +979,7 @@ public class RecordFragment extends Fragment  {
                                 osaTermList.get(osaTermList.size() - 1).AnalysisRawDataList.add(maxARD);
                             }
                         }
-                        maxARD = new AnalysisRawData(times, amplitude, decibel, frequency);
+                        maxARD = new AnalysisRawData(times, amplitude, tmpMaxDb, frequency);
                         timesForMaxArd = Math.floor(times);
                         Log.v(LOG_TAG2,((int)times+" "+ timesForMaxArd+" "+(int)maxARD.getTimes() +" "+maxARD.getAmplitude() +" "+maxARD.getFrequency()+" "+maxARD.getDecibel())+" "+tmpMaxDb);
                         tmpMaxDb = 0;
