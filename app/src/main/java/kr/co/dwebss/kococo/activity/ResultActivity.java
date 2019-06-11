@@ -233,7 +233,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                                         for(int k =0; k<analysisRawDataArr.size(); k++){
                                             JsonObject analysisRawData = (JsonObject) analysisRawDataArr.get(k);
                                             //데이터 넣는 부분
-                                            entries.add(new BarEntry(analysisRawData.get("TIME").getAsInt()*1000, analysisRawData.get("DB").getAsFloat(), recordEntryData));
+                                            entries.add(new BarEntry(((analysisStartDt.getTime()-referenceTimestamp)+analysisRawData.get("TIME").getAsInt()*1000), analysisRawData.get("DB").getAsFloat(), recordEntryData));
                                         }
                                     }
                                 }
