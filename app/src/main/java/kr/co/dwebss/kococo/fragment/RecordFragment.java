@@ -108,8 +108,13 @@ public class RecordFragment extends Fragment  {
     byte[] totalBuf;
     int cnt;
 
-    double tmpMinDb = 99999;
-    double tmpMaxDb = 0;
+    static double tmpMinDb = 99999;
+    static double tmpMaxDb = 0;
+    static double firstDecibelAvg = 0.0;
+    static double secondDecibelAvg = 0.0;
+    static double snoringDbChkCnt = 0;
+    static int soundStartAndSnroingCnt = 0;
+    static int soundStartAndSnroingOppCnt = 0;
 
     int l = 0;
 
@@ -380,13 +385,8 @@ public class RecordFragment extends Fragment  {
                 int[] tmpArray = null;
                 boolean isRecording = false;
                 boolean soundStartInRecording = false;
-                int soundStartAndSnroingCnt = 0;
-                int soundStartAndSnroingOppCnt = 0;
-                double firstDecibelAvg = 0.0;
-                double secondDecibelAvg = 0.0;
                 int snoringBufferFilledCnt = 0;
                 double[] allFHAndDB = null;
-                double snoringDbChkCnt = 0;
                 int grindingRepeatOnceAmpCnt = 0;
 
                 double chkDBAgainInRecording = 0.0;
@@ -848,7 +848,7 @@ public class RecordFragment extends Fragment  {
                     if (osaRecordingExit > 0) {
                         osaRecordingExit--;
                     }
-                    if (osaCnt > 0 && osaStart == false && isRecording == false) {
+                    if (osaCnt > 0 && osaStart == false) {
                         /*
                         System.out.print("무호흡 체크를 시작한다.");
                         Log.v(LOG_TAG2,(String.format("%.2f", times) + "s~" + SleepCheck.isOSATerm + " "
@@ -954,7 +954,7 @@ public class RecordFragment extends Fragment  {
                             double tmpOsaEndTimes = osaTermList.get(osaTermList.size()-1).end;
                             double tmpBeforeSnoringTImes = snoringTermList.get(snoringTermList.size()-1).end;
                             double tmpAfterSnoringTImes = snoringTermList.get(snoringTermList.size()-1).start;
-                            if(tmpOsaStartTimes - tmpBeforeSnoringTImes < 5 && tmpAfterSnoringTImes - tmpOsaEndTimes < 5 ){
+                            if(tmpOsaEndTimes==0 || (tmpOsaStartTimes - tmpBeforeSnoringTImes < 5 && tmpAfterSnoringTImes - tmpOsaEndTimes < 5 )){
                                 //무호흡 시작시간 5초 이내에 코골이가 종료가 발생하고, 무호흡 종료시간 5초 이내에 코골이가 시작이 발생했어야 한다.
                             }else{
                                 //아니면 삭제
@@ -986,7 +986,7 @@ public class RecordFragment extends Fragment  {
                                 snoringTermList.get(snoringTermList.size() - 1).AnalysisRawDataList.add(maxARD);
                             }
                         }
-                        if(osaTermList.size()>0 && isRecording == false && osaStart==true){
+                        if(osaTermList.size()>0 && isRecording == true && SleepCheck.isOSAAnsStart==true){
                             if(osaTermList.get(osaTermList.size() - 1).end!=0){
                                 if(osaTermList.get(osaTermList.size() - 1).end > times){
                                     osaTermList.get(osaTermList.size() - 1).AnalysisRawDataList.add(maxARD);
