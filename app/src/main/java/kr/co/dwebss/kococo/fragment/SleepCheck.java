@@ -198,29 +198,42 @@ public class SleepCheck {
 					 * isOSATermCnt+", isOSATermCntOpp:"+isOSATermCntOpp+"]"); curTermTime = times;
 					 * }
 					 */
-					System.out.println("![" + String.format("%.2f", OSAcurTermTime) + "~" + String.format("%.2f", times)
-							+ "s, isOSATermCnt: " + isOSATermCnt + ", isOSATermCntOpp:" + isOSATermCntOpp + "]");
+					//System.out.println("![" + String.format("%.2f", OSAcurTermTime) + "~" + String.format("%.2f", times)+ "s, isOSATermCnt: " + isOSATermCnt + ", isOSATermCntOpp:" + isOSATermCntOpp + "]");
 					//분석이 종료되는 시점은 앞에서 분석된 시간으로부터 1분이상 초과된 경우에 종료하고, 아닌 경우에는 현재 시간을 end.times에 추가한다.
 					if(RecordFragment.osaTermList.size()>1) {
 						int beforeEndTime = (int) RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-2).end; //0이거나 값이 있거나
 						int currentTime = (int) times;
-						System.out.println(beforeEndTime +" "+ currentTime+"="+(currentTime-beforeEndTime));
+						//System.out.println(beforeEndTime +" "+ currentTime+"="+(currentTime-beforeEndTime));
 						if(currentTime - beforeEndTime > 60) {
 							//System.out.println("기록vo종료");
 							isOSAAnsStart = false;
 							RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).end=times;
+							RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).first = RecordFragment.firstDecibelAvg;
+							RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).second = RecordFragment.secondDecibelAvg;
+							RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).chk = RecordFragment.snoringDbChkCnt;
+							RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).positiveCnt = isOSATermCnt;
+							RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).negitiveCnt = isOSATermCntOpp;
 						}else {
 							//System.out.println("1분이 안 지났으므로, 기록vo종료하지 않고, 이전기록vo에 종료입력, 현재 기록vo 삭제");
 							RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-2).AnalysisRawDataList.addAll(
 									RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).AnalysisRawDataList);
+							RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).AnalysisRawDataList=RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-2).AnalysisRawDataList;
 							RecordFragment.osaTermList.remove(RecordFragment.osaTermList.size()-1);
 							RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).end=times;
+							RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).first = RecordFragment.firstDecibelAvg;
+							RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).second = RecordFragment.secondDecibelAvg;
+							RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).chk = RecordFragment.snoringDbChkCnt;
+							RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).positiveCnt = isOSATermCnt;
+							RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).negitiveCnt = isOSATermCntOpp;
 						}
 					}else {
 						isOSAAnsStart = false;
-						if(RecordFragment.osaTermList.size()>0) {
-							RecordFragment.osaTermList.get(RecordFragment.osaTermList.size() - 1).end = times;
-						}
+						RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).end=times;
+						RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).first = RecordFragment.firstDecibelAvg;
+						RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).second = RecordFragment.secondDecibelAvg;
+						RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).chk = RecordFragment.snoringDbChkCnt;
+						RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).positiveCnt = isOSATermCnt;
+						RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).negitiveCnt = isOSATermCntOpp;
 					}
 
 					double tmpD = OSAcurTermTime;
@@ -259,7 +272,7 @@ public class SleepCheck {
 					RecordFragment.osaTermList.add(new StartEnd());
 					RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).start=times;
 					RecordFragment.osaTermList.get(RecordFragment.osaTermList.size() - 1).AnalysisRawDataList = new ArrayList<AnalysisRawData>();
-					RecordFragment.osaTermList.get(RecordFragment.osaTermList.size() - 1).AnalysisRawDataList.add(new AnalysisRawData(times, amplitude, decibel, frequency));
+					//RecordFragment.osaTermList.get(RecordFragment.osaTermList.size() - 1).AnalysisRawDataList.add(new AnalysisRawData(times, amplitude, RecordFragment.tmpMaxDb, frequency));
 					isOSATermTimeOccur = true;
 					//System.out.println(OSAcurTermTime);
 				}
