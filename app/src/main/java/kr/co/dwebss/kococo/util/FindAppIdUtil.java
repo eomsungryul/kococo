@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
+import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.http.ApiService;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -93,7 +94,8 @@ public class FindAppIdUtil {
                 @Override
                 public void onFailure(Call<JsonObject> call, Throwable t) {
                     //에러 날시에 다시 시작해야됨
-                    Toast.makeText(context, "서버에 접속 할 수 없습니다.\n관리자에게 문의하세요", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(context, R.string.error_server_getRecordList,Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context,t.getMessage(),Toast.LENGTH_LONG).show();
                 }
             });
             return APP_ID;
@@ -165,7 +167,8 @@ public class FindAppIdUtil {
                 @Override
                 public void onFailure(Call<JsonObject> call, Throwable t) {
                     //에러 날시에 다시 시작해야됨
-                    Toast.makeText(context, "서버에 접속 할 수 없습니다.\n관리자에게 문의하세요", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(context, R.string.error_server_getRecordList,Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context,t.getMessage(),Toast.LENGTH_LONG).show();
                 }
             });
 
