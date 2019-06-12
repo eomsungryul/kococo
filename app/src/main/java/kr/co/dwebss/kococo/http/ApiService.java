@@ -58,6 +58,15 @@ public interface ApiService {
 
     Call<JsonObject> getClaimList(String userAppId);
 
+    @PUT("api/userappid/{userappid}")
+    Call<JsonObject> addProfile(@Path("userappid") String userappid, @Body RequestBody requestData);
+
+    @GET("api/userappid/{userappid}")
+    Call<JsonObject> getProfile(@Path("userappid") String userappid);
+
+    @PUT("api/record/consulting/{recordId}")
+    Call<JsonObject> addConsult(@Path("recordId") int recordId, @Body RequestBody requestData);
+
 //    Call<JSONObject> addRecord(@Body JSONObject data);
 //    Call<JsonObject> addRecord(JsonObject data);
 

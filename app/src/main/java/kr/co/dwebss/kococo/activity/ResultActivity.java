@@ -20,6 +20,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -59,13 +60,22 @@ import java.util.List;
 
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.adapter.RecordListAdapter;
+import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.model.RecordData;
 import kr.co.dwebss.kococo.util.DateFormatter;
+import kr.co.dwebss.kococo.util.FindAppIdUtil;
 import kr.co.dwebss.kococo.util.JsonNullCheckUtil;
 import kr.co.dwebss.kococo.util.MediaPlayerUtility;
 import kr.co.dwebss.kococo.util.MyXAxisValueFormatter;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ResultActivity extends AppCompatActivity implements OnSeekBarChangeListener {
+    Retrofit retrofit;
+    ApiService apiService;
 
     private static final String TAG = "ResultActivity";
     private BarChart chart;
@@ -88,6 +98,8 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
     RecordData recordData;
     JsonNullCheckUtil jncu;
 
+    FindAppIdUtil fau = new FindAppIdUtil();
+
     List<BarEntry> entries = new ArrayList<>();
     long referenceTimestamp; // minimum timestamp in your data set;
 
@@ -96,12 +108,19 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
     int playingDetailId;
 
+    int recordId;
+    int analysisId;
+    String analysisServerUploadPath;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
         //세로모드에서 가로모드로 전환 시 onCreate함수가 다시 호출
         setContentView(R.layout.activity_result);
         mpu = new MediaPlayerUtility();
+
+        retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();
+        apiService = retrofit.create(ApiService.class);
 
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         float density = metrics.density;
@@ -146,6 +165,8 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                 recordEndDT =  stringtoDateTimeFormat.parse(responseData.get("recordEndDt").toString().replace("\"",""));
                 recordTerm = recordEndDT.getTime()-recordStartDT.getTime();
 
+                recordId = responseData.get("recordId").getAsInt();
+
                 referenceTimestamp = recordStartDT.getTime();
 
             } catch (ParseException e) {
@@ -187,6 +208,9 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                             recordData.setAnalysisId(analysisObj.get("analysisId").getAsInt());
                             recordData.setAnalysisStartDt(jncu.JsonStringNullCheck(analysisObj,"analysisStartDt"));
                             recordData.setAnalysisEndDt(jncu.JsonStringNullCheck(analysisObj,"analysisEndDt"));
+
+                            analysisId = analysisObj.get("analysisId").getAsInt();
+                            analysisServerUploadPath = jncu.JsonStringNullCheck(analysisObj,"analysisFileAppPath")+"/"+jncu.JsonStringNullCheck(analysisObj,"analysisFileNm");
 
                             JsonObject analysisDetailsObj = (JsonObject) analysisDetailsList.get(j);
                             System.out.println("================analysisDetailsObj==========================="+analysisDetailsObj);
@@ -296,13 +320,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                     JsonObject graphData= (JsonObject) e.getData();
                     playingDetailId = graphData.get("analysisDetailsId").getAsInt();
                     try {
-//                        mpu.playMp(graphData.get("termStartDt").getAsInt(),graphData.get("termEndDt").getAsInt(),graphData.get("filePath").getAsString(),getApplicationContext());
-//                        if(!adapter.getPlayBtnFlag()){
-                            adapter.playActivityMp(graphData.get("analysisDetailsId").getAsInt(),graphData.get("termStartDt").getAsInt(),graphData.get("termEndDt").getAsInt(),graphData.get("filePath").getAsString(),getApplicationContext());
-//                        }else{
-//                            adapter.stopActivityMp(graphData.get("analysisDetailsId").getAsInt());
-//                        }
-
+                        adapter.playActivityMp(graphData.get("analysisDetailsId").getAsInt(),graphData.get("termStartDt").getAsInt(),graphData.get("termEndDt").getAsInt(),graphData.get("filePath").getAsString(),getApplicationContext());
                     } catch (IOException e1) {
                         e1.printStackTrace();
                     }
@@ -329,8 +347,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             //시작과 끝점을 정해줘야 그래프가 제대로잘 나옴
             xAxis.setAxisMinimum(0);
             xAxis.setAxisMaximum((float)(recordEndDT.getTime()-referenceTimestamp));
-
-            System.out.println("=========recordEndDT.getTime()-referenceTimestamp==============="+(recordEndDT.getTime()-referenceTimestamp));
+//            System.out.println("=========recordEndDT.getTime()-referenceTimestamp==============="+(recordEndDT.getTime()-referenceTimestamp));
 
             chart.getAxisLeft().setDrawGridLines(false);
             //Y좌표 폰트
@@ -341,17 +358,12 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             // add a nice and smooth animation
             chart.animateY(1500);
             chart.getLegend().setEnabled(false);
-
             chart = (BarChart)findViewById(R.id.chart1);
 
-//            List<BarEntry> entries = new ArrayList<>();
-
-            System.out.println("=================entries.size()================="+entries.size());
             BarDataSet set1;
             set1 = new BarDataSet(entries, "Data Set");
-//            set1.setColors(ColorTemplate.VORDIPLOM_COLORS);
-//            set1.setDrawValues(false);
             set1.setColors(ColorTemplate.COLORFUL_COLORS);
+            //값을 보여줄건지 말건지 여부
             set1.setDrawValues(true);
             set1.setValueTextColor(Color.WHITE);
 
@@ -366,7 +378,42 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
             chart.invalidate();
 
+            FloatingActionButton consultBtn = (FloatingActionButton) findViewById(R.id.consultBtn);
+            consultBtn.setOnClickListener(new FloatingActionButton.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    apiService.getProfile(fau.getAppid(getApplicationContext())).enqueue(new Callback<JsonObject>() {
+                        @Override
+                        public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                            System.out.println(" ========================response: "+response.body());
+                            JsonObject result = response.body();
+                            if(result.has("userAge")){
+                                //프로필 있음 전문가 상담하기 페이지로 이동
+                                Intent intent = new Intent(v.getContext(), ConsultActivity.class);
+                                intent.putExtra("responseData",response.body().toString()); /*송신*/
+                                System.out.println("============analysisId=========="+analysisId);
+                                System.out.println("============recordId=========="+recordId);
+                                System.out.println("============analysisServerUploadPath=========="+analysisServerUploadPath);
+                                intent.putExtra("analysisId",analysisId); /*송신*/
+                                intent.putExtra("recordId",recordId); /*송신*/
+                                intent.putExtra("analysisServerUploadPath",analysisServerUploadPath); /*송신*/
+                                v.getContext().startActivity(intent);
+                            }else{
+                                //프로필 없음 프로필페이지로 이동
+                                Intent intent = new Intent(v.getContext(), ProfileActivity.class);
+                                v.getContext().startActivity(intent);
+                                Toast.makeText(getApplicationContext(),"전문가와 상담은 프로필이 필요합니다.",Toast.LENGTH_LONG).show();
+                            }
+                        }
+                        @Override
+                        public void onFailure(Call<JsonObject> call, Throwable t) {
+                            System.out.println(" ========================Throwable: "+t.getMessage());
+                        }
+                    });
 
+
+                }
+            });
         }else{
             Toast.makeText(getApplicationContext(),"error",Toast.LENGTH_LONG);
         }
@@ -382,23 +429,16 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
         return super.onOptionsItemSelected(item);
     }
 
-
-
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         Log.v(TAG, "onConfigurationChanged " + newConfig.screenWidthDp + "," + newConfig.screenHeightDp);
     }
 
-
-
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
         ArrayList<BarEntry> values = new ArrayList<>();
-
         BarDataSet set1;
-
         if (chart.getData() != null &&
                 chart.getData().getDataSetCount() > 0) {
             set1 = (BarDataSet) chart.getData().getDataSetByIndex(0);

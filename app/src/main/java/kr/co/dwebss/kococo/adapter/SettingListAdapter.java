@@ -16,6 +16,7 @@
 package kr.co.dwebss.kococo.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.constraint.ConstraintLayout;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +30,7 @@ import com.google.gson.JsonObject;
 import java.util.ArrayList;
 
 import kr.co.dwebss.kococo.R;
+import kr.co.dwebss.kococo.activity.ProfileActivity;
 import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.model.Setting;
 import kr.co.dwebss.kococo.util.FindAppIdUtil;
@@ -46,6 +48,8 @@ public class SettingListAdapter extends BaseAdapter {
     ApiService apiService;
     String userAppId;
     Setting listViewItem;
+
+    FindAppIdUtil fau = new FindAppIdUtil();
 
     // ListViewAdapter의 생성자
     public SettingListAdapter(Context context) {
@@ -96,7 +100,24 @@ public class SettingListAdapter extends BaseAdapter {
 
                 if(position==0){
                     //프로필 페이지
-                    Toast.makeText(context,"페이지 준비중입니다. ",Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(context,"페이지 준비중입니다. ",Toast.LENGTH_SHORT).show();
+                    apiService.getProfile(fau.getAppid(v.getContext())).enqueue(new Callback<JsonObject>() {
+                        @Override
+                        public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                            System.out.println(" ========================response: "+response.body());
+                            Intent intent = new Intent(v.getContext(), ProfileActivity.class);
+                            intent.putExtra("responseData",response.body().toString()); /*송신*/
+                            v.getContext().startActivity(intent);
+                        }
+                        @Override
+                        public void onFailure(Call<JsonObject> call, Throwable t) {
+                            System.out.println(" ========================Throwable: "+t.getMessage());
+                        }
+                    });
+
+                Intent intent = new Intent(context, ProfileActivity.class);
+//                intent.putExtra("responseData",testDt); /*송신*/
+                v.getContext().startActivity(intent);
 
                 }else if(position==1){
                     //전문가 상담내역 페이지
