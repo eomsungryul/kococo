@@ -18,9 +18,12 @@ package kr.co.dwebss.kococo.activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -73,8 +76,19 @@ public class ReportActivity extends AppCompatActivity {
     Boolean addClaimFlag;
     String uploadFirebasePath;
 
+    //인터넷 연결 유형
+    ConnectivityManager cm;
+    NetworkInfo activeNetwork;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        //인터넷 연결 유형
+        cm =
+                (ConnectivityManager)getApplicationContext().getSystemService(getApplicationContext().CONNECTIVITY_SERVICE);
+
+        activeNetwork = cm.getActiveNetworkInfo();
+
         setTheme(R.style.AppTheme);
         //세로모드에서 가로모드로 전환 시 onCreate함수가 다시 호출
 
@@ -137,6 +151,19 @@ public class ReportActivity extends AppCompatActivity {
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
 //                        Toast.makeText(getApplicationContext(),"예를 선택했습니다.",Toast.LENGTH_LONG).show();
+
+                            boolean isWiFi = activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
+                            if(!isWiFi){
+//                                Snackbar.make(getWindow().getDecorView().getRootView(), "와이파이가 아닙니다 ", 10000)
+//                                        .setAction("DISMISS", new View.OnClickListener()
+//                                        {
+//                                            @Override
+//                                            public void onClick(View v)
+//                                            {
+//                                            }
+//                                        }).show();
+                                Toast.makeText(getApplicationContext(),"와이파이가 아닙니다",Toast.LENGTH_LONG).show();
+                            }
                             Toast.makeText(getApplicationContext(),"등록중입니다 잠시만기다려주세요. ",Toast.LENGTH_LONG).show();
                             addFirebaseStorage();
                         }
