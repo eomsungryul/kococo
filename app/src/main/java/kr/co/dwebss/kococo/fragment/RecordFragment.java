@@ -478,6 +478,8 @@ public class RecordFragment extends Fragment  {
                         snoringTermList = new ArrayList<StartEnd>();
                         grindingTermList = new ArrayList<StartEnd>();
                         osaTermList = new ArrayList<StartEnd>();
+                        isBreathTerm = false;
+                        isOSATermTimeOccur = false;
 //                    } else if (isRecording == true && (SleepCheck.noiseCheck(decibel)==0 || recodeFlag==false) ) {
                     } else if (isRecording == true && SleepCheck.noiseCheck(decibel) <= 1000) {
                         Log.v(LOG_TAG2,(calcTime(times)+"("+String.format("%.2f", times) + "s) 녹음 종료!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
