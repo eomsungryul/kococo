@@ -116,6 +116,13 @@ public class RecordFragment extends Fragment  {
     static int soundStartAndSnroingCnt = 0;
     static int soundStartAndSnroingOppCnt = 0;
 
+    static boolean isBreathTerm = false;
+    static boolean isOSATermTimeOccur = false;
+    static int isBreathTermCnt = 0;
+    static double OSAcurTermTime = 0.0;
+    static int isOSATermCnt = 0;
+    static int osaContinueCnt = 0;
+
     int l = 0;
 
 
@@ -502,6 +509,24 @@ public class RecordFragment extends Fragment  {
                         ans.addProperty("analysisFileNm",fileInfo[1]);
                         JsonArray ansDList = new JsonArray();
                         JsonObject ansd = new JsonObject();
+                        for ( int s = 0 ; s < snoringTermList.size() ; s ++) {
+                            if(s>0) {
+                                StartEnd se = snoringTermList.get(s);
+                                StartEnd bse = snoringTermList.get(s-1);
+                                double curStartTime = se.start;
+                                double beforeEndTime = bse.end;
+                                if(curStartTime - beforeEndTime <= 1) {
+                                    bse.end = se.end;
+                                    bse.negitiveCnt += se.negitiveCnt;
+                                    bse.positiveCnt += se.positiveCnt;
+                                    bse.first = (bse.first+se.first);
+                                    bse.second = (bse.second+se.second);
+                                    bse.chk += se.chk;
+                                    bse.AnalysisRawDataList.addAll(se.AnalysisRawDataList);
+                                    snoringTermList.remove(se);
+                                }
+                            }
+                        }
                         for(StartEnd se : snoringTermList) {
                             if(se.end!=0 && se.end>se.start){
                                 Log.v(LOG_TAG2,se.getTerm());
@@ -521,6 +546,24 @@ public class RecordFragment extends Fragment  {
                                 ansDList.add(ansd);
                             }else{
                                 snoringTermList.remove(snoringTermList.size()-1);
+                            }
+                        }
+                        for ( int s = 0 ; s < grindingTermList.size() ; s ++) {
+                            if(s>0) {
+                                StartEnd se = grindingTermList.get(s);
+                                StartEnd bse = grindingTermList.get(s-1);
+                                double curStartTime = se.start;
+                                double beforeEndTime = bse.end;
+                                if(curStartTime - beforeEndTime <= 1) {
+                                    bse.end = se.end;
+                                    bse.negitiveCnt += se.negitiveCnt;
+                                    bse.positiveCnt += se.positiveCnt;
+                                    bse.first = (bse.first+se.first);
+                                    bse.second = (bse.second+se.second);
+                                    bse.chk += se.chk;
+                                    bse.AnalysisRawDataList.addAll(se.AnalysisRawDataList);
+                                    grindingTermList.remove(se);
+                                }
                             }
                         }
                         for(StartEnd se : grindingTermList) {
@@ -843,128 +886,86 @@ public class RecordFragment extends Fragment  {
                     }else {
                     }
 
-                    // 무호흡도 기존 로직대로 체크해서, 어디 구간에서 발생했는지 체크한다.
-                    osaCnt = SleepCheck.OSACheck(times, decibel, amplitude, frequency);
-                    osaRecordingContinueCnt += osaCnt;
-                    // 무호흡 카운트가 발생하고, 체크 상태가 아니면 체크를 시작한다.
-                    if (osaRecordingExit > 0) {
-                        osaRecordingExit--;
+                    if (decibel > SleepCheck.getMinDB()*0.45) {
+                        //소리가 발생했고, 분석 시작 변수 값이 true 인 경우 종료한다.
+                        if(isOSATermTimeOccur) {
+                            //0.1초 동안 소리가 70% 이상 발생한 경우 소리가 발생한 것으로 본다.
+
+                            if(isOSATermCnt+isBreathTermCnt>90 && isOSATermCnt > 20 && isBreathTermCnt > 70) {
+                                //오차범위를 둔다. 0.5초 동안 연속으로 소리가 발생해야 한다.
+                                if(osaContinueCnt > 4) {
+                                    isOSATermTimeOccur = false;
+                                    isBreathTermCnt = 0;
+                                    isBreathTerm = true;
+                                    osaTermList.get(osaTermList.size()-1).end=times;
+                                    osaTermList.get(osaTermList.size()-1).chk=0;
+                                    osaContinueCnt = 0;
+                                }else {
+                                    if(osaContinueCnt!=0) {
+                                        osaContinueCnt ++;
+                                    }else {
+                                        osaContinueCnt = 1;
+                                    }
+                                }
+                            }
+                        }else {
+
+                        }
+                        isBreathTermCnt++;
+                    }else {
+                        //무호흡을 측정하기 위한 분석 시작 변수 초기화
+                        //코골이가 발생하고 5초가 안지났어야 함.
+                        if(snoringTermList.size() > 0
+                                && times - snoringTermList.get(snoringTermList.size()-1).end > 0
+                                && times - snoringTermList.get(snoringTermList.size()-1).end < 5
+                                && !isOSATermTimeOccur) {
+                            //0.1초 동안 묵음이 70% 이상 발생한 경우 소리가 발생한 것으로 본다.
+                            if(isOSATermCnt+isBreathTermCnt>90 && isBreathTermCnt > 70 && isBreathTermCnt > 20) {
+                                osaContinueCnt = 0;
+                                OSAcurTermTime = times;
+                                isOSATermTimeOccur = true;
+                                isBreathTerm = false;
+                                osaTermList.add(new StartEnd());
+                                osaTermList.get(osaTermList.size()-1).start=times;
+                                osaTermList.get(osaTermList.size() - 1).AnalysisRawDataList = new ArrayList<AnalysisRawData>();
+                            }
+                        }
+                        isOSATermCnt++;
                     }
-                    if (osaCnt > 0 && osaStart == false) {
-                        /*
-                        System.out.print("무호흡 체크를 시작한다.");
-                        Log.v(LOG_TAG2,(String.format("%.2f", times) + "s~" + SleepCheck.isOSATerm + " "
-                                + SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
-                        */
-                        osaStart = true;
-                        osaContinue = false;
-                        osaRecordingExit = 0;
-                        osaStartTimes = times;
-                    } else if (times - osaStartTimes < 5 && osaStart == true) {
-                        // 무호흡 녹음 중 5초 이내에 호흡이 발생하면, 무호흡이 아닌 것으로 본다.
-                        if (osaRecordingContinueCnt < 5) {
-                            /*
-                            System.out.print("무호흡 체크 취소. " + osaRecordingContinueCnt + ", ");
-                            Log.v(LOG_TAG2,(String.format("%.2f", times) + "~"
-                                    + String.format("%.2f", times + 0.01) + "s " + SleepCheck.isOSATerm + " "
-                                    + SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
-                            */
-                            osaStart = false;
-                            osaRecordingContinueCnt = 0;
-                            osaTermList.remove(osaTermList.size() - 1);
-                        } else {
-                            if (((double) (audioData.length / (44100d * 16 * 1))) * 8 < times + 1) {
-                                /*
-                                System.out.print("무호흡 끝.");
-                                Log.v(LOG_TAG2,(
-                                        String.format("%.2f", times) + "~" + String.format("%.2f", times + 1) + "s "
-                                                + SleepCheck.grindingContinueAmpCnt + " "
-                                                + SleepCheck.grindingContinueAmpOppCnt + " "
-                                                + SleepCheck.grindingRepeatAmpCnt);
-                                */
-                                osaStart = false;
-                                osaRecordingContinueCnt = 0;
-                            }
-                            osaContinue = true;
-                            /*
-                            System.out.print("무호흡 중.");
-                            Log.v(LOG_TAG2,(String.format("%.2f", times) + "~"
-                                    + String.format("%.2f", times + 0.01) + "s " + SleepCheck.isOSATerm + " "
-                                    + SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
-                            */
-                        }
-                        // 무호흡 녹음 중 5초 이 후에 소리가 발생하면, 다음 소리가 발생한 구간까지 체크한다.
-                    } else if (times - osaStartTimes > 5 && osaStart == true) {
-                        if (SleepCheck.isBreathTerm == true) { // 숨쉬는 구간이 되었으면, 체크 계속 플래그를 업데이트
-                            if (((double) (audioData.length / (44100d * 16 * 1))) * 8 < times + 1) {
-                                /*
-                                System.out.print("무호흡 끝.");
-                                Log.v(LOG_TAG2,(
-                                        String.format("%.2f", times) + "~" + String.format("%.2f", times + 1) + "s "
-                                                + SleepCheck.grindingContinueAmpCnt + " "
-                                                + SleepCheck.grindingContinueAmpOppCnt + " "
-                                                + SleepCheck.grindingRepeatAmpCnt);
-                                */
-                                osaStart = false;
-                                osaRecordingContinueCnt = 0;
-                            }
-                            osaContinue = true;
-                            /*
-                            System.out.print("무호흡 중.2 ");
-                            Log.v(LOG_TAG2,(String.format("%.2f", times) + "~"
-                                    + String.format("%.2f", times + 0.01) + "s " + SleepCheck.isOSATerm + " "
-                                    + SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
-                            */
-                        } else {
-                            if (osaContinue == true && osaRecordingExit == 1) {
-                                /*
-                                System.out.print("무호흡 끝.");
-                                Log.v(LOG_TAG2,(String.format("%.2f", times) + "~"
-                                        + String.format("%.2f", times + 0.01) + "s " + SleepCheck.isOSATerm + " "
-                                        + SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
-                                */
-                                osaStart = false;
-                                osaRecordingContinueCnt = 0;
-                            }
-                            if (osaCnt > 0) {
-                                osaRecordingExit = 1000;
-                            }
-                            osaCnt = 0;
-                        }
-                    } else {
-                        if (osaStart) {
-                            /*
-                            System.out.print("무호흡 중");
-                            Log.v(LOG_TAG2,(String.format("%.2f", times) + "~"
-                                    + String.format("%.2f", times + 0.01) + "s " + SleepCheck.isOSATerm + " "
-                                    + SleepCheck.isBreathTerm + " " + SleepCheck.isOSATermCnt);
-                            */
+                    //무호흡 발생후 3분동안 종료되지 않는다면 취소
+                    if(osaTermList.size()>0 && osaTermList.get(osaTermList.size()-1).end==0 && times-osaTermList.get(osaTermList.size()-1).start > 180) {
+                        isOSATermTimeOccur = false;
+                        isOSATermCnt = 0;
+                        isBreathTerm = false;
+                        isBreathTermCnt = 0;
+                        OSAcurTermTime = 0.0;
+                        osaTermList.remove(osaTermList.size()-1);
+                    }
+
+                    //무호흡 종료 후 녹음된 시간이 너무 짧으면 삭제한다.
+                    if(osaTermList.size()>0 && osaTermList.get(osaTermList.size()-1).end!=0 && times - osaTermList.get(osaTermList.size()-1).end < 5) {
+                        if(osaTermList.get(osaTermList.size()-1).end - osaTermList.get(osaTermList.size()-1).start < 5 ){
+                            osaTermList.remove(osaTermList.size()-1);
                         }
                     }
 
-                    //무호흡의 앞뒤 구간에 코골이가 있는지 체크해서 없으면 삭제
-                    if(osaTermList.size()>0){
-                        if(snoringTermList.size()<2){
-                            //코골이가 2개가 아니고 무호흡 종료 시간으로 부터 5초가 지났으면 일단 삭제
-                            double tmpOsaEndTimes = osaTermList.get(osaTermList.size()-1).end;
-                            if(tmpOsaEndTimes!= 0 && times - tmpOsaEndTimes > 5) {
-                                osaTermList.remove(osaTermList.get(osaTermList.size() - 1));
-                            }
-                        }else{
-                            //코골이가 2개 이상이라면 무호흡의 시작과 끝에 코골이 분석이 걸리는지 체크
-                            double tmpOsaStartTimes = osaTermList.get(osaTermList.size()-1).start;
-                            double tmpOsaEndTimes = osaTermList.get(osaTermList.size()-1).end;
-                            double tmpBeforeSnoringTImes = snoringTermList.get(snoringTermList.size()-1).end;
-                            double tmpAfterSnoringTImes = snoringTermList.get(snoringTermList.size()-1).start;
-                            if(tmpOsaEndTimes==0 || (tmpOsaStartTimes - tmpBeforeSnoringTImes < 5 && tmpAfterSnoringTImes - tmpOsaEndTimes < 5 )){
-                                //무호흡 시작시간 5초 이내에 코골이가 종료가 발생하고, 무호흡 종료시간 5초 이내에 코골이가 시작이 발생했어야 한다.
-                            }else{
-                                //아니면 삭제
-                                osaTermList.remove(osaTermList.get(osaTermList.size()-1));
+                    //무호흡 종료 후 5초 이내에 코골이가 발생하지 않으면 취소
+                    //무호흡 종료 후 5초 동안 코골이 발생여부를 체크한다.
+                    if(osaTermList.size()>0 && osaTermList.get(osaTermList.size()-1).end!=0 && times - osaTermList.get(osaTermList.size()-1).end < 5) {
+                        if(snoringTermList.size()>0 && isRecording == true){
+                            //코골이가 녹음 중이게 되었을 때, 체크 플래그를 업데이트
+                            if(snoringTermList.get(snoringTermList.size() - 1).end==0){
+                                osaTermList.get(osaTermList.size()-1).chk = 1;
                             }
                         }
-
                     }
+                    //무호흡 종료 후 5초가 넘은 경우 플래그를 체크해서 코골이를 삭제한다.
+                    if(osaTermList.size()>0 && osaTermList.get(osaTermList.size()-1).end!=0 && times - osaTermList.get(osaTermList.size()-1).end > 5) {
+                        if(osaTermList.get(osaTermList.size()-1).chk==0) {
+                            osaTermList.remove(osaTermList.size()-1);
+                        }
+                    }
+
 
                     if(maxARD!=null){
                         if(decibel > maxARD.getDecibel()){
@@ -979,6 +980,7 @@ public class RecordFragment extends Fragment  {
                         if(maxARD.getDecibel()==0){
                             maxARD.setDecibel(tmpMaxDb);
                         }
+                        //System.out.println(calcTime(times)+" "+snoringTermList.size()+" "+SleepCheck.isOSATerm+" "+SleepCheck.isBreathTerm+" "+SleepCheck.isOSAAnsStart);
                         if(snoringTermList.size()>0 && isRecording == true){
                             if(snoringTermList.get(snoringTermList.size() - 1).end!=0){
                                 if(snoringTermList.get(snoringTermList.size() - 1).end > times){
@@ -988,7 +990,7 @@ public class RecordFragment extends Fragment  {
                                 snoringTermList.get(snoringTermList.size() - 1).AnalysisRawDataList.add(maxARD);
                             }
                         }
-                        if(osaTermList.size()>0 && isRecording == true && SleepCheck.isOSAAnsStart==true){
+                        if(osaTermList.size()>0 && isRecording == true && isOSATermTimeOccur){
                             if(osaTermList.get(osaTermList.size() - 1).end!=0){
                                 if(osaTermList.get(osaTermList.size() - 1).end > times){
                                     osaTermList.get(osaTermList.size() - 1).AnalysisRawDataList.add(maxARD);
@@ -999,7 +1001,7 @@ public class RecordFragment extends Fragment  {
                         }
                         maxARD = new AnalysisRawData(times, amplitude, tmpMaxDb, frequency);
                         timesForMaxArd = Math.floor(times);
-                        Log.v(LOG_TAG2,((int)times+" "+ timesForMaxArd+" "+(int)maxARD.getTimes() +" "+maxARD.getAmplitude() +" "+maxARD.getFrequency()+" "+maxARD.getDecibel())+" "+tmpMaxDb);
+
                         tmpMaxDb = 0;
                         tmpMinDb = 99999;
                     }
@@ -1031,6 +1033,24 @@ public class RecordFragment extends Fragment  {
                     ans.addProperty("analysisFileNm",fileInfo[1]);
                     JsonArray ansDList = new JsonArray();
                     JsonObject ansd = new JsonObject();
+                    for ( int s = 0 ; s < snoringTermList.size() ; s ++) {
+                        if(s>0) {
+                            StartEnd se = snoringTermList.get(s);
+                            StartEnd bse = snoringTermList.get(s-1);
+                            double curStartTime = se.start;
+                            double beforeEndTime = bse.end;
+                            if(curStartTime - beforeEndTime <= 1) {
+                                bse.end = se.end;
+                                bse.negitiveCnt += se.negitiveCnt;
+                                bse.positiveCnt += se.positiveCnt;
+                                bse.first = (bse.first+se.first);
+                                bse.second = (bse.second+se.second);
+                                bse.chk += se.chk;
+                                bse.AnalysisRawDataList.addAll(se.AnalysisRawDataList);
+                                snoringTermList.remove(se);
+                            }
+                        }
+                    }
                     for(StartEnd se : snoringTermList) {
                         if(se.end!=0 && se.end>se.start){
                             Log.v(LOG_TAG2,se.getTerm());
@@ -1050,6 +1070,24 @@ public class RecordFragment extends Fragment  {
                             ansDList.add(ansd);
                         }else{
                             snoringTermList.remove(se);
+                        }
+                    }
+                    for ( int s = 0 ; s < grindingTermList.size() ; s ++) {
+                        if(s>0) {
+                            StartEnd se = grindingTermList.get(s);
+                            StartEnd bse = grindingTermList.get(s-1);
+                            double curStartTime = se.start;
+                            double beforeEndTime = bse.end;
+                            if(curStartTime - beforeEndTime <= 1) {
+                                bse.end = se.end;
+                                bse.negitiveCnt += se.negitiveCnt;
+                                bse.positiveCnt += se.positiveCnt;
+                                bse.first = (bse.first+se.first);
+                                bse.second = (bse.second+se.second);
+                                bse.chk += se.chk;
+                                bse.AnalysisRawDataList.addAll(se.AnalysisRawDataList);
+                                grindingTermList.remove(se);
+                            }
                         }
                     }
                     for(StartEnd se : grindingTermList) {
