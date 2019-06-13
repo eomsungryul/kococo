@@ -8,6 +8,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class DateFormatter{
 
@@ -42,6 +43,32 @@ public class DateFormatter{
             e.printStackTrace();
         }
         return result;
+    }
+
+
+    public String longToStringFormat(Long date) {
+        String result = new String();
+
+        int seconds = (int) (date / 1000) % 60 ;
+        int minutes = (int) ((date / (1000*60)) % 60);
+        int hours   = (int) ((date / (1000*60*60)) % 24);
+//
+//        String.format("%d시간 %d분 %d 초",
+//                TimeUnit.MILLISECONDS.toHours(date),
+//                TimeUnit.MILLISECONDS.toMinutes(date) -
+//                        TimeUnit.MINUTES.toMinutes(TimeUnit.MILLISECONDS.toHours(date)),
+//                TimeUnit.MILLISECONDS.toSeconds(date) -
+//                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(date))
+//        );
+//        String.format("%d시간 %d분 %d 초",hours, minutes, seconds)
+        if(hours==0){
+            result = String.format("%d분 %d 초", minutes, seconds);
+        }else{
+            result = String.format("%d시간 %d분",hours, minutes);
+        }
+
+
+        return  result;
     }
 
 }

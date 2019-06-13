@@ -67,6 +67,9 @@ public interface ApiService {
     @PUT("api/record/consulting/{recordId}")
     Call<JsonObject> addConsult(@Path("recordId") int recordId, @Body RequestBody requestData);
 
+    @GET("api/statistics")
+    Call<JsonObject> getStats(@Query("userappid") String userAppId,@Query("dateCd") String dateCd);
+
 //    Call<JSONObject> addRecord(@Body JSONObject data);
 //    Call<JsonObject> addRecord(JsonObject data);
 

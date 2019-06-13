@@ -68,6 +68,7 @@ public class RecordListAdapter extends BaseAdapter {
         this.graphClickListener = graphClickListener;
     }
 
+
     public interface GraphClickListener{
         void clickBtn();
     }
@@ -303,6 +304,9 @@ public class RecordListAdapter extends BaseAdapter {
                 break;
             }
         }
+    }
+
+    public void playGraphMp(int analysisDetailsId, int termStartDt, int termEndDt, String filePath, Context applicationContext) {
     }
 
     public boolean getPlayBtnFlag(){

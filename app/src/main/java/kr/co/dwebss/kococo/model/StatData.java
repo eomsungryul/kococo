@@ -19,7 +19,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 
-public class Account extends RowData {
+public class StatData extends RowData {
     private String mName;
     private String mTime;
     private float mAmount;
@@ -27,7 +27,7 @@ public class Account extends RowData {
     private int mColor;
     private DecimalFormat mFormatter;
 
-    public Account(String name, String time, float amount, String lastFourDigits, int color) {
+    public StatData(String name, String time, float amount, String lastFourDigits, int color) {
         mName = name;
         mAmount = amount;
         mTime = time;

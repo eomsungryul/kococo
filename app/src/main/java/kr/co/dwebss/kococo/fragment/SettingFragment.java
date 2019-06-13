@@ -53,7 +53,7 @@ public class SettingFragment extends Fragment {
         adapter2.addItem(res.getString(R.string.commentsAndSuggestions),3) ;
         // 두 번째 아이템 추가.
 //        adapter.addItem(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_36dp),
-//                "Circle", "Account Circle Black 36dp") ;
+//                "Circle", "StatData Circle Black 36dp") ;
         return v;
     }
 
