@@ -228,12 +228,14 @@ public class SleepCheck {
 						}
 					}else {
 						isOSAAnsStart = false;
-						RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).end=times;
-						RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).first = RecordFragment.firstDecibelAvg;
-						RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).second = RecordFragment.secondDecibelAvg;
-						RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).chk = RecordFragment.snoringDbChkCnt;
-						RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).positiveCnt = isOSATermCnt;
-						RecordFragment.osaTermList.get(RecordFragment.osaTermList.size()-1).negitiveCnt = isOSATermCntOpp;
+						if(RecordFragment.osaTermList.size()>0) {
+                            RecordFragment.osaTermList.get(RecordFragment.osaTermList.size() - 1).end = times;
+                            RecordFragment.osaTermList.get(RecordFragment.osaTermList.size() - 1).first = RecordFragment.firstDecibelAvg;
+                            RecordFragment.osaTermList.get(RecordFragment.osaTermList.size() - 1).second = RecordFragment.secondDecibelAvg;
+                            RecordFragment.osaTermList.get(RecordFragment.osaTermList.size() - 1).chk = RecordFragment.snoringDbChkCnt;
+                            RecordFragment.osaTermList.get(RecordFragment.osaTermList.size() - 1).positiveCnt = isOSATermCnt;
+                            RecordFragment.osaTermList.get(RecordFragment.osaTermList.size() - 1).negitiveCnt = isOSATermCntOpp;
+                        }
 					}
 
 					double tmpD = OSAcurTermTime;
