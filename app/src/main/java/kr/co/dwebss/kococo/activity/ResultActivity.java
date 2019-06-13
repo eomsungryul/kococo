@@ -37,13 +37,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.gson.Gson;
@@ -78,7 +82,8 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
     ApiService apiService;
 
     private static final String TAG = "ResultActivity";
-    private BarChart chart;
+//    private BarChart chart;
+    private LineChart chart;
 
     private RecyclerView resultListRv;
     private ListView recordLv ;
@@ -100,7 +105,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
     FindAppIdUtil fau = new FindAppIdUtil();
 
-    List<BarEntry> entries = new ArrayList<>();
+    List<Entry> entries = new ArrayList<>();
     long referenceTimestamp; // minimum timestamp in your data set;
 
     MediaPlayerUtility mpu;
@@ -310,7 +315,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             // scaling can now only be done on x- and y-axis separately
             chart.setPinchZoom(false);
 
-            chart.setDrawBarShadow(false);
+//            chart.setDrawBarShadow(false);
             chart.setDrawGridBackground(false);
             chart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
                 @Override
@@ -358,23 +363,24 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             // add a nice and smooth animation
             chart.animateY(1500);
             chart.getLegend().setEnabled(false);
-            chart = (BarChart)findViewById(R.id.chart1);
+//            chart = (BarChart) findViewById(R.id.chart1);
+            chart = (LineChart) findViewById(R.id.chart1);
 
-            BarDataSet set1;
-            set1 = new BarDataSet(entries, "Data Set");
+            LineDataSet set1;
+            set1 = new LineDataSet(entries, "Data Set");
             set1.setColors(ColorTemplate.COLORFUL_COLORS);
             //값을 보여줄건지 말건지 여부
             set1.setDrawValues(true);
             set1.setValueTextColor(Color.WHITE);
 
-            ArrayList<IBarDataSet> dataSets = new ArrayList<>();
+            ArrayList<ILineDataSet> dataSets = new ArrayList<>();
             dataSets.add(set1);
 
-            BarData data = new BarData(dataSets);
+            LineData data = new LineData(dataSets);
             //바의 두께를 바꿀수 있는
-            data.setBarWidth(100f);
+//            data.setBarWidth(100f);
             chart.setData(data);
-            chart.setFitBars(true);
+//            chart.setFitBars(true);
 
             chart.invalidate();
 
@@ -437,25 +443,25 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        ArrayList<BarEntry> values = new ArrayList<>();
-        BarDataSet set1;
+        ArrayList<Entry> values = new ArrayList<>();
+        LineDataSet set1;
         if (chart.getData() != null &&
                 chart.getData().getDataSetCount() > 0) {
-            set1 = (BarDataSet) chart.getData().getDataSetByIndex(0);
+            set1 = (LineDataSet) chart.getData().getDataSetByIndex(0);
             set1.setValues(values);
             chart.getData().notifyDataChanged();
             chart.notifyDataSetChanged();
         } else {
-            set1 = new BarDataSet(values, "Data Set");
+            set1 = new LineDataSet(values, "Data Set");
             set1.setColors(ColorTemplate.VORDIPLOM_COLORS);
             set1.setDrawValues(false);
 
-            ArrayList<IBarDataSet> dataSets = new ArrayList<>();
+            ArrayList<ILineDataSet> dataSets = new ArrayList<>();
             dataSets.add(set1);
 
-            BarData data = new BarData(dataSets);
+            LineData data = new LineData(dataSets);
             chart.setData(data);
-            chart.setFitBars(true);
+//            chart.setFitBars(true);
         }
 
         chart.invalidate();

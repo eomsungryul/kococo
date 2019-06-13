@@ -288,7 +288,8 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
     </LinearLayout>
 
 
-    <com.github.mikephil.charting.charts.BarChart
+    <!--<com.github.mikephil.charting.charts.BarChart-->
+    <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/chart1"
         android:layout_width="match_parent"
         android:layout_height="150dp"
