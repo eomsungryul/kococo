@@ -191,11 +191,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             // 녹음 검출리스트 추가.
             JsonArray analysisList = responseData.getAsJsonArray("analysisList");
 
-
-
-
             if(analysisList.size()>0){
-
                 for(int i=0; i<analysisList.size(); i++){
                     JsonObject analysisObj = (JsonObject) analysisList.get(i);
                     analysisObj.get("analysisStartDt");
@@ -239,8 +235,6 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                                 osaCnt++;
                             }
 //                                adapter.addItem(recordData) ;
-
-
                             //데이터를 넣을때는 발생시간 - 최초시간을 넣어야함
                             long date = 0;
                                 date = stringtoDateTimeFormat.parse(recordData.getTermStartDt()).getTime();
@@ -309,11 +303,6 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                 }
             }
 
-
-            //test용
-//        dateTxtHeader.setText(transFormat.format(recordStartD)+"===="+recordData.getAnalysisId());
-
-
             //점수 구하는법
             //공식은 전체 녹음시간 분의 검출된 시간으로 퍼센트로 구한다.
             sleepScore=100-(((float)kococoTerm/(float)recordTerm)*100);
@@ -324,7 +313,6 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             scoreTextView.setText(scoreText);
 
             //시간 HH:mm ~ HH:mm
-//        System.out.println("=============레알 kococoTerm=========="+kococoTerm);
             String recodeText = DateTimeToStringFormat.format(recordStartDT)+"~"+DateTimeToStringFormat.format(recordEndDT);
             TextView recodeTextView = findViewById(R.id.recodeTextView);
             recodeTextView.setText(recodeText);
@@ -363,13 +351,14 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                     }
                 }
             });
-
             MyXAxisValueFormatter xAxisFormatter = new MyXAxisValueFormatter(referenceTimestamp);
             XAxis xAxis = chart.getXAxis();
             xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-            xAxis.setGranularity(1f);
-            xAxis.setCenterAxisLabels(true);
-            xAxis.setDrawGridLines(true);
+            //데이터의 분할 정도
+//            xAxis.setGranularity(6000f);
+            //데이터값 중간에 보이게
+//            xAxis.setCenterAxisLabels(true);
+            xAxis.setDrawGridLines(false);
             //X좌표 폰트
             xAxis.setTextColor(Color.WHITE);
             xAxis.setValueFormatter(xAxisFormatter);
@@ -416,7 +405,6 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 //            chart.setVisibleXRange(0f,30000f);
 //            chart.zoom(chart.getScaleX(),chart.getScaleY(),0f,30000f);
 
-
             ArrayList<IBarDataSet> dataSets = new ArrayList<>();
             dataSets.add(set1);
             dataSets.add(grindSet);
@@ -424,10 +412,12 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
             BarData data = new BarData(set1,grindSet,osaSet);
             //바의 두께를 바꿀수 있는
-            data.setBarWidth(800f);
+            data.setBarWidth(3000f);
             chart.setData(data);
-            chart.setFitBars(true);
+//            chart.setFitBars(true);
 
+//            chart.getBarData().setBarWidth(800f);
+//            chart.groupBars(0,32f ,12f);
             chart.invalidate();
 
             FloatingActionButton consultBtn = (FloatingActionButton) findViewById(R.id.consultBtn);

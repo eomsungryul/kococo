@@ -45,8 +45,8 @@ public interface ApiService {
 //            "Accept: application/json",
 //            "Content-Type: application/json"
 //    })
-    @PUT("api/claim/analysisDetail/{analysisDetailId}")
-    Call<JsonObject> addClaim(@Path("analysisDetailId") Integer analysisDetailId, @Body RequestBody data);
+    @PUT("api/claim/analysis/{analysisId}")
+    Call<JsonObject> addClaim(@Path("analysisId") Integer analysisId, @Body RequestBody data);
 
     //@Query 를 이용하면 ?key=value 식으로 보내진다.
     @GET("api/record/search/findByUserAppId")
