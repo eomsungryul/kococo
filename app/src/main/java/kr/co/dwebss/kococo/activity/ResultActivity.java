@@ -36,21 +36,16 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
-import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.ColorTemplate;
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -82,13 +77,9 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
     ApiService apiService;
 
     private static final String TAG = "ResultActivity";
-//    private BarChart chart;
     private LineChart chart;
 
-    private RecyclerView resultListRv;
-    private ListView recordLv ;
     JsonObject responseData;
-
 
     Date recordStartD;
     Date recordEndD;
@@ -101,7 +92,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
     double sleepScore;
 
     RecordData recordData;
-    JsonNullCheckUtil jncu;
+    JsonNullCheckUtil jncu = new JsonNullCheckUtil();;
 
     FindAppIdUtil fau = new FindAppIdUtil();
 
@@ -130,15 +121,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         float density = metrics.density;
 
-//        initializeData();
         super.onCreate(savedInstanceState);
-        jncu = new JsonNullCheckUtil();
-        //녹음 기록 갱신
-//        FragmentManager fragmentManager = getFragmentManager();
-//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//        Fragment fragment = fragmentManager.findFragmentById(R.id.diaryFr);
-//        fragmentTransaction.remove(fragment);
-//        fragmentTransaction.commit();
 
         //데이터 수신
         Intent intent = getIntent();
@@ -247,12 +230,17 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                                 //데이터 넣을 시에 재생 파일 패스 및 재생 구간을 넣으면된다.
                                 JsonObject recordEntryData = new JsonObject();
                                 Date analysisStartDt =  stringtoDateTimeFormat.parse(recordData.getAnalysisStartDt());
+                                Date analysisEndDt =  stringtoDateTimeFormat.parse(recordData.getAnalysisEndDt());
                                 Date termStartDt =  stringtoDateTimeFormat.parse(recordData.getTermStartDt());
                                 Date termEndDt =  stringtoDateTimeFormat.parse(recordData.getTermEndDt());
 
                                 recordEntryData.addProperty("filePath",recordData.getAnalysisFileAppPath()+"/"+recordData.getAnalysisFileNm());
-                                recordEntryData.addProperty("termStartDt",termStartDt.getTime()-analysisStartDt.getTime());
-                                recordEntryData.addProperty("termEndDt",termEndDt.getTime()-analysisStartDt.getTime());
+                                //그래프 클릭 시에 구간만 재생하는
+//                                recordEntryData.addProperty("termStartDt",termStartDt.getTime()-analysisStartDt.getTime());
+//                                recordEntryData.addProperty("termEndDt",termEndDt.getTime()-analysisStartDt.getTime());
+                                //그래프 클릭 시에 전체 재생
+                                recordEntryData.addProperty("termStartDt",analysisStartDt.getTime()-analysisStartDt.getTime());
+                                recordEntryData.addProperty("termEndDt",analysisEndDt.getTime()-analysisStartDt.getTime());
                                 recordEntryData.addProperty("analysisDetailsId",recordData.getAnalysisDetailsId());
 
                                 if(analysisDetailsObj.has("analysisData")){
@@ -326,6 +314,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                     playingDetailId = graphData.get("analysisDetailsId").getAsInt();
                     try {
                         adapter.playActivityMp(graphData.get("analysisDetailsId").getAsInt(),graphData.get("termStartDt").getAsInt(),graphData.get("termEndDt").getAsInt(),graphData.get("filePath").getAsString(),getApplicationContext());
+//                        adapter.playGraphMp(graphData.get("analysisDetailsId").getAsInt(),graphData.get("termStartDt").getAsInt(),graphData.get("termEndDt").getAsInt(),graphData.get("filePath").getAsString(),getApplicationContext());
                     } catch (IOException e1) {
                         e1.printStackTrace();
                     }
@@ -336,7 +325,6 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                     if(adapter.getPlayBtnFlag()){
                         adapter.stopActivityMp(playingDetailId);
                     }
-
                 }
             });
 
@@ -391,15 +379,12 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                     apiService.getProfile(fau.getAppid(getApplicationContext())).enqueue(new Callback<JsonObject>() {
                         @Override
                         public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                            System.out.println(" ========================response: "+response.body());
+                            System.out.println(" ===========getProfile=============response: "+response.body());
                             JsonObject result = response.body();
                             if(result.has("userAge")){
                                 //프로필 있음 전문가 상담하기 페이지로 이동
                                 Intent intent = new Intent(v.getContext(), ConsultActivity.class);
                                 intent.putExtra("responseData",response.body().toString()); /*송신*/
-                                System.out.println("============analysisId=========="+analysisId);
-                                System.out.println("============recordId=========="+recordId);
-                                System.out.println("============analysisServerUploadPath=========="+analysisServerUploadPath);
                                 intent.putExtra("analysisId",analysisId); /*송신*/
                                 intent.putExtra("recordId",recordId); /*송신*/
                                 intent.putExtra("analysisServerUploadPath",analysisServerUploadPath); /*송신*/
@@ -413,7 +398,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                         }
                         @Override
                         public void onFailure(Call<JsonObject> call, Throwable t) {
-                            System.out.println(" ========================Throwable: "+t.getMessage());
+                            System.out.println(" =============getProfile===========Throwable: "+t.getMessage());
                         }
                     });
 
@@ -443,6 +428,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        System.out.println("============onProgressChanged=============");
         ArrayList<Entry> values = new ArrayList<>();
         LineDataSet set1;
         if (chart.getData() != null &&
@@ -463,7 +449,6 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             chart.setData(data);
 //            chart.setFitBars(true);
         }
-
         chart.invalidate();
     }
 
@@ -482,5 +467,4 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 //         MediaPlayer 해지
         mpu.endMp();
     }
-
 }
