@@ -127,6 +127,7 @@ public class RecordFragment extends Fragment  {
     JsonObject recordData;
     String userAppId;
     String recordStartDt;
+    Long recordStartDtL;
     String recordEndDt;
     SimpleDateFormat dayTimeDefalt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -174,6 +175,7 @@ public class RecordFragment extends Fragment  {
                         recodeBtn.setText("녹음 종료");
                         recodeFlag = true;
                         recordStartDt= dayTimeDefalt.format(new Date(System.currentTimeMillis()));
+                        recordStartDtL= System.currentTimeMillis();
                         start();
                     }
                 }else{
@@ -505,8 +507,8 @@ public class RecordFragment extends Fragment  {
                                 Log.v(LOG_TAG2,se.getTerm());
                                 ansd = new JsonObject();
                                 ansd.addProperty("termTypeCd",200101);
-                                ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
-                                ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+                                ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartDtL+se.start*1000))));
+                                ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartDtL+se.end*1000))));
                                 try {
                                     Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                                     String andRList = gson.toJson(se.printAnalysisRawDataList());
@@ -526,8 +528,8 @@ public class RecordFragment extends Fragment  {
                                 Log.v(LOG_TAG2,se.getTerm());
                                     ansd = new JsonObject();
                                     ansd.addProperty("termTypeCd",200102);
-                                    ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
-                                    ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+                                    ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartDtL+se.start*1000))));
+                                    ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartDtL+se.end*1000))));
                                     try {
                                         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                                         String andRList = gson.toJson(se.printAnalysisRawDataList());
@@ -547,8 +549,8 @@ public class RecordFragment extends Fragment  {
                                 Log.v(LOG_TAG2,se.getTerm());
                                     ansd = new JsonObject();
                                     ansd.addProperty("termTypeCd",200103);
-                                    ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
-                                    ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+                                    ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartDtL+se.start*1000))));
+                                    ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartDtL+se.end*1000))));
                                     try {
                                         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                                         String andRList = gson.toJson(se.printAnalysisRawDataList());
@@ -1034,8 +1036,8 @@ public class RecordFragment extends Fragment  {
                             Log.v(LOG_TAG2,se.getTerm());
                             ansd = new JsonObject();
                             ansd.addProperty("termTypeCd",200101);
-                            ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
-                            ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+                            ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartDtL+se.start*1000))));
+                            ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartDtL+se.end*1000))));
                             try {
                                 Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                                 String andRList = gson.toJson(se.printAnalysisRawDataList());
@@ -1055,8 +1057,8 @@ public class RecordFragment extends Fragment  {
                             Log.v(LOG_TAG2,se.getTerm());
                             ansd = new JsonObject();
                             ansd.addProperty("termTypeCd",200102);
-                            ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
-                            ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+                            ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartDtL+se.start*1000))));
+                            ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartDtL+se.end*1000))));
                             try {
                                 Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                                 String andRList = gson.toJson(se.printAnalysisRawDataList());
@@ -1076,8 +1078,8 @@ public class RecordFragment extends Fragment  {
                             Log.v(LOG_TAG2,se.getTerm());
                             ansd = new JsonObject();
                             ansd.addProperty("termTypeCd",200103);
-                            ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.start*1000))));
-                            ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartingTIme+se.end*1000))));
+                            ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordStartDtL+se.start*1000))));
+                            ansd.addProperty("termEndDt",dayTimeDefalt.format(new Date((long) (recordStartDtL+se.end*1000))));
                             try {
                                 Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                                 String andRList = gson.toJson(se.printAnalysisRawDataList());
@@ -1220,11 +1222,11 @@ class StartEnd {
                         + " negitiveCnt: " + negitiveCnt;
     }
 
-    public String getTermForRequest(int termCd, long recordStartingTIme) {
+    public String getTermForRequest(int termCd, long recordStartDtL) {
         SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         return "termTypeCd: " + termCd + ", termStartDt: "
-                + dayTime.format(new Date((long) (recordStartingTIme + this.start * 1000))) + ",termEndDt: "
-                + dayTime.format(new Date((long) (recordStartingTIme + this.end * 1000)));
+                + dayTime.format(new Date((long) (recordStartDtL + this.start * 1000))) + ",termEndDt: "
+                + dayTime.format(new Date((long) (recordStartDtL + this.end * 1000)));
     }
 
 //    public String printAnalysisRawDataList() {
