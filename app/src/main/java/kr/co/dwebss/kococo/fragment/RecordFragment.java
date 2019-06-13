@@ -515,7 +515,7 @@ public class RecordFragment extends Fragment  {
                                 StartEnd bse = snoringTermList.get(s-1);
                                 double curStartTime = se.start;
                                 double beforeEndTime = bse.end;
-                                if(curStartTime - beforeEndTime <= 1) {
+                                if(curStartTime - beforeEndTime <= 1 && se.end!=0) {
                                     bse.end = se.end;
                                     bse.negitiveCnt += se.negitiveCnt;
                                     bse.positiveCnt += se.positiveCnt;
@@ -555,7 +555,7 @@ public class RecordFragment extends Fragment  {
                                 StartEnd bse = grindingTermList.get(s-1);
                                 double curStartTime = se.start;
                                 double beforeEndTime = bse.end;
-                                if(curStartTime - beforeEndTime <= 1) {
+                                if(curStartTime - beforeEndTime <= 1 && se.end!=0) {
                                     bse.end = se.end;
                                     bse.negitiveCnt += se.negitiveCnt;
                                     bse.positiveCnt += se.positiveCnt;
@@ -1046,7 +1046,7 @@ public class RecordFragment extends Fragment  {
                             StartEnd bse = snoringTermList.get(s-1);
                             double curStartTime = se.start;
                             double beforeEndTime = bse.end;
-                            if(curStartTime - beforeEndTime <= 1) {
+                            if(curStartTime - beforeEndTime <= 1 && se.end!=0) {
                                 bse.end = se.end;
                                 bse.negitiveCnt += se.negitiveCnt;
                                 bse.positiveCnt += se.positiveCnt;
@@ -1086,7 +1086,7 @@ public class RecordFragment extends Fragment  {
                             StartEnd bse = grindingTermList.get(s-1);
                             double curStartTime = se.start;
                             double beforeEndTime = bse.end;
-                            if(curStartTime - beforeEndTime <= 1) {
+                            if(curStartTime - beforeEndTime <= 1 && se.end!=0) {
                                 bse.end = se.end;
                                 bse.negitiveCnt += se.negitiveCnt;
                                 bse.positiveCnt += se.positiveCnt;
