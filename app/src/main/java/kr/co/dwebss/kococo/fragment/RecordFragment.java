@@ -460,7 +460,7 @@ public class RecordFragment extends Fragment  {
                     final String amp = String.valueOf(amplitude + "Amp");
                     final String db = String.valueOf(decibel + "db");
                     final String hz = String.valueOf(frequency + "Hz");
-                    Log.v(LOG_TAG3,(calcTime(times)+" "+hz +" "+db+" "+amp+" "+decibel+"vs"+SleepCheck.getMaxDB())+","+SleepCheck.getMinDB()+" "+SleepCheck.noiseChkSum+" "+SleepCheck.noiseChkCnt);
+                    //Log.v(LOG_TAG3,(calcTime(times)+" "+hz +" "+db+" "+amp+" "+decibel+"vs"+SleepCheck.getMaxDB())+","+SleepCheck.getMinDB()+" "+SleepCheck.noiseChkSum+" "+SleepCheck.noiseChkCnt);
 
                     //실제로는 1초 이후 분석한다.
                     if (i < 100) {
@@ -524,6 +524,7 @@ public class RecordFragment extends Fragment  {
                                     bse.chk += se.chk;
                                     bse.AnalysisRawDataList.addAll(se.AnalysisRawDataList);
                                     snoringTermList.remove(se);
+                                    s--;
                                 }
                             }
                         }
@@ -563,6 +564,7 @@ public class RecordFragment extends Fragment  {
                                     bse.chk += se.chk;
                                     bse.AnalysisRawDataList.addAll(se.AnalysisRawDataList);
                                     grindingTermList.remove(se);
+                                    s--;
                                 }
                             }
                         }
@@ -726,6 +728,10 @@ public class RecordFragment extends Fragment  {
                                 tmpMinDb = allFHAndDB[m];
                             }
                         }
+                        if(tmpMaxDb>40) {
+                            Log.v(LOG_TAG3, (calcTime(times) + " " + hz + " " + db + " " + amp + " " + decibel + ", 100db: " + tmpMaxDb + "db, max: " + SleepCheck.getMaxDB()) + ", min: " + SleepCheck.getMinDB() + " " + SleepCheck.noiseChkSum + " " + SleepCheck.noiseChkCnt);
+                        }
+
                             /*
                             Arrays.stream(allFHAndDB).forEach(e ->{
                                         if( e > tmpMaxDb) {
@@ -737,7 +743,7 @@ public class RecordFragment extends Fragment  {
                                     }
                             );
                             */
-                        if(decibel > chkSnoringDb) {
+                        if(decibel > chkSnoringDb && tmpMaxDb>40) {
                             //코골이 음파가 발생했음.
                             if(soundStartInRecording==false) {
                                 //코골이 분석 중 이갈이 구별 하기위한 카운트 초기화, 이갈이라면 이 카운트가 매우 높아선 안된다.
@@ -916,6 +922,7 @@ public class RecordFragment extends Fragment  {
                         //무호흡을 측정하기 위한 분석 시작 변수 초기화
                         //코골이가 발생하고 5초가 안지났어야 함.
                         if(snoringTermList.size() > 0
+                                && snoringTermList.get(snoringTermList.size()-1).end != 0
                                 && times - snoringTermList.get(snoringTermList.size()-1).end > 0
                                 && times - snoringTermList.get(snoringTermList.size()-1).end < 5
                                 && !isOSATermTimeOccur) {
@@ -1048,6 +1055,7 @@ public class RecordFragment extends Fragment  {
                                 bse.chk += se.chk;
                                 bse.AnalysisRawDataList.addAll(se.AnalysisRawDataList);
                                 snoringTermList.remove(se);
+                                s--;
                             }
                         }
                     }
@@ -1087,6 +1095,7 @@ public class RecordFragment extends Fragment  {
                                 bse.chk += se.chk;
                                 bse.AnalysisRawDataList.addAll(se.AnalysisRawDataList);
                                 grindingTermList.remove(se);
+                                s--;
                             }
                         }
                     }
