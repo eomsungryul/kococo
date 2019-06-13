@@ -94,7 +94,8 @@ public class RecordListAdapter extends BaseAdapter {
 
         // 화면에 표시될 View(Layout이 inflate된)으로부터 위젯에 대한 참조 획득
 //        ImageView iconImageView = (ImageView) convertView.findViewById(R.id.imageView1) ;
-        TextView titleTextView = (TextView) convertView.findViewById(R.id.recordNameText) ;
+        TextView timeTextView = (TextView) convertView.findViewById(R.id.recordTimeText) ;
+        TextView nameTextView = (TextView) convertView.findViewById(R.id.recordNameText) ;
 //        TextView descTextView = (TextView) convertView.findViewById(R.id.textView2) ;
 
         // Data Set(listViewItemList)에서 position에 위치한 데이터 참조 획득
@@ -102,7 +103,9 @@ public class RecordListAdapter extends BaseAdapter {
 
         // 아이템 내 각 위젯에 데이터 반영
 //        iconImageView.setImageDrawable(listViewItem.getIcon());
-        titleTextView.setText(listViewItem.getTitle());
+        String[] title=listViewItem.getTitle().split("/");
+        timeTextView.setText(title[1]);
+        nameTextView.setText(title[0]);
         System.out.println("===========listViewItem.getTitle()==========="+listViewItem.getTitle());
 //        descTextView.setText(listViewItem.getDesc());
 
@@ -115,55 +118,23 @@ public class RecordListAdapter extends BaseAdapter {
         playBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Toast.makeText(context, "파일정보 : "+position+" : "+listViewItem.getAnalysisFileAppPath()+"/"+listViewItem.getAnalysisFileNm(), Toast.LENGTH_SHORT).show();
-                //후에 액티비티에 접근할때 사용한다.
-                graphClickListener.clickBtn();
-                //재생버튼 누를 시 정지버튼으로 변경하는 메소드
-                //재생중이거나 해당버튼이 재생position 값과 다른 경우에만 초기화를 해줌
-                if(isPlaying && playPosition != position){
-                    //재생 중지 버튼
-                    for(int i=0; i<getCount();i++){
-                        View v2 = parent.getChildAt(i);
-                        ImageButton playBtn2 = (ImageButton) v2.findViewById(R.id.recordPlay);
-                        playBtn2.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
-                    }
-                    if(mediaPlayer.isPlaying()){
-                        mediaPlayer.stop();
-                        mediaPlayer.reset();
-                    }
-                    cdt.cancel();
-                    playBtnFlag = false;
-                    isPlaying = false;
-                }
-                if(!playBtnFlag){
-                    //재생일 시에
-                    playBtn.setImageResource(R.drawable.baseline_pause_white_48dp);
-                    playBtnFlag = true;
-                    playPosition = position;
-                    SimpleDateFormat stringtoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-                    long startTerm = 0L;
-                    long endTerm = 0L;
-                    try {
-                        Date analysisStartDt =  stringtoDateFormat.parse(listViewItem.getAnalysisStartDt().toString());
-                        Date termStartDt =  stringtoDateFormat.parse(listViewItem.getTermStartDt().toString());
-                        Date termEndDt =  stringtoDateFormat.parse(listViewItem.getTermEndDt().toString());
-                        startTerm = termStartDt.getTime()-analysisStartDt.getTime();
-                        endTerm = termEndDt.getTime()-analysisStartDt.getTime();
-//                        System.out.println("================termEndDt:"+termEndDt);
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        playMp((int)startTerm,(int)endTerm,listViewItem.getAnalysisFileAppPath()+"/"+listViewItem.getAnalysisFileNm(),context,playBtn);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }else{
-                    stopMp(playBtn);
-                }
+                rowClickEvt(position,listViewItem,playBtn);
             }
         });
 
+        timeTextView.setOnClickListener(new TextView.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                rowClickEvt(position,listViewItem,playBtn);
+            }
+        });
+
+        nameTextView.setOnClickListener(new TextView.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                rowClickEvt(position,listViewItem,playBtn);
+            }
+        });
         //{"userAppId":"7dc9e960-b0db-4c1c-81b5-2c8f2ce7ca4f","recordId":116,"recordStartD":"2019-05-30","recordStartDt":"2019-05-30T15:13:46","recordEndD":"2019-05-30","recordEndDt":"2019-05-30T15:14:46","consultingYn":"N","consultingReplyYn":"N","analysisList":[{"analysisId":93,"analysisStartD":"2019-05-30T00:00:00","analysisStartDt":"2019-05-30T15:13:50","analysisEndD":"2019-05-30T00:00:00","analysisEndDt":"2019-05-30T15:14:49","analysisFileNm":"snoring-20191330_1513-30_1514_1559196886407.wav","analysisFileAppPath":"/data/user/0/kr.co.dwebss.kococo/files/rec_data/29","analysisServerUploadYn":"N","analysisDetailsList":[{"analysisId":93,"analysisDetailsId":97,"termTypeCd":200102,"termStartDt":"2019-05-30T15:14:37","termEndDt":"2019-05-30T15:14:42","claimYn":"N"}],"_links":{"record":{"href":"http://52.79.88.47:8080/kococo/api/record/116"}}}],"_links":{"self":{"href":"http://52.79.88.47:8080/kococo/api/record/116"},"record":{"href":"http://52.79.88.47:8080/kococo/api/record/116"},"admin":{"href":"http://52.79.88.47:8080/kococo/api/record/116/admin"},"user":{"href":"http://52.79.88.47:8080/kococo/api/record/116/user"},"sleepStatusCd":{"href":"http://52.79.88.47:8080/kococo/api/record/116/sleepStatusCd"}}}
 
 
@@ -258,7 +229,6 @@ public class RecordListAdapter extends BaseAdapter {
     public void playActivityMp(int adi,int startTime, int endTime , String filePath, Context context)throws IOException {
 //        View v = viewGroup.getChildAt(position);
 //        ImageButton playBtn = (ImageButton) v.findViewById(R.id.recordPlay);
-
         View v;
         ImageButton playBtn;
         if(isPlaying && analysisDetailsId != adi){
@@ -306,7 +276,64 @@ public class RecordListAdapter extends BaseAdapter {
         }
     }
 
-    public void playGraphMp(int analysisDetailsId, int termStartDt, int termEndDt, String filePath, Context applicationContext) {
+    public void playGraphMp(int termStartDt, int termEndDt, String filePath, Context applicationContext) throws IOException {
+        System.out.println("=============termStartDt()======="+termStartDt+"====termEndDt=="+termEndDt);
+//        playMp(termStartDt, termEndDt , filePath, applicationContext, playBtn);
+    }
+
+    public void rowClickEvt(int position,RecordData listViewItem,ImageButton playBtn) {
+//              Toast.makeText(context, "파일정보 : "+position+" : "+listViewItem.getAnalysisFileAppPath()+"/"+listViewItem.getAnalysisFileNm(), Toast.LENGTH_SHORT).show();
+        //후에 액티비티에 접근할때 사용한다.
+        graphClickListener.clickBtn();
+        //재생버튼 누를 시 정지버튼으로 변경하는 메소드
+        //재생중이거나 해당버튼이 재생position 값과 다른 경우에만 초기화를 해줌
+        if(isPlaying && playPosition != position){
+            //재생 중지 버튼
+            for(int i=0; i<getCount();i++){
+                View v2 = viewGroup.getChildAt(i);
+                ImageButton playBtn2 = (ImageButton) v2.findViewById(R.id.recordPlay);
+                playBtn2.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
+            }
+            if(mediaPlayer.isPlaying()){
+                mediaPlayer.stop();
+                mediaPlayer.reset();
+            }
+            cdt.cancel();
+            playBtnFlag = false;
+            isPlaying = false;
+        }
+        if(!playBtnFlag){
+            //재생일 시에
+            playBtn.setImageResource(R.drawable.baseline_pause_white_48dp);
+            playBtnFlag = true;
+            playPosition = position;
+            System.out.println("=============position==============="+playPosition);
+            SimpleDateFormat stringtoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+            long startTerm = 0L;
+            long endTerm = 0L;
+            try {
+                //재생구간만 하는것
+                Date analysisStartDt =  stringtoDateFormat.parse(listViewItem.getAnalysisStartDt().toString());
+                Date analysisEndDt =  stringtoDateFormat.parse(listViewItem.getAnalysisEndDt().toString());
+//                Date termStartDt =  stringtoDateFormat.parse(listViewItem.getTermStartDt().toString());
+//                Date termEndDt =  stringtoDateFormat.parse(listViewItem.getTermEndDt().toString());
+//                startTerm = termStartDt.getTime()-analysisStartDt.getTime();
+//                endTerm = termEndDt.getTime()-analysisStartDt.getTime();
+                //전체구간 재생
+                startTerm = 0;
+                endTerm = analysisEndDt.getTime()-analysisStartDt.getTime();
+//                        System.out.println("================termEndDt:"+termEndDt);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            try {
+                playMp((int)startTerm,(int)endTerm,listViewItem.getAnalysisFileAppPath()+"/"+listViewItem.getAnalysisFileNm(),context,playBtn);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }else{
+            stopMp(playBtn);
+        }
     }
 
     public boolean getPlayBtnFlag(){

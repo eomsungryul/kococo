@@ -20,7 +20,8 @@ public class MyXAxisValueFormatter implements IAxisValueFormatter
 
     public MyXAxisValueFormatter(long referenceTimestamp) {
         this.referenceTimestamp = referenceTimestamp;
-        this.mDataFormat = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
+//        this.mDataFormat = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
+        this.mDataFormat = new SimpleDateFormat("HH:mm", Locale.KOREA);
         this.mDate = new Date();
     }
 
