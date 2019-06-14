@@ -52,6 +52,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import org.w3c.dom.Text;
+
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -149,7 +151,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             TextView dateTxtHeader = (TextView) findViewById(R.id.date_txt_header);
             Date from = new Date();
             SimpleDateFormat stringtoDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            SimpleDateFormat transFormat = new SimpleDateFormat("yyyy년 MM월 dd일");
+            SimpleDateFormat transFormat = new SimpleDateFormat("yy/MM/dd");
             SimpleDateFormat stringtoDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             SimpleDateFormat DateTimeToStringFormat = new SimpleDateFormat("HH:mm");
             SimpleDateFormat DateSecondToStringFormat = new SimpleDateFormat("HH:mm:ss");
@@ -160,26 +162,29 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                 recordStartDT =  stringtoDateTimeFormat.parse(responseData.get("recordStartDt").toString().replace("\"",""));
                 recordEndDT =  stringtoDateTimeFormat.parse(responseData.get("recordEndDt").toString().replace("\"",""));
                 recordTerm = recordEndDT.getTime()-recordStartDT.getTime();
-
                 recordId = responseData.get("recordId").getAsInt();
-
                 referenceTimestamp = recordStartDT.getTime();
 
             } catch (ParseException e) {
                 e.printStackTrace();
             }
 
-            if(recordStartD.equals(recordEndD)){
-                dateTxtHeader.setText(transFormat.format(recordStartD));
-            }else{
-                dateTxtHeader.setText(transFormat.format(recordStartD)+"~"+transFormat.format(recordEndD));
-            }
+            //시간 HH:mm ~ HH:mm
+            String recodeText = DateTimeToStringFormat.format(recordStartDT)+"~"+DateTimeToStringFormat.format(recordEndDT);
+//            TextView recodeTextView = findViewById(R.id.recodeTextView);
+//            recodeTextView.setText(recodeText);
+
+//            if(recordStartD.equals(recordEndD)){
+//                dateTxtHeader.setText(transFormat.format(recordStartD)+"\n"+recodeText);
+//            }else{
+                dateTxtHeader.setText(transFormat.format(recordStartD)+" "
+                        + DateTimeToStringFormat.format(recordStartDT)+"\n  ~ "+transFormat.format(recordEndD)+" "+DateTimeToStringFormat.format(recordEndDT));
+//            }
 
             // 하단에 녹음 검출리스트 파일 리스트  Adapter 생성
             RecordListAdapter adapter = new RecordListAdapter(this, new RecordListAdapter.GraphClickListener() {
                 @Override
                 public void clickBtn() {
-                    System.out.println("===============된다...");
                 }
             }) ;
 
@@ -209,6 +214,12 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                             recordData.setAnalysisStartDt(jncu.JsonStringNullCheck(analysisObj,"analysisStartDt"));
                             recordData.setAnalysisEndDt(jncu.JsonStringNullCheck(analysisObj,"analysisEndDt"));
 
+                            recordData.setAnalysisEndDt(jncu.JsonStringNullCheck(analysisObj,"analysisEndDt"));
+
+//                            String analysisRawStr =analysisObj.get("analysisData").getAsString();
+////                                    System.out.println("=================analysisRawStr======================"+analysisRawStr);
+//                            JsonArray analysisRawDataArr = new JsonParser().parse(analysisRawStr).getAsJsonArray();
+
                             analysisId = analysisObj.get("analysisId").getAsInt();
                             analysisServerUploadPath = jncu.JsonStringNullCheck(analysisObj,"analysisFileAppPath")+"/"+jncu.JsonStringNullCheck(analysisObj,"analysisFileNm");
 
@@ -221,11 +232,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                             recordData.setTermTypeCd(termTypeCd);
                             //증상 시작시간(HH:mm:ss) ~ 종료시간(HH:mm:ss) 으로 표기
                             try {
-                            if(termTypeCd==200101){
-//                                recordData.setTitle("코골이 : "+df.returnStringISO8601ToHHmmssFormat(recordData.getTermStartDt())
-//                                        +" ~ "+ df.returnStringISO8601ToHHmmssFormat(recordData.getTermEndDt()));
-                                snoreCnt++;
-                            }else if(termTypeCd==200102){
+                            if(termTypeCd==200102){
 //                                recordData.setTitle("이갈이 : "+df.returnStringISO8601ToHHmmssFormat(recordData.getTermStartDt())
 //                                        +" ~ "+ df.returnStringISO8601ToHHmmssFormat(recordData.getTermEndDt()));
                                 grindCnt++;
@@ -259,6 +266,10 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                                     String analysisRawStr =analysisDetailsObj.get("analysisData").getAsString();
 //                                    System.out.println("=================analysisRawStr======================"+analysisRawStr);
                                     JsonArray analysisRawDataArr = new JsonParser().parse(analysisRawStr).getAsJsonArray();
+
+
+
+
                                     if(analysisRawDataArr.size()>0){
                                         for(int k =0; k<analysisRawDataArr.size(); k++){
                                             JsonObject analysisRawData = (JsonObject) analysisRawDataArr.get(k);
@@ -277,13 +288,16 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                                                 int minute =time/60;
 
                                                 if(termTypeCd==200101){
-                                                    entries.add(new BarEntry(minute*60*1000, analysisRawData.get("DB").getAsFloat(), recordEntryData));
+//                                                    entries.add(new BarEntry(minute*60*1000, analysisRawData.get("DB").getAsFloat(), recordEntryData));
+                                                    entries.add(new BarEntry(minute, analysisRawData.get("DB").getAsFloat(), recordEntryData));
                                                 }else if(termTypeCd==200102){
-                                                    grindEntries.add(new BarEntry(minute*60*1000, analysisRawData.get("DB").getAsFloat(), recordEntryData));
+//                                                    grindEntries.add(new BarEntry(minute*60*1000, analysisRawData.get("DB").getAsFloat(), recordEntryData));
+                                                    grindEntries.add(new BarEntry(minute, analysisRawData.get("DB").getAsFloat(), recordEntryData));
                                                 }else{
-                                                    osaEntries.add(new BarEntry(minute*60*1000, analysisRawData.get("DB").getAsFloat(), recordEntryData));
+//                                                    osaEntries.add(new BarEntry(minute*60*1000, analysisRawData.get("DB").getAsFloat(), recordEntryData));
+                                                    osaEntries.add(new BarEntry(minute, analysisRawData.get("DB").getAsFloat(), recordEntryData));
                                                 }
-
+//                                                System.out.println("============time"+time+"=====================minute"+minute);
 //                                            entries.add(new BarEntry((analysisRawData.get("TIME").getAsInt()*1000), analysisRawData.get("DB").getAsFloat(), recordEntryData));
                                         }
                                     }
@@ -295,12 +309,26 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                                 e.printStackTrace();
                             }
                     }
-                        recordData.setTitle("코골이 : "+snoreCnt+"회"+"이갈이 : "+grindCnt+"회"+"무호흡 : "+osaCnt+"회 /"
-                                        +df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
-                                        +" ~ "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt()));
+                        String detectedTxt = "";
+                        if(grindCnt>0){
+                            detectedTxt = detectedTxt+"이갈이 : "+grindCnt+"회";
+                        }
+                        if(osaCnt>0){
+                            if(grindCnt>0){
+                                detectedTxt = detectedTxt+", ";
+                            }
+                            detectedTxt = detectedTxt+"무호흡 : "+osaCnt+"회";
+                        }
+                        //~시~분~초부터 ~시~분~초까지 코를 골았습니다. \n (무호흡 0회, )
+                        recordData.setTitle(df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
+                                        +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지\n 코를 골았습니다."
+                                +"("+detectedTxt+")");
                         adapter.addItem(recordData) ;
                     }
                 }
+            }else{
+                TextView nullTextView = (TextView) findViewById(R.id.nullTextView);
+                nullTextView.setText("검출된 코골이가 없습니다. \n건강한 수면을 하셨네요!");
             }
 
             //점수 구하는법
@@ -311,11 +339,6 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             Resources res = getResources();
             String scoreText = String.format(res.getString(R.string.score),Math.round(sleepScore));
             scoreTextView.setText(scoreText);
-
-            //시간 HH:mm ~ HH:mm
-            String recodeText = DateTimeToStringFormat.format(recordStartDT)+"~"+DateTimeToStringFormat.format(recordEndDT);
-            TextView recodeTextView = findViewById(R.id.recodeTextView);
-            recodeTextView.setText(recodeText);
 
             //차트 시작
             chart = findViewById(R.id.chart1);
@@ -352,6 +375,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                 }
             });
             MyXAxisValueFormatter xAxisFormatter = new MyXAxisValueFormatter(referenceTimestamp);
+//            MyXAxisValueFormatter xAxisFormatter = new MyXAxisValueFormatter(0);
             XAxis xAxis = chart.getXAxis();
             xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
             //데이터의 분할 정도
@@ -365,9 +389,10 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
             //시작과 끝점을 정해줘야 그래프가 제대로잘 나옴
             xAxis.setAxisMinimum(0);
-            xAxis.setAxisMaximum((float)(recordEndDT.getTime()-referenceTimestamp+(30*1000)));
-            System.out.println("=========recordEndDT.getTime()-referenceTimestamp===recordTerm============"+recordTerm);
+            xAxis.setAxisMaximum((float)(recordEndDT.getTime()-referenceTimestamp)/(60*1000));
+            System.out.println("=========recordEndDT.getTime()-referenceTimestamp===recordTerm============"+(float)(recordEndDT.getTime()-referenceTimestamp)/(60*1000));
 
+            chart.setScaleYEnabled(false);
             chart.getAxisLeft().setDrawGridLines(false);
             //Y좌표 폰트
             chart.getAxisLeft().setTextColor(Color.WHITE);
@@ -412,9 +437,9 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
             BarData data = new BarData(set1,grindSet,osaSet);
             //바의 두께를 바꿀수 있는
-            data.setBarWidth(3000f);
+//            data.setBarWidth(3000f);
             chart.setData(data);
-//            chart.setFitBars(true);
+            chart.setFitBars(true);
 
 //            chart.getBarData().setBarWidth(800f);
 //            chart.groupBars(0,32f ,12f);

@@ -21,7 +21,7 @@
     <string name="recordEnd">녹음 종료</string>
 
     <!--resultActivity -->
-    <string name="status">상태</string>
+    <string name="status">오늘 수면은 어떠셨나요?</string>
     <string name="score">%1$d점</string>
     <string name="allBtn">전체</string>
     <string name="snoreBtn">코골이</string>
@@ -29,7 +29,7 @@
     <string name="apneaBtn">무호흡</string>
 
     <string-array name="statusArr">
-        <item >일반잠</item>
+        <item >숙면</item>
         <item >음주</item>
         <item >야식</item>
         <item >운동</item>

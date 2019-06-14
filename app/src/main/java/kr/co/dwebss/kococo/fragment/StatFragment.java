@@ -91,6 +91,8 @@ public class StatFragment extends Fragment implements SeekBar.OnSeekBarChangeLis
                 int sleepScore=result.get("sleepScore").getAsInt();
                 DateFormatter df = new DateFormatter();
 
+                long totalTimes=recordedTimes+snoringTimes+osaTimes+grindingTimes;
+
                 stats.add(new StatData(res.getString(R.string.goodSleepRow),df.longToStringFormat(recordedTimes), recordedTimes, "1", 0xFF1EB980));
                 stats.add(new StatData(res.getString(R.string.snoreRow), df.longToStringFormat(snoringTimes),snoringTimes, "1", 0xFFFF6859));
                 stats.add(new StatData(res.getString(R.string.grindRow),df.longToStringFormat(grindingTimes),grindingTimes, "1", 0xFFFFCF44));
@@ -166,6 +168,7 @@ public class StatFragment extends Fragment implements SeekBar.OnSeekBarChangeLis
                 chart.setEntryLabelColor(Color.WHITE);
 //        chart.setEntryLabelTypeface(tfRegular);
                 chart.setEntryLabelTextSize(12f);
+
                 //그래프가 작아짐
 //                chart.setMinOffset(100f);
 
@@ -174,9 +177,15 @@ public class StatFragment extends Fragment implements SeekBar.OnSeekBarChangeLis
 
                 for (int i = 0; i < stats.size() ; i++) {
                     float val = stats.get(i).getRowAmount();
-                    entries.add(new PieEntry(
-                            val,
-                            stats.get(i).getRowName()));
+                    float valval = (val/totalTimes)*100;
+//                    System.out.println("=======valval======="+valval);
+                    if(valval>1.8f){
+                        entries.add(new PieEntry(
+                                val,
+                                stats.get(i).getRowName()));
+//                        entries.get(i).setLabel("");
+//                        entries.get(i).setData("");
+                    }
                 }
 
                 //라벨이 있을시 목차(legend)의 라벨이 입력됨
@@ -234,6 +243,7 @@ public class StatFragment extends Fragment implements SeekBar.OnSeekBarChangeLis
                 chart.invalidate();
                 //파이 차트 끝!
             }
+
 
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {

@@ -5,29 +5,24 @@ import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
 /**
  * Created by Yasir on 02/06/16.
  */
-public class MyXAxisValueFormatter implements IAxisValueFormatter
+public class MYXAxisValueFormatter_DATE implements IAxisValueFormatter
 {
 
     private long referenceTimestamp; // minimum timestamp in your data set
-    private long standardMinite; // minimum timestamp in your data set
+    private DateFormat mDataFormat;
+    private Date mDate;
 
-
-    //시작시간은 기존 HH:mm를 받고 그걸로
-    public MyXAxisValueFormatter(long referenceTimestamp) {
+    public MYXAxisValueFormatter_DATE(long referenceTimestamp) {
         this.referenceTimestamp = referenceTimestamp;
-        DateFormat mDataFormat = new SimpleDateFormat("HH:mm", Locale.KOREA);
-        Date mDate = new Date(referenceTimestamp);
-        int hours = mDate.getHours();
-        int minutes = mDate.getMinutes();
-        this.standardMinite= (hours*60)+minutes;
-
+//        this.mDataFormat = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
+        this.mDataFormat = new SimpleDateFormat("HH:mm", Locale.KOREA);
+        this.mDate = new Date();
     }
 
     /**
@@ -43,17 +38,24 @@ public class MyXAxisValueFormatter implements IAxisValueFormatter
     public String getFormattedValue(float value, AxisBase axis) {
         // convertedTimestamp = originalTimestamp - referenceTimestamp
         long convertedTimestamp = (long) value;
+
         // Retrieve original timestamp
-        long originalTimestamp = standardMinite+convertedTimestamp;
-//        System.out.println("========MyXAxisValueFormatter==convertedTimestamp============"+convertedTimestamp);
+        long originalTimestamp = referenceTimestamp + convertedTimestamp;
+        System.out.println("==========getHour(originalTimestamp)============"+getHour(originalTimestamp));
+        // Convert timestamp to hour:minute
+
         return getHour(originalTimestamp);
     }
 
     private String getHour(long timestamp){
-        long minutes = (long) ((timestamp) % 60);
-        long hours   = (long) ((timestamp /60) % 24);
-//        System.out.println("=======MyXAxisValueFormatter===hours========"+hours+"==========minutes========"+minutes);
-        return String.format("%02d:%02d",hours, minutes);
+        try{
+            mDate.setTime(timestamp);
+            System.out.println("==========mDataFormat.format(mDate)============"+mDataFormat.format(mDate));
+            return mDataFormat.format(mDate);
+        }
+        catch(Exception ex){
+            return "xx";
+        }
     }
 }
 

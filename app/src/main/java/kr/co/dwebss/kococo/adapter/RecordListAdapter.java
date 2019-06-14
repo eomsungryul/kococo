@@ -95,7 +95,7 @@ public class RecordListAdapter extends BaseAdapter {
         // 화면에 표시될 View(Layout이 inflate된)으로부터 위젯에 대한 참조 획득
 //        ImageView iconImageView = (ImageView) convertView.findViewById(R.id.imageView1) ;
         TextView timeTextView = (TextView) convertView.findViewById(R.id.recordTimeText) ;
-        TextView nameTextView = (TextView) convertView.findViewById(R.id.recordNameText) ;
+//        TextView nameTextView = (TextView) convertView.findViewById(R.id.recordNameText) ;
 //        TextView descTextView = (TextView) convertView.findViewById(R.id.textView2) ;
 
         // Data Set(listViewItemList)에서 position에 위치한 데이터 참조 획득
@@ -103,10 +103,9 @@ public class RecordListAdapter extends BaseAdapter {
 
         // 아이템 내 각 위젯에 데이터 반영
 //        iconImageView.setImageDrawable(listViewItem.getIcon());
-        String[] title=listViewItem.getTitle().split("/");
-        timeTextView.setText(title[1]);
-        nameTextView.setText(title[0]);
-        System.out.println("===========listViewItem.getTitle()==========="+listViewItem.getTitle());
+        timeTextView.setText(listViewItem.getTitle());
+//        nameTextView.setText(title[0]);
+//        System.out.println("===========listViewItem.getTitle()==========="+listViewItem.getTitle());
 //        descTextView.setText(listViewItem.getDesc());
 
         playBtnFlag = false;
@@ -128,13 +127,13 @@ public class RecordListAdapter extends BaseAdapter {
                 rowClickEvt(position,listViewItem,playBtn);
             }
         });
-
-        nameTextView.setOnClickListener(new TextView.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                rowClickEvt(position,listViewItem,playBtn);
-            }
-        });
+//
+//        nameTextView.setOnClickListener(new TextView.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                rowClickEvt(position,listViewItem,playBtn);
+//            }
+//        });
         //{"userAppId":"7dc9e960-b0db-4c1c-81b5-2c8f2ce7ca4f","recordId":116,"recordStartD":"2019-05-30","recordStartDt":"2019-05-30T15:13:46","recordEndD":"2019-05-30","recordEndDt":"2019-05-30T15:14:46","consultingYn":"N","consultingReplyYn":"N","analysisList":[{"analysisId":93,"analysisStartD":"2019-05-30T00:00:00","analysisStartDt":"2019-05-30T15:13:50","analysisEndD":"2019-05-30T00:00:00","analysisEndDt":"2019-05-30T15:14:49","analysisFileNm":"snoring-20191330_1513-30_1514_1559196886407.wav","analysisFileAppPath":"/data/user/0/kr.co.dwebss.kococo/files/rec_data/29","analysisServerUploadYn":"N","analysisDetailsList":[{"analysisId":93,"analysisDetailsId":97,"termTypeCd":200102,"termStartDt":"2019-05-30T15:14:37","termEndDt":"2019-05-30T15:14:42","claimYn":"N"}],"_links":{"record":{"href":"http://52.79.88.47:8080/kococo/api/record/116"}}}],"_links":{"self":{"href":"http://52.79.88.47:8080/kococo/api/record/116"},"record":{"href":"http://52.79.88.47:8080/kococo/api/record/116"},"admin":{"href":"http://52.79.88.47:8080/kococo/api/record/116/admin"},"user":{"href":"http://52.79.88.47:8080/kococo/api/record/116/user"},"sleepStatusCd":{"href":"http://52.79.88.47:8080/kococo/api/record/116/sleepStatusCd"}}}
 
 
