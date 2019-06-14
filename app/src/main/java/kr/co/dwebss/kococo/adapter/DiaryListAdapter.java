@@ -79,8 +79,8 @@ public class DiaryListAdapter extends BaseAdapter {
 
         // 아이템 내 각 위젯에 데이터 반영
 //        iconImageView.setImageDrawable(listViewItem.getIcon());
-        titleTextView.setText("id : "+listViewItem.getRecordId()+"/"+listViewItem.getRecordStartD().replace("\"","")+"~"+listViewItem.getRecordEndD().replace("\"",""));
-//        titleTextView.setText(listViewItem.getRecordStartD().replace("\"","")+"~"+listViewItem.getRecordEndD().replace("\"",""));
+//        titleTextView.setText("id : "+listViewItem.getRecordId()+"/"+listViewItem.getRecordStartD().replace("\"","")+"~"+listViewItem.getRecordEndD().replace("\"",""));
+        titleTextView.setText(listViewItem.getRecordStartD().replace("\"","")+"~"+listViewItem.getRecordEndD().replace("\"",""));
 //        descTextView.setText(listViewItem.getDesc());
 
 

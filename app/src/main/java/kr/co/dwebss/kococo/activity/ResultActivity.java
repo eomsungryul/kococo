@@ -105,7 +105,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
     MediaPlayerUtility mpu;
     DateFormatter df = new DateFormatter();
 
-    int playingDetailId;
+    int playingId;
 
     int recordId;
     int analysisId;
@@ -225,7 +225,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                     //그래프 클릭 시에 전체 재생
                     recordEntryData.addProperty("termStartDt",0);
                     recordEntryData.addProperty("termEndDt",analysisEndDt.getTime()-analysisStartDt.getTime());
-                    recordEntryData.addProperty("analysisDetailsId",recordData.getAnalysisDetailsId());
+                    recordEntryData.addProperty("analysisId",recordData.getAnalysisId());
 
 
                       if(analysisObj.has("recordingData")){
@@ -341,10 +341,10 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 //                    System.out.println("=========클릭했다~~~"+e.getData());
                     //데이터 넣을 시에 재생 파일 패스 및 재생 구간을 넣으면된다.
                     JsonObject graphData= (JsonObject) e.getData();
-                    playingDetailId = graphData.get("analysisDetailsId").getAsInt();
+                    playingId = graphData.get("analysisId").getAsInt();
                     try {
-//                        adapter.playActivityMp(graphData.get("analysisDetailsId").getAsInt(),graphData.get("termStartDt").getAsInt(),graphData.get("termEndDt").getAsInt(),graphData.get("filePath").getAsString(),getApplicationContext());
-                        adapter.playGraphMp(graphData.get("termStartDt").getAsInt(),graphData.get("termEndDt").getAsInt(),graphData.get("filePath").getAsString(),getApplicationContext());
+                        adapter.playActivityMp(graphData.get("analysisId").getAsInt(),graphData.get("termStartDt").getAsInt(),graphData.get("termEndDt").getAsInt(),graphData.get("filePath").getAsString(),getApplicationContext());
+//                        adapter.playGraphMp(graphData.get("termStartDt").getAsInt(),graphData.get("termEndDt").getAsInt(),graphData.get("filePath").getAsString(),getApplicationContext());
                     } catch (IOException e1) {
                         e1.printStackTrace();
                     }
@@ -352,7 +352,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                 @Override
                 public void onNothingSelected() {
                     if(adapter.getPlayBtnFlag()){
-                        adapter.stopActivityMp(playingDetailId);
+                        adapter.stopActivityMp(playingId);
                     }
                 }
             });

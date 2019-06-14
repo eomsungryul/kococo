@@ -58,7 +58,7 @@ public class RecordListAdapter extends BaseAdapter {
     MediaPlayer mediaPlayer = new MediaPlayer();
     CountDownTimer cdt;
 
-    int analysisDetailsId;
+    int analysisId;
 
     private GraphClickListener graphClickListener;
 
@@ -134,7 +134,7 @@ public class RecordListAdapter extends BaseAdapter {
 //                rowClickEvt(position,listViewItem,playBtn);
 //            }
 //        });
-        //{"userAppId":"7dc9e960-b0db-4c1c-81b5-2c8f2ce7ca4f","recordId":116,"recordStartD":"2019-05-30","recordStartDt":"2019-05-30T15:13:46","recordEndD":"2019-05-30","recordEndDt":"2019-05-30T15:14:46","consultingYn":"N","consultingReplyYn":"N","analysisList":[{"analysisId":93,"analysisStartD":"2019-05-30T00:00:00","analysisStartDt":"2019-05-30T15:13:50","analysisEndD":"2019-05-30T00:00:00","analysisEndDt":"2019-05-30T15:14:49","analysisFileNm":"snoring-20191330_1513-30_1514_1559196886407.wav","analysisFileAppPath":"/data/user/0/kr.co.dwebss.kococo/files/rec_data/29","analysisServerUploadYn":"N","analysisDetailsList":[{"analysisId":93,"analysisDetailsId":97,"termTypeCd":200102,"termStartDt":"2019-05-30T15:14:37","termEndDt":"2019-05-30T15:14:42","claimYn":"N"}],"_links":{"record":{"href":"http://52.79.88.47:8080/kococo/api/record/116"}}}],"_links":{"self":{"href":"http://52.79.88.47:8080/kococo/api/record/116"},"record":{"href":"http://52.79.88.47:8080/kococo/api/record/116"},"admin":{"href":"http://52.79.88.47:8080/kococo/api/record/116/admin"},"user":{"href":"http://52.79.88.47:8080/kococo/api/record/116/user"},"sleepStatusCd":{"href":"http://52.79.88.47:8080/kococo/api/record/116/sleepStatusCd"}}}
+        //{"userAppId":"7dc9e960-b0db-4c1c-81b5-2c8f2ce7ca4f","recordId":116,"recordStartD":"2019-05-30","recordStartDt":"2019-05-30T15:13:46","recordEndD":"2019-05-30","recordEndDt":"2019-05-30T15:14:46","consultingYn":"N","consultingReplyYn":"N","analysisList":[{"analysisId":93,"analysisStartD":"2019-05-30T00:00:00","analysisStartDt":"2019-05-30T15:13:50","analysisEndD":"2019-05-30T00:00:00","analysisEndDt":"2019-05-30T15:14:49","analysisFileNm":"snoring-20191330_1513-30_1514_1559196886407.wav","analysisFileAppPath":"/data/user/0/kr.co.dwebss.kococo/files/rec_data/29","analysisServerUploadYn":"N","analysisDetailsList":[{"analysisId":93,"analysisId":97,"termTypeCd":200102,"termStartDt":"2019-05-30T15:14:37","termEndDt":"2019-05-30T15:14:42","claimYn":"N"}],"_links":{"record":{"href":"http://52.79.88.47:8080/kococo/api/record/116"}}}],"_links":{"self":{"href":"http://52.79.88.47:8080/kococo/api/record/116"},"record":{"href":"http://52.79.88.47:8080/kococo/api/record/116"},"admin":{"href":"http://52.79.88.47:8080/kococo/api/record/116/admin"},"user":{"href":"http://52.79.88.47:8080/kococo/api/record/116/user"},"sleepStatusCd":{"href":"http://52.79.88.47:8080/kococo/api/record/116/sleepStatusCd"}}}
 
 
         //신고하기 버튼
@@ -230,7 +230,7 @@ public class RecordListAdapter extends BaseAdapter {
 //        ImageButton playBtn = (ImageButton) v.findViewById(R.id.recordPlay);
         View v;
         ImageButton playBtn;
-        if(isPlaying && analysisDetailsId != adi){
+        if(isPlaying && analysisId != adi){
             //재생 중지 버튼
             for(int i=0; i<getCount();i++){
                 View v2 = viewGroup.getChildAt(i);
@@ -248,11 +248,11 @@ public class RecordListAdapter extends BaseAdapter {
         for(int i=0; i<getCount();i++){
             v = viewGroup.getChildAt(i);
             RecordData rd =listViewItemList.get(i);
-            System.out.println("=============rd.getAnalysisDetailsId()======="+rd.getAnalysisDetailsId()+"====position=="+adi);
-            if(rd.getAnalysisDetailsId()==adi){
+            System.out.println("=============rd.getanalysisId()======="+rd.getAnalysisId()+"====position=="+adi);
+            if(rd.getAnalysisId()==adi){
                 playBtn = (ImageButton) v.findViewById(R.id.recordPlay);
                 playBtnFlag = true;
-                analysisDetailsId = adi;
+                analysisId = adi;
                 playBtn.setImageResource(R.drawable.baseline_pause_white_48dp);
                 playMp(startTime, endTime , filePath, context, playBtn);
                 break;
@@ -266,7 +266,7 @@ public class RecordListAdapter extends BaseAdapter {
         for(int i=0; i<getCount();i++){
             v = viewGroup.getChildAt(i);
             RecordData rd =listViewItemList.get(i);
-            if(rd.getAnalysisDetailsId()==position){
+            if(rd.getAnalysisId()==position){
                 playBtn = (ImageButton) v.findViewById(R.id.recordPlay);
                 playBtnFlag = true;
                 stopMp(playBtn);
