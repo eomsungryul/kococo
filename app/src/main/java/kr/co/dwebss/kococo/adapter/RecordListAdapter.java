@@ -69,6 +69,7 @@ public class RecordListAdapter extends BaseAdapter {
     }
 
 
+
     public interface GraphClickListener{
         void clickBtn();
     }
@@ -334,9 +335,15 @@ public class RecordListAdapter extends BaseAdapter {
             stopMp(playBtn);
         }
     }
-
     public boolean getPlayBtnFlag(){
         return playBtnFlag;
     }
 
+    public void destroyMp() {
+        if(cdt!=null){
+            cdt.cancel();
+        }
+        mediaPlayer.release();
+        mediaPlayer=null;
+    }
 }

@@ -16,7 +16,7 @@ public class DateFormatter{
     SimpleDateFormat stringtoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     SimpleDateFormat transFormat = new SimpleDateFormat("yyyy년 MM월 dd일");
     SimpleDateFormat DateTimeToStringFormat = new SimpleDateFormat("HH:mm");
-    SimpleDateFormat DateSecondToStringFormat = new SimpleDateFormat("H'시간'm'분's'초'", Locale.KOREA);
+    SimpleDateFormat DateSecondToStringFormat = new SimpleDateFormat("H'시'm'분's'초'", Locale.KOREA);
 
     public DateFormatter() {
     }

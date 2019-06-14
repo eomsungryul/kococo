@@ -86,7 +86,7 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toEndOf="@+id/previousButton"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.36" />
+            app:layout_constraintVertical_bias="0.48" />
     </android.support.constraint.ConstraintLayout>
 
     <android.support.constraint.ConstraintLayout

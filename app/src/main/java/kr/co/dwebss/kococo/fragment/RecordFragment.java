@@ -259,6 +259,12 @@ public class RecordFragment extends Fragment  {
                             addRecord(requestData);
                         }
                     }, 5000);
+
+                    recodeBtn.setText("녹음 시작");
+                    recodeTxt.setVisibility(View.INVISIBLE);
+                    recordTimer.setVisibility(View.INVISIBLE);
+                    logo.setVisibility(View.VISIBLE);
+                    recordTime = 0;
                 }
             }
         });
@@ -281,11 +287,11 @@ public class RecordFragment extends Fragment  {
     public void onResume() {
         super.onResume();
         //다시 돌아왔을 경우에 텍스트를 종료에서 시작으로 바꿈
-        recodeBtn.setText("녹음 시작");
-        recodeTxt.setVisibility(View.INVISIBLE);
-        recordTimer.setVisibility(View.INVISIBLE);
-        logo.setVisibility(View.VISIBLE);
-        recordTime = 0;
+//        recodeBtn.setText("녹음 시작");
+//        recodeTxt.setVisibility(View.INVISIBLE);
+//        recordTimer.setVisibility(View.INVISIBLE);
+//        logo.setVisibility(View.VISIBLE);
+//        recordTime = 0;
     }
 
     class CustomTimer extends TimerTask {

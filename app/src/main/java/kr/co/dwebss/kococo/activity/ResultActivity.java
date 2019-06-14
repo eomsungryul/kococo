@@ -116,6 +116,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
     int grindCnt=0;
 
     RecordDataGroupByUtil rd = new RecordDataGroupByUtil();
+    RecordListAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,19 +170,23 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             }
 
             //시간 HH:mm ~ HH:mm
-            String recodeText = DateTimeToStringFormat.format(recordStartDT)+"~"+DateTimeToStringFormat.format(recordEndDT);
+            String recodeText = DateTimeToStringFormat.format(recordStartDT)+" ~ "+DateTimeToStringFormat.format(recordEndDT);
 //            TextView recodeTextView = findViewById(R.id.recodeTextView);
 //            recodeTextView.setText(recodeText);
 
-//            if(recordStartD.equals(recordEndD)){
-//                dateTxtHeader.setText(transFormat.format(recordStartD)+"\n"+recodeText);
-//            }else{
+            if(recordStartD.equals(recordEndD)){
+                if(recordStartDT.getHours()==recordEndDT.getHours()&&recordEndDT.getMinutes()==recordStartDT.getMinutes()){
+                    dateTxtHeader.setText(transFormat.format(recordStartD)+" "+DateTimeToStringFormat.format(recordStartDT));
+                }else{
+                    dateTxtHeader.setText(transFormat.format(recordStartD)+" "+recodeText);
+                }
+            }else{
                 dateTxtHeader.setText(transFormat.format(recordStartD)+" "
                         + DateTimeToStringFormat.format(recordStartDT)+"\n  ~ "+transFormat.format(recordEndD)+" "+DateTimeToStringFormat.format(recordEndDT));
-//            }
+            }
 
             // 하단에 녹음 검출리스트 파일 리스트  Adapter 생성
-            RecordListAdapter adapter = new RecordListAdapter(this, new RecordListAdapter.GraphClickListener() {
+            adapter = new RecordListAdapter(this, new RecordListAdapter.GraphClickListener() {
                 @Override
                 public void clickBtn() {
                 }
@@ -298,11 +303,15 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                         }
                         if("".equals(detectedTxt)){
                             recordData.setTitle(df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
-                                    +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지\n 코를 골았습니다."
+                                    +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지\n"
+//                                            +df.longToStringFormat(kococoTerm)
+                                            +"코를 골았습니다. "
                                     );
                         }else{
                             recordData.setTitle(df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
-                                    +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지\n 코를 골았습니다."
+                                    +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지\n"
+//                                    +df.longToStringFormat(kococoTerm)
+                                            +"코를 골았습니다. "
                                     +"("+detectedTxt+")");
                         }
                         //~시~분~초부터 ~시~분~초까지 코를 골았습니다. \n (무호흡 0회, )
@@ -316,7 +325,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                 }
             }else{
                 TextView nullTextView = (TextView) findViewById(R.id.nullTextView);
-                nullTextView.setText("검출된 코골이가 없습니다. \n건강한 수면을 하셨네요!");
+                nullTextView.setText("코를 골지 않으셨어요!!\n건강한 수면을 하셨네요!");
             }
 
             //점수 구하는법
@@ -554,6 +563,6 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
     public void onDestroy() {
         super.onDestroy();
 //         MediaPlayer 해지
-        mpu.endMp();
+        adapter.destroyMp();
     }
 }
