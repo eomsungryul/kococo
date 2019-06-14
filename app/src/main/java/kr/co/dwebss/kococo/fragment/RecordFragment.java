@@ -207,7 +207,6 @@ public class RecordFragment extends Fragment  {
                         return;
                     } else {
                         //녹음 시작 클릭
-//                        Toast.makeText(getActivity(), "permission 승인", Toast.LENGTH_SHORT).show();
                         Log.e(LOG_TAG2, "permission 승인");
                         recodeBtn.setText("녹음 종료");
                         //녹음버튼 누를 시에 밝기 최대한 줄이기
@@ -219,7 +218,7 @@ public class RecordFragment extends Fragment  {
                         }catch(Exception e){
                             Log.e("Exception e "+e.getMessage(), null);
                         }
-                        //TODO 녹음버튼 누를 시에 타이머 START
+                        //녹음버튼 누를 시에 타이머 START
                         recodeTxt.setVisibility(View.VISIBLE);
                         recordTimer.setVisibility(View.VISIBLE);
                         logo.setVisibility(View.INVISIBLE);
