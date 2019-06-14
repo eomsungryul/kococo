@@ -18,6 +18,7 @@ public class Analysis implements Serializable {
     private String analysisServerUploadPath;
     private String analysisServerUploadDt;
     private List<AnalysisDetails> analysisDetailsList = new ArrayList<AnalysisDetails>();
+    private String recordingData;
 
     public Analysis() {
     }
@@ -116,5 +117,13 @@ public class Analysis implements Serializable {
 
     public void setAnalysisDetailsList(List<AnalysisDetails> analysisDetailsList) {
         this.analysisDetailsList = analysisDetailsList;
+    }
+
+    public String getRecordingData() {
+        return recordingData;
+    }
+
+    public void setRecordingData(String recordingData) {
+        this.recordingData = recordingData;
     }
 }

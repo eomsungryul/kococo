@@ -93,6 +93,7 @@ public class RecordFragment extends Fragment  {
     static List<StartEnd> snoringTermList;
     public static List<StartEnd> osaTermList;
     static List<StartEnd> grindingTermList;
+    List<AnalysisRawData> AllAnalysisRawDataList;
 
     boolean isRecording = false;
     ByteArrayOutputStream baos;
@@ -387,6 +388,7 @@ public class RecordFragment extends Fragment  {
                 snoringTermList = new ArrayList<StartEnd>();
                 grindingTermList = new ArrayList<StartEnd>();
                 osaTermList = new ArrayList<StartEnd>();
+                AllAnalysisRawDataList = new ArrayList<AnalysisRawData>();
                 JsonArray ansList = new JsonArray();
 
                 double times=0.0;
@@ -468,7 +470,8 @@ public class RecordFragment extends Fragment  {
                     }
 
                     // 소리가 발생하면 녹음을 시작하고, 1분이상 소리가 발생하지 않으면 녹음을 하지 않는다.
-                    if (SleepCheck.noiseCheckForStart(decibel) >= 30 && isRecording == false
+                    //if (SleepCheck.noiseCheckForStart(decibel) >= 30 && isRecording == false
+                    if (isRecording == false
                             && Math.floor((double) (audioData.length / (44100d * 16 * 1)) * 8) != Math.floor(times) ) {
                         Log.v(LOG_TAG2,(calcTime(times)+"("+String.format("%.2f", times) + "s) 녹음 시작!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
                         //recordStartingTIme = times;
@@ -478,10 +481,12 @@ public class RecordFragment extends Fragment  {
                         snoringTermList = new ArrayList<StartEnd>();
                         grindingTermList = new ArrayList<StartEnd>();
                         osaTermList = new ArrayList<StartEnd>();
+                        AllAnalysisRawDataList = new ArrayList<AnalysisRawData>();
                         isBreathTerm = false;
                         isOSATermTimeOccur = false;
 //                    } else if (isRecording == true && (SleepCheck.noiseCheck(decibel)==0 || recodeFlag==false) ) {
-                    } else if (isRecording == true && SleepCheck.noiseCheck(decibel) <= 1000) {
+                    //} else if (isRecording == true && SleepCheck.noiseCheck(decibel) <= 100) {
+                    } else if (isRecording == true && SleepCheck.noiseCheck(decibel) == 0) {
                         Log.v(LOG_TAG2,(calcTime(times)+"("+String.format("%.2f", times) + "s) 녹음 종료!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
                         SimpleDateFormat dayTime = new SimpleDateFormat("yyyyMM_dd_HHmm");
                         String fileName = dayTime.format(new Date(recordStartingTIme));
@@ -503,6 +508,18 @@ public class RecordFragment extends Fragment  {
                         Log.v(LOG_TAG2,("tmpMaxDb: "+tmpMaxDb));
 
                         JsonObject ans = new JsonObject();
+                        StartEnd tmpSE = new StartEnd(); //전체 분석 데이터를 변환하기 위해 임시로 vo를 생성
+                        tmpSE.AnalysisRawDataList = AllAnalysisRawDataList;
+
+                        try {
+                            Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+                            String andRList = gson.toJson(tmpSE.printAnalysisRawDataList());
+                            //Log.v(LOG_TAG2,andRList);
+                            ans.addProperty("recordingData", andRList);
+
+                        }catch(NullPointerException e){
+                            e.getMessage();
+                        }
                         //ans.setAnalysisStartDt(LocalDateTime.ofInstant(Instant.ofEpochMilli(recordStartingTIme), ZoneId.systemDefault()));
                         //ans.setAnalysisEndDt(LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()));
                         ans.addProperty("analysisStartDt",dayTimeDefalt.format(new Date(recordStartingTIme)));
@@ -1008,6 +1025,9 @@ public class RecordFragment extends Fragment  {
                                 osaTermList.get(osaTermList.size() - 1).AnalysisRawDataList.add(maxARD);
                             }
                         }
+                        if(isRecording == true){
+                            AllAnalysisRawDataList.add(maxARD);
+                        }
                         maxARD = new AnalysisRawData(times, amplitude, tmpMaxDb, frequency);
                         timesForMaxArd = Math.floor(times);
 
@@ -1036,6 +1056,18 @@ public class RecordFragment extends Fragment  {
                     Log.v(LOG_TAG2,("tmpMaxDb: "+tmpMaxDb));
 
                     JsonObject ans = new JsonObject();
+                    StartEnd tmpSE = new StartEnd(); //전체 분석 데이터를 변환하기 위해 임시로 vo를 생성
+                    tmpSE.AnalysisRawDataList = AllAnalysisRawDataList;
+
+                    try {
+                        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+                        String andRList = gson.toJson(tmpSE.printAnalysisRawDataList());
+                        //Log.v(LOG_TAG2,andRList);
+                        ans.addProperty("recordingData", andRList);
+
+                    }catch(NullPointerException e){
+                        e.getMessage();
+                    }
                     ans.addProperty("analysisStartDt",dayTimeDefalt.format(new Date(recordStartingTIme)));
                     ans.addProperty("analysisEndDt",dayTimeDefalt.format(new Date(time)));
                     ans.addProperty("analysisFileAppPath",fileInfo[0]);
@@ -1295,9 +1327,9 @@ class StartEnd {
 
                 JsonObject data = new JsonObject();
                 data.addProperty("TIME", String.format("%.0f", d.getTimes()));
-                data.addProperty("DB", d.getDecibel());
-                data.addProperty("HZ", d.getFrequency());
-                data.addProperty("AMP", d.getAmplitude());
+                data.addProperty("DB", String.format("%.2f", d.getDecibel()));
+                //data.addProperty("HZ", d.getFrequency());
+                //data.addProperty("AMP", d.getAmplitude());
 
 //                rtn+=d.toString()+"\r\n";
                 rtn.add(data);
