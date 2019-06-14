@@ -20,7 +20,8 @@ public class MyXAxisValueFormatter implements IAxisValueFormatter
 
     public MyXAxisValueFormatter(long referenceTimestamp) {
         this.referenceTimestamp = referenceTimestamp;
-        this.mDataFormat = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
+//        this.mDataFormat = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
+        this.mDataFormat = new SimpleDateFormat("HH:mm", Locale.KOREA);
         this.mDate = new Date();
     }
 
@@ -40,15 +41,17 @@ public class MyXAxisValueFormatter implements IAxisValueFormatter
 
         // Retrieve original timestamp
         long originalTimestamp = referenceTimestamp + convertedTimestamp;
-//        System.out.println("==========getHour(originalTimestamp)============"+getHour(originalTimestamp));
+        System.out.println("==========getHour(originalTimestamp)============"+getHour(originalTimestamp));
         // Convert timestamp to hour:minute
+
         return getHour(originalTimestamp);
     }
 
     private String getHour(long timestamp){
+
         try{
             mDate.setTime(timestamp);
-//            System.out.println("==========mDataFormat.format(mDate)============"+mDataFormat.format(mDate));
+            System.out.println("==========mDataFormat.format(mDate)============"+mDataFormat.format(mDate));
             return mDataFormat.format(mDate);
         }
         catch(Exception ex){

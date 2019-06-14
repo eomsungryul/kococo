@@ -18,9 +18,12 @@ package kr.co.dwebss.kococo.activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -73,8 +76,19 @@ public class ReportActivity extends AppCompatActivity {
     Boolean addClaimFlag;
     String uploadFirebasePath;
 
+    //인터넷 연결 유형
+    ConnectivityManager cm;
+    NetworkInfo activeNetwork;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        //인터넷 연결 유형
+        cm =
+                (ConnectivityManager)getApplicationContext().getSystemService(getApplicationContext().CONNECTIVITY_SERVICE);
+
+        activeNetwork = cm.getActiveNetworkInfo();
+
         setTheme(R.style.AppTheme);
         //세로모드에서 가로모드로 전환 시 onCreate함수가 다시 호출
 
@@ -137,6 +151,19 @@ public class ReportActivity extends AppCompatActivity {
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
 //                        Toast.makeText(getApplicationContext(),"예를 선택했습니다.",Toast.LENGTH_LONG).show();
+
+                            boolean isWiFi = activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
+                            if(!isWiFi){
+//                                Snackbar.make(getWindow().getDecorView().getRootView(), "와이파이가 아닙니다 ", 10000)
+//                                        .setAction("DISMISS", new View.OnClickListener()
+//                                        {
+//                                            @Override
+//                                            public void onClick(View v)
+//                                            {
+//                                            }
+//                                        }).show();
+                                Toast.makeText(getApplicationContext(),"와이파이가 아닙니다",Toast.LENGTH_LONG).show();
+                            }
                             Toast.makeText(getApplicationContext(),"등록중입니다 잠시만기다려주세요. ",Toast.LENGTH_LONG).show();
                             addFirebaseStorage();
                         }
@@ -169,23 +196,28 @@ public class ReportActivity extends AppCompatActivity {
         //}
         JsonObject requestJson = new JsonObject();
         requestJson.addProperty("analysisServerUploadPath",uploadFirebasePath);
-        JsonArray analysisDetailsList = new JsonArray();
-        JsonObject analysisDetailsObj = new JsonObject();
-        analysisDetailsObj.addProperty("claimReasonCd",recordData.getTermTypeCd());
-        analysisDetailsObj.addProperty("consultContents",claimContents.getText().toString());
-        analysisDetailsList.add(analysisDetailsObj);
-        requestJson.add("analysisDetailsList",analysisDetailsList);
+        requestJson.addProperty("claimReasonCd",recordData.getTermTypeCd());
+        requestJson.addProperty("claimContents",claimContents.getText().toString());
+//        JsonArray analysisDetailsList = new JsonArray();
+//        JsonObject analysisDetailsObj = new JsonObject();
+//        analysisDetailsObj.addProperty("claimReasonCd",recordData.getTermTypeCd());
+//        analysisDetailsObj.addProperty("consultContents",claimContents.getText().toString());
+//        analysisDetailsList.add(analysisDetailsObj);
+//        requestJson.add("analysisDetailsList",analysisDetailsList);
+
 
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
         RequestBody requestData = RequestBody.create(MediaType.parse("application/json"), gson.toJson(requestJson));
         Toast.makeText(getApplicationContext(),"ddd"+requestData.toString(),Toast.LENGTH_LONG).show();
                 System.out.println(" =============ddd===========Throwable: "+ requestJson.toString());
                 System.out.println(" ============eeee============Throwable: "+ requestData.toString());
+                System.out.println(" ============recordData.getAnalysisId()============Throwable: "+ recordData.getAnalysisId());
 
 //        {"analysisServerUploadPath":"rec_data/7dc9e960-b0db-4c1c-81b5-2c8f2ce7ca4f/2019-05-30/snoring-20191330_1513-30_1514_1559196886407.wav","analysisDetailsList":[{"claimReasonCd":200102,"consultContents":"recordData : /data/user/0/kr.co.dwebss.kococo/files/rec_data/29/snoring-20191330_1513-30_1514_1559196886407.wav/getAnalysisDetailsId :97/getAnalysisId :93"}]}
 //        {"userAppId":"7dc9e960-b0db-4c1c-81b5-2c8f2ce7ca4f","recordStartDt":"2019-05-30T18:54:48","recordEndDt":"2019-05-30T18:55:09","analysisList":[{"analysisStartDt":"2019-05-30T18:54:56","analysisEndDt":"2019-05-30T18:55:16","analysisFileAppPath":"/storage/emulated/0/Download/rec_data/1","analysisFileNm":"snoring-20190530_1854-30_1855_1559210109319.mp3","analysisDetailsList":[]}]}
 
-        apiService.addClaim(recordData.getAnalysisDetailsId(),requestData).enqueue(new Callback<JsonObject>() {
+
+        apiService.addClaim(recordData.getAnalysisId(),requestData).enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
 //                System.out.println(" ========================response: "+response.body());
