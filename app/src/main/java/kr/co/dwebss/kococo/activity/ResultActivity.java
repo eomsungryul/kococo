@@ -201,6 +201,8 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                     snoreCnt=0;
                     osaCnt=0;
                     grindCnt=0;
+
+
                     if(analysisDetailsList.size()>0){
                         for(int j=0; j<analysisDetailsList.size(); j++){
                             recordData = new RecordData();
@@ -219,8 +221,6 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                             RecordDataGroupByUtil rd = new RecordDataGroupByUtil();
                             JsonArray result =rd.groupByMinites(analysisDataArr);
                             System.out.println("===========RecordDataGroupByUtil=============="+result);
-
-
 
                             analysisId = analysisObj.get("analysisId").getAsInt();
                             analysisServerUploadPath = jncu.JsonStringNullCheck(analysisObj,"analysisFileAppPath")+"/"+jncu.JsonStringNullCheck(analysisObj,"analysisFileNm");
