@@ -736,7 +736,9 @@ public class RecordFragment extends Fragment  {
                     }
                     if(allFHAndDB!=null) {
                         //코골이는 임계치를 보정해서 코골이의 음파 여부를 판단한다.
-                        for(int m = 0 ; m < allFHAndDB.length ; m++){
+                        int maxDBL = allFHAndDB.length;
+                        maxDBL = maxDBL > 41 ? 41 : maxDBL;
+                        for(int m = 0 ; m < maxDBL ; m++){
                             if(allFHAndDB[m] > tmpMaxDb){
                                 tmpMaxDb = allFHAndDB[m];
                                 if(tmpMaxDb<0){
@@ -911,7 +913,8 @@ public class RecordFragment extends Fragment  {
                     }else {
                     }
 
-                    if (decibel > SleepCheck.getMinDB()*0.45) {
+                    //if (decibel > SleepCheck.getMinDB()*0.45) {
+                    if(decibel > chkGrindingDb) {
                         //소리가 발생했고, 분석 시작 변수 값이 true 인 경우 종료한다.
                         if(isOSATermTimeOccur) {
                             //0.1초 동안 소리가 70% 이상 발생한 경우 소리가 발생한 것으로 본다.
