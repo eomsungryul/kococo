@@ -285,22 +285,28 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                                 kococoTerm += (stringtoDateTimeFormat.parse(recordData.getTermEndDt()).getTime()
                                         -stringtoDateTimeFormat.parse(recordData.getTermStartDt()).getTime());
                             }
-                            String detectedTxt = "";
+                        }
+                        String detectedTxt = "";
+                        if(grindCnt>0){
+                            detectedTxt = detectedTxt+"이갈이 : "+grindCnt+"회";
+                        }
+                        if(osaCnt>0){
                             if(grindCnt>0){
-                                detectedTxt = detectedTxt+"이갈이 : "+grindCnt+"회";
+                                detectedTxt = detectedTxt+", ";
                             }
-                            if(osaCnt>0){
-                                if(grindCnt>0){
-                                    detectedTxt = detectedTxt+", ";
-                                }
-                                detectedTxt = detectedTxt+"무호흡 : "+osaCnt+"회";
-                            }
-                            //~시~분~초부터 ~시~분~초까지 코를 골았습니다. \n (무호흡 0회, )
+                            detectedTxt = detectedTxt+"무호흡 : "+osaCnt+"회";
+                        }
+                        if("".equals(detectedTxt)){
+                            recordData.setTitle(df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
+                                    +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지\n 코를 골았습니다."
+                                    );
+                        }else{
                             recordData.setTitle(df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
                                     +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지\n 코를 골았습니다."
                                     +"("+detectedTxt+")");
-                            adapter.addItem(recordData) ;
                         }
+                        //~시~분~초부터 ~시~분~초까지 코를 골았습니다. \n (무호흡 0회, )
+                        adapter.addItem(recordData) ;
 
                     } catch (ParseException e) {
                         e.printStackTrace();

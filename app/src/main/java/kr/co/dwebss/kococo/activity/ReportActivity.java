@@ -195,6 +195,9 @@ public class ReportActivity extends AppCompatActivity {
         //  } ]
         //}
         JsonObject requestJson = new JsonObject();
+        if(recordData.getTermTypeCd()==0){
+            recordData.setTermTypeCd(200104);
+        }
         requestJson.addProperty("analysisServerUploadPath",uploadFirebasePath);
         requestJson.addProperty("claimReasonCd",recordData.getTermTypeCd());
         requestJson.addProperty("claimContents",claimContents.getText().toString());
@@ -205,10 +208,9 @@ public class ReportActivity extends AppCompatActivity {
 //        analysisDetailsList.add(analysisDetailsObj);
 //        requestJson.add("analysisDetailsList",analysisDetailsList);
 
-
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
         RequestBody requestData = RequestBody.create(MediaType.parse("application/json"), gson.toJson(requestJson));
-        Toast.makeText(getApplicationContext(),"ddd"+requestData.toString(),Toast.LENGTH_LONG).show();
+//        Toast.makeText(getApplicationContext(),"ddd"+requestData.toString(),Toast.LENGTH_LONG).show();
                 System.out.println(" =============ddd===========Throwable: "+ requestJson.toString());
                 System.out.println(" ============eeee============Throwable: "+ requestData.toString());
                 System.out.println(" ============recordData.getAnalysisId()============Throwable: "+ recordData.getAnalysisId());
