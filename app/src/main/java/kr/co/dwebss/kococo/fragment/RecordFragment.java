@@ -7,8 +7,12 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
+import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
@@ -16,7 +20,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -31,6 +38,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.activity.ResultActivity;
@@ -140,6 +149,17 @@ public class RecordFragment extends Fragment  {
 
     byte[] mp3buffer;
 
+    //사용자의 밝기 저장
+    int now_bright_status;
+
+    Button recodeBtn;
+    TextView recodeTxt;
+    TextView recordTimer;
+    ImageView logo;
+    int recordTime=0;
+
+    Handler timerMessegeHandler;
+
     public RecordFragment() {
         // Required empty public constructor
     }
@@ -153,10 +173,19 @@ public class RecordFragment extends Fragment  {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        WindowManager.LayoutParams params = getActivity().getWindow().getAttributes();
+
         View v = inflater.inflate(R.layout.fragment_record, container, false);
-        Button recodeBtn = (Button) v.findViewById(R.id.recodeBtn) ;
+        recodeBtn = (Button) v.findViewById(R.id.recodeBtn) ;
         recodeFlag = false;
         recodeBtn.setText("녹음 시작");
+
+        recodeTxt = (TextView) v.findViewById(R.id.recordTxt);
+        logo = (ImageView) v.findViewById(R.id.imageView);
+        recordTimer = (TextView) v.findViewById(R.id.recordTimer);
+        recodeTxt.setVisibility(View.INVISIBLE);
+        recordTimer.setVisibility(View.INVISIBLE);
+        logo.setVisibility(View.VISIBLE);
 
         retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();
         apiService = retrofit.create(ApiService.class);
@@ -180,42 +209,38 @@ public class RecordFragment extends Fragment  {
 //                        Toast.makeText(getActivity(), "permission 승인", Toast.LENGTH_SHORT).show();
                         Log.e(LOG_TAG2, "permission 승인");
                         recodeBtn.setText("녹음 종료");
+                        //녹음버튼 누를 시에 밝기 최대한 줄이기
+                        try{
+                            now_bright_status = android.provider.Settings.System.getInt(getContext().getContentResolver(),
+                                    android.provider.Settings.System.SCREEN_BRIGHTNESS);
+                            params.screenBrightness = (float) 1 / 100;
+                            getActivity().getWindow().setAttributes(params);
+                        }catch(Exception e){
+                            Log.e("Exception e "+e.getMessage(), null);
+                        }
+                        //TODO 녹음버튼 누를 시에 타이머 START
+                        recodeTxt.setVisibility(View.VISIBLE);
+                        recordTimer.setVisibility(View.VISIBLE);
+                        logo.setVisibility(View.INVISIBLE);
+                        recordTime=0;
+                        Timer mTimer =  new Timer();
+                        mTimer.schedule(new CustomTimer(), 2000, 1000);
+
                         recodeFlag = true;
                         recordStartDt= dayTimeDefalt.format(new Date(System.currentTimeMillis()));
                         recordStartDtL= System.currentTimeMillis();
                         start();
+
                     }
                 }else{
                     Toast.makeText(getActivity(), "분석중입니다 잠시만 기다려주세요...", Toast.LENGTH_LONG).show();
-//                    recordEndDt= dayTimeDefalt.format(new Date(System.currentTimeMillis()));
                     recodeFlag = false;
                     stop(v);
 
-                    Handler delayHandler = new Handler();
-                    delayHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            // TODO
-                            RequestBody requestData = RequestBody.create(MediaType.parse("application/json"), new Gson().toJson(recordData));
-                            Log.v(LOG_TAG2,(" ================녹음 종료 시 DB 저장========requestData: "+requestData.toString()));
-                            addRecord(requestData);
-                        }
-                    }, 5000);
-                    recodeBtn.setText("녹음 시작");
-                }
-            }
-        });
+                    //기존 밝기로 복귀
+                    params.screenBrightness = (float) now_bright_status/100;
+                    getActivity().getWindow().setAttributes(params);
 
-        FindAppIdUtil fau = new FindAppIdUtil();
-        userAppId = fau.getAppid(getContext());
-
-//        Button testBtn = (Button) v.findViewById(R.id.testBtn) ;
-//        testBtn.setText("테스트");
-//
-//        //xml 내에서 onclick으로 가능하다. 하지만 그건 activity 내에서만 가능하고 프래그먼트에서는 onclickListener()로 해야함
-//        testBtn.setOnClickListener(new Button.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
 //                //정상 테스트 데이터
 ////                String testDt = "{\"userAppId\":\"7dc9e960-b0db-4c1c-81b5-2c8f2ce7ca4f\",\"recordId\":86,\"recordStartD\":\"2019-05-29\",\"recordStartDt\":\"2019-05-29T16:10:31\",\"recordEndD\":\"2019-05-29\",\"recordEndDt\":\"2019-05-29T16:10:54\",\"consultingYn\":\"N\",\"consultingReplyYn\":\"N\",\"analysisList\":[{\"analysisId\":63,\"analysisStartD\":\"2019-05-29T16:10:34\",\"analysisStartDt\":\"2019-05-29T16:10:34\",\"analysisEndD\":\"2019-05-29T16:10:54\",\"analysisEndDt\":\"2019-05-29T16:10:54\",\"analysisFileNm\":\"snoring-20190605_1708-05_1709_1559722170788.mp3\",\"analysisFileAppPath\":\"/data/user/0/kr.co.dwebss.kococo/files/rec_data/8\",\"analysisServerUploadYn\":\"N\",\"claimYn\":\"N\",\"analysisDetailsList\":[{\"analysisDetailsId\":65,\"termTypeCd\":200102,\"termStartDt\":\"2019-05-29T16:10:36\",\"termEndDt\":\"2019-05-29T16:10:40\"}],\"_links\":{\"record\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86\"}}}],\"_links\":{\"self\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86\"},\"record\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86\"},\"admin\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86/admin\"},\"user\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86/user\"}}}";
 //                String testDt = "{\"userAppId\":\"7dc9e960-b0db-4c1c-81b5-2c8f2ce7ca4f\",\"recordId\":86,\"recordStartD\":\"2019-05-29\",\"recordStartDt\":\"2019-05-29T16:10:31\",\"recordEndD\":\"2019-05-29\",\"recordEndDt\":\"2019-05-29T16:10:54\",\"consultingYn\":\"N\",\"consultingReplyYn\":\"N\",\"analysisList\":[{\"analysisId\":63,\"analysisStartD\":\"2019-05-29T16:10:34\",\"analysisStartDt\":\"2019-05-29T16:10:34\",\"analysisEndD\":\"2019-05-29T16:10:54\",\"analysisEndDt\":\"2019-05-29T16:10:54\",\"analysisFileNm\":\"snoring-20190605_1708-05_1709_1559722170788.mp3\",\"analysisFileAppPath\":\"/data/user/0/kr.co.dwebss.kococo/files/rec_data/8\",\"analysisServerUploadYn\":\"N\",\"claimYn\":\"N\",\"analysisDetailsList\":[{\"analysisDetailsId\":65,\"termTypeCd\":200102,\"termStartDt\":\"2019-05-29T16:10:36\",\"termEndDt\":\"2019-05-29T16:10:40\"},{\"analysisDetailsId\":66,\"termTypeCd\":200101,\"termStartDt\":\"2019-05-29T16:10:50\",\"termEndDt\":\"2019-05-29T16:10:53\"}],\"_links\":{\"record\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86\"}}}],\"_links\":{\"self\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86\"},\"record\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86\"},\"admin\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86/admin\"},\"user\":{\"href\":\"http://52.79.88.47:8080/kococo/api/record/86/user\"}}}";
@@ -224,11 +249,56 @@ public class RecordFragment extends Fragment  {
 //                Intent intent = new Intent(getActivity(), ResultActivity.class);
 //                intent.putExtra("responseData",testDt); /*송신*/
 //                startActivity(intent);
-//
-//            }
-//        });
+
+                    Handler delayHandler = new Handler();
+                    delayHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            RequestBody requestData = RequestBody.create(MediaType.parse("application/json"), new Gson().toJson(recordData));
+                            Log.v(LOG_TAG2,(" ================녹음 종료 시 DB 저장========requestData: "+requestData.toString()));
+                            addRecord(requestData);
+                        }
+                    }, 5000);
+                }
+            }
+        });
+
+        FindAppIdUtil fau = new FindAppIdUtil();
+        userAppId = fau.getAppid(getContext());
+
+        timerMessegeHandler = new Handler(){
+            public void handleMessage(Message msg){
+                int sec = (recordTime) % 60;
+                int min = (recordTime/60) % 60;
+                int hour = (recordTime / (60*60)) % 24;
+                recordTimer.setText(String.format("%02d:%02d:%02d", hour, min, sec));
+            }
+        };
         return v;
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        //다시 돌아왔을 경우에 텍스트를 종료에서 시작으로 바꿈
+        recodeBtn.setText("녹음 시작");
+        recodeTxt.setVisibility(View.INVISIBLE);
+        recordTimer.setVisibility(View.INVISIBLE);
+        logo.setVisibility(View.VISIBLE);
+        recordTime = 0;
+    }
+
+    class CustomTimer extends TimerTask {
+        @Override
+        public void run() {
+            recordTime++;
+            Message msg = new Message();
+            msg.arg1 = recordTime;
+            timerMessegeHandler.sendMessage(msg);
+        }
+    }
+
+
 
     public void addRecord(RequestBody requestData) {
         //POST /api/record를 호출한다.

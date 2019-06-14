@@ -152,8 +152,6 @@ public class MainActivity extends AppCompatActivity {
         includesForCreateReference();
         //firebase storage 끝
 
-
-
         viewPager = (ViewPager) findViewById(R.id.view_pager);
         setupViewPager(viewPager);
 

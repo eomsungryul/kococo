@@ -88,6 +88,7 @@ public class StatFragment extends Fragment implements SeekBar.OnSeekBarChangeLis
                 long snoringTimes=result.get("snoringTimes").getAsLong();
                 long osaTimes=result.get("osaTimes").getAsLong();
                 long grindingTimes=result.get("grindingTimes").getAsLong();
+                int sleepScore=result.get("sleepScore").getAsInt();
                 DateFormatter df = new DateFormatter();
 
                 stats.add(new StatData(res.getString(R.string.goodSleepRow),df.longToStringFormat(recordedTimes), recordedTimes, "1", 0xFF1EB980));
@@ -116,7 +117,7 @@ public class StatFragment extends Fragment implements SeekBar.OnSeekBarChangeLis
 
                 //폰트체 설정하는부분
 //        chart.setCenterTextTypeface(tfLight);
-                chart.setCenterText(generateCenterSpannableText());
+                chart.setCenterText(generateCenterSpannableText(sleepScore));
                 chart.setCenterTextColor(Color.WHITE);
 
                 //안에 구멍을 넣을지 말지.. 없으면 피자조각처럼 됨
@@ -252,13 +253,13 @@ public class StatFragment extends Fragment implements SeekBar.OnSeekBarChangeLis
     }
 
     //안드로이드에서 TextView에 setText시 text에 부분적으로 밑줄을 긋거나 색상을 바꾸거나 이미지를 중간에 삽입하거나 등이 필요 시
-    private SpannableString generateCenterSpannableText() {
+    private SpannableString generateCenterSpannableText(int sleepScore) {
 //        SpannableString s = new SpannableString("평균\n80점");
 //        //사이즈 크기조절 RelativeSizeSpan
 //        s.setSpan(new RelativeSizeSpan(1.7f), 0, s.length()-3, 0);
 //        s.setSpan(new RelativeSizeSpan(3.7f), s.length()-3, s.length(), 0);
 
-        SpannableString s = new SpannableString("80점");
+        SpannableString s = new SpannableString(sleepScore+"점");
         s.setSpan(new RelativeSizeSpan(3.7f), 0, s.length(), 0);
 
 
