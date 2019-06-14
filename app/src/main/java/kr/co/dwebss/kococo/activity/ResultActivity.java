@@ -41,18 +41,13 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
-import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -70,6 +65,7 @@ import kr.co.dwebss.kococo.util.FindAppIdUtil;
 import kr.co.dwebss.kococo.util.JsonNullCheckUtil;
 import kr.co.dwebss.kococo.util.MediaPlayerUtility;
 import kr.co.dwebss.kococo.util.MyXAxisValueFormatter;
+import kr.co.dwebss.kococo.util.RecordDataGroupByUtil;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -100,7 +96,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
     FindAppIdUtil fau = new FindAppIdUtil();
 
-    List<BarEntry> entries = new ArrayList<>();
+    List<BarEntry> snoreEntries = new ArrayList<>();
     List<BarEntry> osaEntries = new ArrayList<>();
     List<BarEntry> grindEntries = new ArrayList<>();
     long referenceTimestamp; // minimum timestamp in your data set;
@@ -216,9 +212,15 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
                             recordData.setAnalysisEndDt(jncu.JsonStringNullCheck(analysisObj,"analysisEndDt"));
 
-//                            String analysisRawStr =analysisObj.get("analysisData").getAsString();
-////                                    System.out.println("=================analysisRawStr======================"+analysisRawStr);
-//                            JsonArray analysisRawDataArr = new JsonParser().parse(analysisRawStr).getAsJsonArray();
+                            String analysisDataRawStr =analysisObj.get("recordingData").getAsString();
+//                                    System.out.println("=================analysisRawStr======================"+analysisRawStr);
+                            JsonArray analysisDataArr = new JsonParser().parse(analysisDataRawStr).getAsJsonArray();
+                            System.out.println("===========RecordDataGroupByUtil==start============"+analysisDataArr);
+                            RecordDataGroupByUtil rd = new RecordDataGroupByUtil();
+                            JsonArray result =rd.groupByMinites(analysisDataArr);
+                            System.out.println("===========RecordDataGroupByUtil=============="+result);
+
+
 
                             analysisId = analysisObj.get("analysisId").getAsInt();
                             analysisServerUploadPath = jncu.JsonStringNullCheck(analysisObj,"analysisFileAppPath")+"/"+jncu.JsonStringNullCheck(analysisObj,"analysisFileNm");
@@ -275,9 +277,8 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                                             JsonObject analysisRawData = (JsonObject) analysisRawDataArr.get(k);
                                             //데이터 넣는 부분
                                             //타임은 recordStartDt 이후의 시간
-
 //                                                if(termTypeCd==200101){
-//                                                    entries.add(new BarEntry((analysisRawData.get("TIME").getAsInt()*1000), analysisRawData.get("DB").getAsFloat(), recordEntryData));
+//                                                    snoreEntries.add(new BarEntry((analysisRawData.get("TIME").getAsInt()*1000), analysisRawData.get("DB").getAsFloat(), recordEntryData));
 //                                                }else if(termTypeCd==200102){
 //                                                    grindEntries.add(new BarEntry((analysisRawData.get("TIME").getAsInt()*1000), analysisRawData.get("DB").getAsFloat(), recordEntryData));
 //                                                }else{
@@ -288,8 +289,8 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                                                 int minute =time/60;
 
                                                 if(termTypeCd==200101){
-//                                                    entries.add(new BarEntry(minute*60*1000, analysisRawData.get("DB").getAsFloat(), recordEntryData));
-                                                    entries.add(new BarEntry(minute, analysisRawData.get("DB").getAsFloat(), recordEntryData));
+//                                                    snoreEntries.add(new BarEntry(minute*60*1000, analysisRawData.get("DB").getAsFloat(), recordEntryData));
+                                                    snoreEntries.add(new BarEntry(minute, analysisRawData.get("DB").getAsFloat(), recordEntryData));
                                                 }else if(termTypeCd==200102){
 //                                                    grindEntries.add(new BarEntry(minute*60*1000, analysisRawData.get("DB").getAsFloat(), recordEntryData));
                                                     grindEntries.add(new BarEntry(minute, analysisRawData.get("DB").getAsFloat(), recordEntryData));
@@ -298,7 +299,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                                                     osaEntries.add(new BarEntry(minute, analysisRawData.get("DB").getAsFloat(), recordEntryData));
                                                 }
 //                                                System.out.println("============time"+time+"=====================minute"+minute);
-//                                            entries.add(new BarEntry((analysisRawData.get("TIME").getAsInt()*1000), analysisRawData.get("DB").getAsFloat(), recordEntryData));
+//                                            snoreEntries.add(new BarEntry((analysisRawData.get("TIME").getAsInt()*1000), analysisRawData.get("DB").getAsFloat(), recordEntryData));
                                         }
                                     }
                                 }
@@ -343,7 +344,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             //차트 시작
             chart = findViewById(R.id.chart1);
             chart.getDescription().setEnabled(false);
-            // if more than 60 entries are displayed in the chart, no values will be
+            // if more than 60 snoreEntries are displayed in the chart, no values will be
             // drawn
 //            chart.setMaxVisibleValueCount(60);
 
@@ -405,7 +406,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             chart = (BarChart) findViewById(R.id.chart1);
 
             BarDataSet set1;
-            set1 = new BarDataSet(entries, "Data Set");
+            set1 = new BarDataSet(snoreEntries, "Data Set");
             set1.setColors(Color.rgb(255, 104, 89));
             //값을 보여줄건지 말건지 여부
             set1.setDrawValues(false);
