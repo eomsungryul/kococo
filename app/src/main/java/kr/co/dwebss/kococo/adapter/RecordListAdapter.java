@@ -350,4 +350,7 @@ public class RecordListAdapter extends BaseAdapter {
         mediaPlayer.release();
         mediaPlayer=null;
     }
+
+
+
 }

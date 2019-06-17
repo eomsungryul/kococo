@@ -144,6 +144,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             bt.setOnClickListener(new Button.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    adapter.destroyMp();
                     ResultActivity.super.onBackPressed();
                 }
             });
@@ -588,6 +589,5 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
     public void onDestroy() {
         super.onDestroy();
 //         MediaPlayer 해지
-        adapter.destroyMp();
     }
 }
