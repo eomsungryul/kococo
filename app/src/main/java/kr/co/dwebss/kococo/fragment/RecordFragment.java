@@ -1111,7 +1111,20 @@ public class RecordFragment extends Fragment  {
                             }
                         }
                         if(isRecording == true){
-                            AllAnalysisRawDataList.add(maxARD);
+                            //AllAnalysisRawDataList.add(maxARD);
+                            int tmpTime = (int) Math.floor(times);
+                            //1초 혹은 1분 단위로 기록
+                            if(tmpTime ==1 || tmpTime%60 ==0) {
+                                AllAnalysisRawDataList.add(maxARD);
+                            }
+                            //1분 당시의 데이터가 없는 경우
+                            if(tmpTime !=1 && tmpTime%60==1 && AllAnalysisRawDataList.size() > 0){
+                                AnalysisRawData tmpAwd = AllAnalysisRawDataList.get(AllAnalysisRawDataList.size()-1);
+                                int tmpTimeBefore = (int) Math.floor(tmpAwd.getTimes());
+                                if(tmpTime - tmpTimeBefore==60 || tmpTime - tmpTimeBefore==61){
+                                    AllAnalysisRawDataList.add(maxARD);
+                                }
+                            }
                         }
                         maxARD = new AnalysisRawData(times, amplitude, tmpMaxDb, frequency);
                         timesForMaxArd = Math.floor(times);
