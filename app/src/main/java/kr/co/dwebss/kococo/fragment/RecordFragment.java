@@ -555,7 +555,7 @@ public class RecordFragment extends Fragment  {
 
                     // 소리가 발생하면 녹음을 시작하고, 1분이상 소리가 발생하지 않으면 녹음을 하지 않는다.
                     //if (SleepCheck.noiseCheckForStart(decibel) >= 30 && isRecording == false
-                    if (isRecording == false
+                    if (SleepCheck.noiseCheckForStart(decibel) >= 1 && isRecording == false
                             && Math.floor((double) (audioData.length / (44100d * 16 * 1)) * 8) != Math.floor(times) ) {
                         Log.v(LOG_TAG2,(calcTime(times)+"("+String.format("%.2f", times) + "s) 녹음 시작!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
                         //recordStartingTIme = times;
@@ -1129,6 +1129,8 @@ public class RecordFragment extends Fragment  {
                                 Log.v(LOG_TAG2,(calcTime(times)+" "+calcTime(maxARD.getTimes())+" "+maxARD.getDecibel()));
                                 AllAnalysisRawDataList.add(maxARD);
                             }
+
+                            Log.v(LOG_TAG2,(calcTime(times))+" "+calcTime((System.currentTimeMillis()/1000)%60));
                             if(tmpTime>60 && tmpTime%60 > 2) {
 
                                 double tmpCM = (times+(int) (recordStartDtL / 1000) % 60);
