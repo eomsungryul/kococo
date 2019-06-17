@@ -100,6 +100,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
     List<BarEntry> snoreEntries = new ArrayList<>();
     List<BarEntry> osaEntries = new ArrayList<>();
     List<BarEntry> grindEntries = new ArrayList<>();
+    List<BarEntry> emptyEntries = new ArrayList<>();
     long referenceTimestamp; // minimum timestamp in your data set;
 
     MediaPlayerUtility mpu;
@@ -237,7 +238,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                           String analysisDataRawStr =analysisObj.get("recordingData").getAsString();
                           JsonArray analysisDataArr = new JsonParser().parse(analysisDataRawStr).getAsJsonArray();
 
-                          JsonArray analysisDataArrGroupByMinite =rd.groupByMinites(analysisDataArr);
+                          JsonArray analysisDataArrGroupByMinite =rd.groupByMinites(analysisDataArr,DateTimeToStringFormat.format(recordStartDT));
 
                           if(analysisDataArrGroupByMinite.size()>0){
                               for(int k =0; k<analysisDataArrGroupByMinite.size(); k++){
@@ -267,7 +268,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                                 JsonArray analysisRawDataArr = new JsonParser().parse(analysisRawStr).getAsJsonArray();
 
                                 if(analysisRawDataArr.size()>0){
-                                    JsonArray analysisRawDataArrGroupByMinite =rd.groupByMinites(analysisRawDataArr);
+                                    JsonArray analysisRawDataArrGroupByMinite =rd.groupByMinites(analysisRawDataArr,DateTimeToStringFormat.format(recordStartDT));
 
                                         for(int k =0; k<analysisRawDataArrGroupByMinite.size(); k++){
                                             JsonObject analysisRawData = (JsonObject) analysisRawDataArrGroupByMinite.get(k);
@@ -287,8 +288,8 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                                     }
                                 }
 
-                                kococoTerm += (stringtoDateTimeFormat.parse(recordData.getTermEndDt()).getTime()
-                                        -stringtoDateTimeFormat.parse(recordData.getTermStartDt()).getTime());
+                            kococoTerm += (stringtoDateTimeFormat.parse(recordData.getTermEndDt()).getTime()
+                                    -stringtoDateTimeFormat.parse(recordData.getTermStartDt()).getTime());
                             }
                         }
                         String detectedTxt = "";
@@ -305,7 +306,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                             recordData.setTitle(df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
                                     +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지\n"
 //                                            +df.longToStringFormat(kococoTerm)
-                                            +"코를 골았습니다. "
+                                            +"소리가 났습니다."
                                     );
                         }else{
                             recordData.setTitle(df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
@@ -350,18 +351,26 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
 
 //            chart.setDrawBarShadow(false);
             chart.setDrawGridBackground(false);
+            //터치를 제한시키는 부분인데 값을 어떻게 쓰는지를 모르겠음
+//            chart.setMaxHighlightDistance (1.5f);
+//            chart.setHighlightFullBarEnabled(true);
             chart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
                 @Override
                 public void onValueSelected(Entry e, Highlight h) {
-//                    System.out.println("=========클릭했다~~~"+e.getData());
+                    System.out.println("=========클릭했다~~~"+e.getData());
+                    if(adapter.getPlayBtnFlag()){
+                        adapter.stopActivityMp(playingId);
+                    }
                     //데이터 넣을 시에 재생 파일 패스 및 재생 구간을 넣으면된다.
-                    JsonObject graphData= (JsonObject) e.getData();
-                    playingId = graphData.get("analysisId").getAsInt();
-                    try {
-                        adapter.playActivityMp(graphData.get("analysisId").getAsInt(),graphData.get("termStartDt").getAsInt(),graphData.get("termEndDt").getAsInt(),graphData.get("filePath").getAsString(),getApplicationContext());
-//                        adapter.playGraphMp(graphData.get("termStartDt").getAsInt(),graphData.get("termEndDt").getAsInt(),graphData.get("filePath").getAsString(),getApplicationContext());
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
+                    if(e.getData()!=null){
+                        JsonObject graphData= (JsonObject) e.getData();
+                        playingId = graphData.get("analysisId").getAsInt();
+                        try {
+                            adapter.playActivityMp(graphData.get("analysisId").getAsInt(),graphData.get("termStartDt").getAsInt(),graphData.get("termEndDt").getAsInt(),graphData.get("filePath").getAsString(),getApplicationContext());
+                            //                        adapter.playGraphMp(graphData.get("termStartDt").getAsInt(),graphData.get("termEndDt").getAsInt(),graphData.get("filePath").getAsString(),getApplicationContext());
+                        } catch (IOException e1) {
+                            e1.printStackTrace();
+                        }
                     }
                 }
                 @Override
@@ -371,6 +380,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                     }
                 }
             });
+
             MyXAxisValueFormatter xAxisFormatter = new MyXAxisValueFormatter(referenceTimestamp);
 //            MyXAxisValueFormatter xAxisFormatter = new MyXAxisValueFormatter(0);
             XAxis xAxis = chart.getXAxis();
@@ -383,11 +393,13 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             //X좌표 폰트
             xAxis.setTextColor(Color.WHITE);
             xAxis.setValueFormatter(xAxisFormatter);
+            xAxis.setXOffset(1f);
 
             //시작과 끝점을 정해줘야 그래프가 제대로잘 나옴
+            float endMinites = (recordEndDT.getTime()-referenceTimestamp)/(60*1000);
             xAxis.setAxisMinimum(0);
-            xAxis.setAxisMaximum((float)(recordEndDT.getTime()-referenceTimestamp)/(60*1000));
-            System.out.println("=========recordEndDT.getTime()-referenceTimestamp===recordTerm============"+(float)(recordEndDT.getTime()-referenceTimestamp)/(60*1000));
+            xAxis.setAxisMaximum(endMinites);
+            System.out.println("=========recordEndDT.getTime()-referenceTimestamp===recordTerm============"+endMinites);
 
             chart.setScaleYEnabled(false);
             chart.getAxisLeft().setDrawGridLines(false);
@@ -400,6 +412,10 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             chart.animateY(1500);
             chart.getLegend().setEnabled(false);
             chart = (BarChart) findViewById(R.id.chart1);
+
+            //마지막 데이터 정제
+            emptyEntries = rd.addZeroData(endMinites,soundEntries,snoreEntries,osaEntries,grindEntries);
+            chart.getAxisLeft().setAxisMinimum(0f);
 
             BarDataSet set1;
             set1 = new BarDataSet(snoreEntries, "Data Set");
@@ -429,6 +445,14 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             soundSet.setDrawValues(false);
             soundSet.setValueTextColor(Color.WHITE);
 
+            BarDataSet emptySet;
+            emptySet = new BarDataSet(emptyEntries, "Data Set");
+            emptySet.setColors(Color.TRANSPARENT);
+            //값을 보여줄건지 말건지 여부
+            emptySet.setDrawValues(false);
+            emptySet.setValueTextColor(Color.WHITE);
+            emptySet.setVisible(false);
+
 //            chart.setViewPortOffsets(0f, 60f, 30f, 0f);
             //X 간격을 조정 할 수있지만 줌 기능이 정지됨
 //            chart.setVisibleXRange(0f,30000f);
@@ -439,6 +463,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             dataSets.add(set1);
             dataSets.add(grindSet);
             dataSets.add(osaSet);
+            dataSets.add(emptySet);
 
             BarData data = new BarData(dataSets);
             //바의 두께를 바꿀수 있는

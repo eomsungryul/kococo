@@ -61,7 +61,7 @@ public class RecordListAdapter extends BaseAdapter {
     int analysisId;
 
     private GraphClickListener graphClickListener;
-
+    int pos = 0;
     // ListViewAdapter의 생성자
     public RecordListAdapter(Context context, GraphClickListener graphClickListener) {
         this.context = context;
@@ -83,7 +83,7 @@ public class RecordListAdapter extends BaseAdapter {
     // position에 위치한 데이터를 화면에 출력하는데 사용될 View를 리턴. : 필수 구현
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        final int pos = position;
+        pos = position;
         final Context context = parent.getContext();
         viewGroup = parent;
 
@@ -136,7 +136,6 @@ public class RecordListAdapter extends BaseAdapter {
 //            }
 //        });
         //{"userAppId":"7dc9e960-b0db-4c1c-81b5-2c8f2ce7ca4f","recordId":116,"recordStartD":"2019-05-30","recordStartDt":"2019-05-30T15:13:46","recordEndD":"2019-05-30","recordEndDt":"2019-05-30T15:14:46","consultingYn":"N","consultingReplyYn":"N","analysisList":[{"analysisId":93,"analysisStartD":"2019-05-30T00:00:00","analysisStartDt":"2019-05-30T15:13:50","analysisEndD":"2019-05-30T00:00:00","analysisEndDt":"2019-05-30T15:14:49","analysisFileNm":"snoring-20191330_1513-30_1514_1559196886407.wav","analysisFileAppPath":"/data/user/0/kr.co.dwebss.kococo/files/rec_data/29","analysisServerUploadYn":"N","analysisDetailsList":[{"analysisId":93,"analysisId":97,"termTypeCd":200102,"termStartDt":"2019-05-30T15:14:37","termEndDt":"2019-05-30T15:14:42","claimYn":"N"}],"_links":{"record":{"href":"http://52.79.88.47:8080/kococo/api/record/116"}}}],"_links":{"self":{"href":"http://52.79.88.47:8080/kococo/api/record/116"},"record":{"href":"http://52.79.88.47:8080/kococo/api/record/116"},"admin":{"href":"http://52.79.88.47:8080/kococo/api/record/116/admin"},"user":{"href":"http://52.79.88.47:8080/kococo/api/record/116/user"},"sleepStatusCd":{"href":"http://52.79.88.47:8080/kococo/api/record/116/sleepStatusCd"}}}
-
 
         //신고하기 버튼
         //신고하기를 클릭 할 시에 데이터를 보낸다!
@@ -246,10 +245,15 @@ public class RecordListAdapter extends BaseAdapter {
             playBtnFlag = false;
             isPlaying = false;
         }
+        System.out.println("==========123====test============"+getCount()+viewGroup.getChildCount());
         for(int i=0; i<getCount();i++){
             v = viewGroup.getChildAt(i);
             RecordData rd =listViewItemList.get(i);
-            System.out.println("=============rd.getanalysisId()======="+rd.getAnalysisId()+"====position=="+adi);
+
+            TextView timeTextView = (TextView) v.findViewById(R.id.recordTimeText) ;
+            System.out.println("========123======timeTextView.getText()============"+timeTextView.getText());
+
+            System.out.println("=======123======rd.getanalysisId()======="+rd.getAnalysisId()+"====position=="+adi);
             if(rd.getAnalysisId()==adi){
                 playBtn = (ImageButton) v.findViewById(R.id.recordPlay);
                 playBtnFlag = true;

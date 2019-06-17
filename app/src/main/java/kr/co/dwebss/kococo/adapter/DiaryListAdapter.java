@@ -104,6 +104,7 @@ public class DiaryListAdapter extends BaseAdapter {
         Record data = (Record) getItem(position);
 
         apiService.getRecord(data.getRecordId()).enqueue(new Callback<JsonObject>() {
+//        apiService.getRecord(335).enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
                 System.out.println(data.getRecordId()+" ========================response: "+response.body());
