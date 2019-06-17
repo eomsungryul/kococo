@@ -1130,9 +1130,13 @@ public class RecordFragment extends Fragment  {
                                 AllAnalysisRawDataList.add(maxARD);
                             }
                             if(tmpTime>60 && tmpTime%60 > 2) {
-                                double tmpCM = recordStartDtL+(times*1000);
-                                double tmpBeforeCM = recordStartDtL+(AllAnalysisRawDataList.get(AllAnalysisRawDataList.size()-1).getTimes()*1000);
-                                if(tmpCM - tmpBeforeCM >= 60*1000 && tmpCM - tmpBeforeCM <= 61*1000){
+
+                                double tmpCM = (times+(int) (recordStartDtL / 1000) % 60);
+                                double tmpBeforeCM = (AllAnalysisRawDataList.get(AllAnalysisRawDataList.size()-1).getTimes()+(int) (recordStartDtL / 1000) % 60);
+                                int tmpM = calcMinute(tmpCM);
+                                int tmpBeforeM = calcMinute(tmpBeforeCM);
+                                //Log.v(LOG_TAG2,(calcTime(times)+" "+tmpCM+" "+tmpBeforeCM+" "+tmpM+" "+tmpBeforeM));
+                                if(tmpM%60==2){
                                     AllAnalysisRawDataList.add(maxARD);
                                 }
                             }
@@ -1399,6 +1403,17 @@ public class RecordFragment extends Fragment  {
         double seconds_output = (times% 3600)%60;
         seconds_output = Math.floor(seconds_output*1000)/1000;
         return hours  + ":" + minutes + ":" + seconds_output +"";
+    }
+    private int calcMinute(double times) {
+        int seconds;
+        int minutes ;
+        int hours;
+        seconds =  (int)times;
+        hours = seconds / 3600;
+        minutes = (seconds%3600)/60;
+        double seconds_output = (times% 3600)%60;
+        seconds_output = Math.floor(seconds_output*1000)/1000;
+        return minutes;
     }
 }
 
