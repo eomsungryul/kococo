@@ -488,6 +488,8 @@ public class RecordFragment extends Fragment  {
 
                 AnalysisRawData maxARD = null;
                 double timesForMaxArd = 0.0;
+
+                int recordingLength = 0;
                 while (mShouldContinue) {
                     times = (((double) (frameBytes.length / (44100d * 16 * 1))) * 8) * i;
                     int numberOfShort = record.read(audioData, 0, audioData.length);
@@ -559,6 +561,7 @@ public class RecordFragment extends Fragment  {
                         //recordStartingTIme = times;
                         recordStartingTIme = System.currentTimeMillis();
                         baos = new ByteArrayOutputStream();
+                        recordingLength = 0;
                         isRecording = true;
                         snoringTermList = new ArrayList<StartEnd>();
                         grindingTermList = new ArrayList<StartEnd>();
@@ -570,6 +573,7 @@ public class RecordFragment extends Fragment  {
                     //} else if (isRecording == true && SleepCheck.noiseCheck(decibel) <= 100) {
                     } else if (isRecording == true && SleepCheck.noiseCheck(decibel) == 0) {
                         Log.v(LOG_TAG2,(calcTime(times)+"("+String.format("%.2f", times) + "s) 녹음 종료!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
+                        AllAnalysisRawDataList.add(maxARD);
                         SimpleDateFormat dayTime = new SimpleDateFormat("yyyyMM_dd_HHmm");
                         String fileName = dayTime.format(new Date(recordStartingTIme));
                         dayTime = new SimpleDateFormat("dd_HHmm");
@@ -585,7 +589,7 @@ public class RecordFragment extends Fragment  {
                         String[] fileInfo = wfc.saveLongTermMp3(fileName, getContext(), waveData);
 
                         Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
-                        Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (waveData.length / (44100d * 16 * 1))) * 8));
+                        Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (recordingLength / (44100d * 16 * 1))) * 8));
                         Log.v(LOG_TAG2,("tmpMinDb: "+tmpMinDb));
                         Log.v(LOG_TAG2,("tmpMaxDb: "+tmpMaxDb));
 
@@ -769,10 +773,14 @@ public class RecordFragment extends Fragment  {
                         continue;
                     }
                     //baos.write(frameBytes);
+                    if(audioData != null ) {
+                        recordingLength += (audioData.length*2);
+                    }
                     int encResult = SimpleLame.encode(audioData, audioData, numberOfShort, mp3buffer);
                     if (encResult != 0) {
                         baos.write(mp3buffer, 0, encResult);
                     }
+
                     /*
                     System.out.print("녹음 중! ");
                     Log.v(LOG_TAG2,(String.format("%.2f", times)+"s ");
@@ -1063,7 +1071,7 @@ public class RecordFragment extends Fragment  {
                     //무호흡 종료 후 5초 이내에 코골이가 발생하지 않으면 취소
                     //무호흡 종료 후 5초 동안 코골이 발생여부를 체크한다.
                     if(osaTermList.size()>0 && osaTermList.get(osaTermList.size()-1).end!=0 && times - osaTermList.get(osaTermList.size()-1).end < 5) {
-                        if(snoringTermList.size()>0 && isRecording == true){
+                        if(snoringTermList.size()>0 && snoringTermList.get(snoringTermList.size()-1).start - osaTermList.get(osaTermList.size()-1).end > 0 && snoringTermList.get(snoringTermList.size()-1).start - osaTermList.get(osaTermList.size()-1).end < 5){
                             //코골이가 녹음 중이게 되었을 때, 체크 플래그를 업데이트
                             if(snoringTermList.get(snoringTermList.size() - 1).end==0){
                                 osaTermList.get(osaTermList.size()-1).chk = 1;
@@ -1111,7 +1119,26 @@ public class RecordFragment extends Fragment  {
                             }
                         }
                         if(isRecording == true){
-                            AllAnalysisRawDataList.add(maxARD);
+                            //AllAnalysisRawDataList.add(maxARD);
+                            int tmpTime = (int) Math.floor(times);
+                            //1초 혹은 1분 단위로 기록
+                            if(tmpTime<=61){
+                                AllAnalysisRawDataList.add(maxARD);
+                            }
+                            if(tmpTime>60 && tmpTime%60 ==2) {
+                                Log.v(LOG_TAG2,(calcTime(times)+" "+calcTime(maxARD.getTimes())+" "+maxARD.getDecibel()));
+                                AllAnalysisRawDataList.add(maxARD);
+                            }
+                            //1분 당시의 데이터가 없는 경우
+                            /*
+                            if(AllAnalysisRawDataList.size()>0 && tmpTime%60==1 && AllAnalysisRawDataList.size() > 0){
+                                AnalysisRawData tmpAwd = AllAnalysisRawDataList.get(AllAnalysisRawDataList.size()-1);
+                                int tmpTimeBefore = (int) Math.floor(tmpAwd.getTimes());
+                                if(tmpTime - tmpTimeBefore < 70){
+                                    AllAnalysisRawDataList.add(maxARD);
+                                }
+                            }
+                            */
                         }
                         maxARD = new AnalysisRawData(times, amplitude, tmpMaxDb, frequency);
                         timesForMaxArd = Math.floor(times);
@@ -1122,6 +1149,7 @@ public class RecordFragment extends Fragment  {
                 }
                 if (isRecording == true && recodeFlag==false) {
                     Log.v(LOG_TAG2,(calcTime(times)+"("+String.format("%.2f", times) + "s) 녹음 종료 버튼을 눌러서 현재 진행되던 녹음을 종료!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
+                    AllAnalysisRawDataList.add(maxARD);
                     SimpleDateFormat dayTime = new SimpleDateFormat("yyyyMM_dd_HHmm");
                     String fileName = dayTime.format(new Date(recordStartingTIme));
                     dayTime = new SimpleDateFormat("dd_HHmm");
@@ -1136,7 +1164,7 @@ public class RecordFragment extends Fragment  {
                     String[] fileInfo = wfc.saveLongTermMp3(fileName, getContext(), waveData);
 
                     Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
-                    Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (waveData.length / (44100d * 16 * 1))) * 8));
+                    Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (recordingLength/ (44100d * 16 * 1))) * 8));
                     Log.v(LOG_TAG2,("tmpMinDb: "+tmpMinDb));
                     Log.v(LOG_TAG2,("tmpMaxDb: "+tmpMaxDb));
 
