@@ -71,7 +71,7 @@ public class RecordListAdapter extends BaseAdapter {
 
 
     public interface GraphClickListener{
-        void clickBtn();
+        void clickBtn(RecordData listViewItem);
     }
 
     // Adapter에 사용되는 데이터의 개수를 리턴. : 필수 구현
@@ -174,8 +174,6 @@ public class RecordListAdapter extends BaseAdapter {
     RecordData data) {
         listViewItemList.add(data);
     }
-
-
 
     public void playMp(int startTime, int endTime , String filePath, Context context,ImageButton playBtn) throws IOException {
 //        mediaPlayer = MediaPlayer.create(context, Uri.parse("/data/data/kr.co.dwebss.kococo/files/rec_data/23/snoring-20191029_0410-29_0410_1559113854914.wav"));
@@ -287,8 +285,9 @@ public class RecordListAdapter extends BaseAdapter {
 
     public void rowClickEvt(int position,RecordData listViewItem,ImageButton playBtn) {
 //              Toast.makeText(context, "파일정보 : "+position+" : "+listViewItem.getAnalysisFileAppPath()+"/"+listViewItem.getAnalysisFileNm(), Toast.LENGTH_SHORT).show();
+        System.out.println("===============파일getResponseObj정보 : "+position+" : "+listViewItem.getResponseObj()+"/"+listViewItem.getAnalysisFileNm());
         //후에 액티비티에 접근할때 사용한다.
-        graphClickListener.clickBtn();
+        graphClickListener.clickBtn(listViewItem);
         //재생버튼 누를 시 정지버튼으로 변경하는 메소드
         //재생중이거나 해당버튼이 재생position 값과 다른 경우에만 초기화를 해줌
         if(isPlaying && playPosition != position){

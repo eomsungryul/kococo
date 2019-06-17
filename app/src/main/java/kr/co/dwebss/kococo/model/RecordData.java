@@ -30,6 +30,16 @@ public class RecordData implements Serializable {
     private String analysisStartDt;
     private String analysisEndDt;
 
+    private String responseObj;
+
+    public String getResponseObj() {
+        return responseObj;
+    }
+
+    public void setResponseObj(String responseObj) {
+        this.responseObj = responseObj;
+    }
+
     public RecordData(){
 
     }
