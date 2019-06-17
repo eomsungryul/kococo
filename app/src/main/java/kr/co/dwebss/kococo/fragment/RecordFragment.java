@@ -570,6 +570,7 @@ public class RecordFragment extends Fragment  {
                     //} else if (isRecording == true && SleepCheck.noiseCheck(decibel) <= 100) {
                     } else if (isRecording == true && SleepCheck.noiseCheck(decibel) == 0) {
                         Log.v(LOG_TAG2,(calcTime(times)+"("+String.format("%.2f", times) + "s) 녹음 종료!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
+                        AllAnalysisRawDataList.add(maxARD);
                         SimpleDateFormat dayTime = new SimpleDateFormat("yyyyMM_dd_HHmm");
                         String fileName = dayTime.format(new Date(recordStartingTIme));
                         dayTime = new SimpleDateFormat("dd_HHmm");
@@ -1114,17 +1115,23 @@ public class RecordFragment extends Fragment  {
                             //AllAnalysisRawDataList.add(maxARD);
                             int tmpTime = (int) Math.floor(times);
                             //1초 혹은 1분 단위로 기록
-                            if(tmpTime ==1 || tmpTime%60 ==0) {
+                            if(tmpTime<=61){
+                                AllAnalysisRawDataList.add(maxARD);
+                            }
+                            if(tmpTime>60 && tmpTime%60 ==2) {
+                                Log.v(LOG_TAG2,(calcTime(times)+" "+calcTime(maxARD.getTimes())+" "+maxARD.getDecibel()));
                                 AllAnalysisRawDataList.add(maxARD);
                             }
                             //1분 당시의 데이터가 없는 경우
-                            if(tmpTime !=1 && tmpTime%60==1 && AllAnalysisRawDataList.size() > 0){
+                            /*
+                            if(AllAnalysisRawDataList.size()>0 && tmpTime%60==1 && AllAnalysisRawDataList.size() > 0){
                                 AnalysisRawData tmpAwd = AllAnalysisRawDataList.get(AllAnalysisRawDataList.size()-1);
                                 int tmpTimeBefore = (int) Math.floor(tmpAwd.getTimes());
-                                if(tmpTime - tmpTimeBefore==60 || tmpTime - tmpTimeBefore==61){
+                                if(tmpTime - tmpTimeBefore < 70){
                                     AllAnalysisRawDataList.add(maxARD);
                                 }
                             }
+                            */
                         }
                         maxARD = new AnalysisRawData(times, amplitude, tmpMaxDb, frequency);
                         timesForMaxArd = Math.floor(times);
@@ -1135,6 +1142,7 @@ public class RecordFragment extends Fragment  {
                 }
                 if (isRecording == true && recodeFlag==false) {
                     Log.v(LOG_TAG2,(calcTime(times)+"("+String.format("%.2f", times) + "s) 녹음 종료 버튼을 눌러서 현재 진행되던 녹음을 종료!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
+                    AllAnalysisRawDataList.add(maxARD);
                     SimpleDateFormat dayTime = new SimpleDateFormat("yyyyMM_dd_HHmm");
                     String fileName = dayTime.format(new Date(recordStartingTIme));
                     dayTime = new SimpleDateFormat("dd_HHmm");
