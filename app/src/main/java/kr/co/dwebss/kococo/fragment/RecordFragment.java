@@ -493,12 +493,19 @@ public class RecordFragment extends Fragment  {
                     int numberOfShort = record.read(audioData, 0, audioData.length);
                     shortsRead += numberOfShort;
                     frameBytes = shortToByte(audioData,numberOfShort);
-
+                    int amplitude = 0;
+                    double decibel = 0;
+                    double frequency = 0;
                     audioCalculator.setBytes(frameBytes);
-                    // 소리가 발생하면 녹음을 시작하고, 1분이상 소리가 발생하지 않으면 녹음을 하지 않는다.
-                    int amplitude = audioCalculator.getAmplitude();
-                    double decibel = audioCalculator.getDecibel();
-                    double frequency = audioCalculator.getFrequency();
+                    try{
+                        // 소리가 발생하면 녹음을 시작하고, 1분이상 소리가 발생하지 않으면 녹음을 하지 않는다.
+                        amplitude = audioCalculator.getAmplitude();
+                        decibel = audioCalculator.getDecibel();
+                        frequency = audioCalculator.getFrequency();
+                    }catch(ArrayIndexOutOfBoundsException e){
+                        Log.v(LOG_TAG2, e.getMessage());
+                        continue;
+                    }
 
                     //전체 진폭을 가져온다.
                     //전체 진폭에 대한 주파수, 주파수의 갭=hzPerDataPoint
