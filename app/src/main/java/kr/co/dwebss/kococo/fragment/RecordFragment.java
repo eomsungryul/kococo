@@ -1129,6 +1129,13 @@ public class RecordFragment extends Fragment  {
                                 Log.v(LOG_TAG2,(calcTime(times)+" "+calcTime(maxARD.getTimes())+" "+maxARD.getDecibel()));
                                 AllAnalysisRawDataList.add(maxARD);
                             }
+                            if(tmpTime>60) {
+                                double tmpCM = recordStartDtL+(times*1000);
+                                double tmpBeforeCM = recordStartDtL+(AllAnalysisRawDataList.get(AllAnalysisRawDataList.size()-1).getTimes()*1000);
+                                if(tmpCM - tmpBeforeCM >= 60*1000 && tmpCM - tmpBeforeCM <= 61*1000){
+                                    AllAnalysisRawDataList.add(maxARD);
+                                }
+                            }
                             //1분 당시의 데이터가 없는 경우
                             /*
                             if(AllAnalysisRawDataList.size()>0 && tmpTime%60==1 && AllAnalysisRawDataList.size() > 0){
