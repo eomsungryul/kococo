@@ -1063,7 +1063,7 @@ public class RecordFragment extends Fragment  {
                     //무호흡 종료 후 5초 이내에 코골이가 발생하지 않으면 취소
                     //무호흡 종료 후 5초 동안 코골이 발생여부를 체크한다.
                     if(osaTermList.size()>0 && osaTermList.get(osaTermList.size()-1).end!=0 && times - osaTermList.get(osaTermList.size()-1).end < 5) {
-                        if(snoringTermList.size()>0 && isRecording == true){
+                        if(snoringTermList.size()>0 && snoringTermList.get(snoringTermList.size()-1).start - osaTermList.get(osaTermList.size()-1).end > 0 && snoringTermList.get(snoringTermList.size()-1).start - osaTermList.get(osaTermList.size()-1).end < 5){
                             //코골이가 녹음 중이게 되었을 때, 체크 플래그를 업데이트
                             if(snoringTermList.get(snoringTermList.size() - 1).end==0){
                                 osaTermList.get(osaTermList.size()-1).chk = 1;
