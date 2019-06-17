@@ -41,7 +41,7 @@ public class RecordDataGroupByUtil {
                             standardDb =db;
                         }
                         //하다가 끝이나면 값을 넣어줌
-                        if(i==aList.size()){
+                        if((i+1)==aList.size()){
                             JsonObject obj = new JsonObject();
                             obj.addProperty("TIME",minute);
                             obj.addProperty("DB",db);
