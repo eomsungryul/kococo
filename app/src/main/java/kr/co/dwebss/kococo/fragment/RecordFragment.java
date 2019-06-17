@@ -1129,7 +1129,7 @@ public class RecordFragment extends Fragment  {
                                 Log.v(LOG_TAG2,(calcTime(times)+" "+calcTime(maxARD.getTimes())+" "+maxARD.getDecibel()));
                                 AllAnalysisRawDataList.add(maxARD);
                             }
-                            if(tmpTime>60) {
+                            if(tmpTime>60 && tmpTime%60 > 2) {
                                 double tmpCM = recordStartDtL+(times*1000);
                                 double tmpBeforeCM = recordStartDtL+(AllAnalysisRawDataList.get(AllAnalysisRawDataList.size()-1).getTimes()*1000);
                                 if(tmpCM - tmpBeforeCM >= 60*1000 && tmpCM - tmpBeforeCM <= 61*1000){
