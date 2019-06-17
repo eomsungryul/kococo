@@ -488,6 +488,8 @@ public class RecordFragment extends Fragment  {
 
                 AnalysisRawData maxARD = null;
                 double timesForMaxArd = 0.0;
+
+                int recordingLength = 0;
                 while (mShouldContinue) {
                     times = (((double) (frameBytes.length / (44100d * 16 * 1))) * 8) * i;
                     int numberOfShort = record.read(audioData, 0, audioData.length);
@@ -559,6 +561,7 @@ public class RecordFragment extends Fragment  {
                         //recordStartingTIme = times;
                         recordStartingTIme = System.currentTimeMillis();
                         baos = new ByteArrayOutputStream();
+                        recordingLength = 0;
                         isRecording = true;
                         snoringTermList = new ArrayList<StartEnd>();
                         grindingTermList = new ArrayList<StartEnd>();
@@ -586,7 +589,7 @@ public class RecordFragment extends Fragment  {
                         String[] fileInfo = wfc.saveLongTermMp3(fileName, getContext(), waveData);
 
                         Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
-                        Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (waveData.length / (44100d * 16 * 1))) * 8));
+                        Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (recordingLength / (44100d * 16 * 1))) * 8));
                         Log.v(LOG_TAG2,("tmpMinDb: "+tmpMinDb));
                         Log.v(LOG_TAG2,("tmpMaxDb: "+tmpMaxDb));
 
@@ -770,10 +773,14 @@ public class RecordFragment extends Fragment  {
                         continue;
                     }
                     //baos.write(frameBytes);
+                    if(audioData != null ) {
+                        recordingLength += (audioData.length*2);
+                    }
                     int encResult = SimpleLame.encode(audioData, audioData, numberOfShort, mp3buffer);
                     if (encResult != 0) {
                         baos.write(mp3buffer, 0, encResult);
                     }
+
                     /*
                     System.out.print("녹음 중! ");
                     Log.v(LOG_TAG2,(String.format("%.2f", times)+"s ");
@@ -1157,7 +1164,7 @@ public class RecordFragment extends Fragment  {
                     String[] fileInfo = wfc.saveLongTermMp3(fileName, getContext(), waveData);
 
                     Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
-                    Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (waveData.length / (44100d * 16 * 1))) * 8));
+                    Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (recordingLength/ (44100d * 16 * 1))) * 8));
                     Log.v(LOG_TAG2,("tmpMinDb: "+tmpMinDb));
                     Log.v(LOG_TAG2,("tmpMaxDb: "+tmpMaxDb));
 
