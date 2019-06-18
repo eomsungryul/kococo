@@ -327,6 +327,11 @@ public class ResultActivity extends AppCompatActivity {
 //                                            +df.longToStringFormat(kococoTerm)
                                             +"소리가 발생했습니다."
                                     );
+                        }else if(osaCnt==0||grindCnt==0||snoreCnt==0){
+                            recordData.setTitle(df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
+                                    +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지 "
+                                    +df.longToStringFormat(kococoTerm)+" 동안\n"
+                                    +detectedTxt +" 발생했습니다. ");
                         }else{
                             recordData.setTitle(df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
                                     +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지 "
