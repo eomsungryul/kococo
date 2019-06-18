@@ -111,6 +111,9 @@ public class RecordingThread extends Thread {
             times = (((double) (frameBytes.length / (44100d * 16 * 1))) * 8) * i;
             int numberOfShort = recordFragment.getAudioRecord().read(audioData, 0, audioData.length);
             shortsRead += numberOfShort;
+            if(numberOfShort<0){
+                continue;
+            }
             frameBytes = shortToByte(audioData,numberOfShort);
             int amplitude = 0;
             double decibel = 0;
@@ -674,23 +677,29 @@ public class RecordingThread extends Thread {
                     //AllAnalysisRawDataList.add(maxARD);
                     int tmpTime = (int) Math.floor(times);
                     //1초 혹은 1분 단위로 기록
-                    if(tmpTime<=61){
+                    if(tmpTime<31){
+                        Log.v(LOG_TAG2,(calcTime(times))+" 1번");
                         AllAnalysisRawDataList.add(maxARD);
                     }
-                    if(tmpTime>60 && tmpTime%60 ==2) {
-                        Log.v(LOG_TAG2,(calcTime(times)+" "+calcTime(maxARD.getTimes())+" "+maxARD.getDecibel()));
+                    //if(tmpTime>60 && tmpTime%30 ==2) {
+                    /*
+                    if(tmpTime%30 ==2) {
+                        Log.v(LOG_TAG2,(calcTime(times))+" 2번");
+                        //Log.v(LOG_TAG2,(calcTime(times)+" "+calcTime(maxARD.getTimes())+" "+maxARD.getDecibel()));
                         AllAnalysisRawDataList.add(maxARD);
                     }
+                    */
 
-                    Log.v(LOG_TAG2,(calcTime(times))+" "+calcTime((System.currentTimeMillis()/1000)%60));
-                    if(tmpTime>60 && tmpTime%60 > 2) {
+                    //Log.v(LOG_TAG2,(calcTime(times))+" "+calcTime((System.currentTimeMillis()/1000)%60));
+                    if(tmpTime>30) {
 
                         double tmpCM = (times+(int) (recordFragment.getRecordStartDtl() / 1000) % 60);
                         double tmpBeforeCM = (AllAnalysisRawDataList.get(AllAnalysisRawDataList.size()-1).getTimes()+(int) (recordFragment.getRecordStartDtl() / 1000) % 60);
                         int tmpM = calcMinute(tmpCM);
                         int tmpBeforeM = calcMinute(tmpBeforeCM);
                         //Log.v(LOG_TAG2,(calcTime(times)+" "+tmpCM+" "+tmpBeforeCM+" "+tmpM+" "+tmpBeforeM));
-                        if(tmpM%60==2){
+                        if(tmpM!=tmpBeforeM){
+                            Log.v(LOG_TAG2,(calcTime(times))+" 3번 "+tmpTime);
                             AllAnalysisRawDataList.add(maxARD);
                         }
                     }
