@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
+import android.media.AudioTrack;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -108,7 +109,6 @@ public class RecordFragment extends Fragment  {
     ByteArrayOutputStream baos;
     //재생할때 필요한
     MediaPlayer mediaPlayer;
-    Boolean testFlag = false;
 
     short[] audioData = new short[frameByteSize/2];
 
@@ -135,10 +135,8 @@ public class RecordFragment extends Fragment  {
 
     int l = 0;
 
-
     Retrofit retrofit;
     ApiService apiService;
-
 
     //request 데이터 모음
     JsonObject recordData;
@@ -162,6 +160,9 @@ public class RecordFragment extends Fragment  {
     Handler timerMessegeHandler;
     Timer mTimer;
 
+    Button testBtn;
+    Boolean testFlag = false;
+
     public RecordFragment() {
         // Required empty public constructor
     }
@@ -174,6 +175,8 @@ public class RecordFragment extends Fragment  {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        //화면이 자동으로 꺼지는것을 방지한다.
+        getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         WindowManager.LayoutParams params = getActivity().getWindow().getAttributes();
 
@@ -191,6 +194,62 @@ public class RecordFragment extends Fragment  {
 
         retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();
         apiService = retrofit.create(ApiService.class);
+
+//
+//        testBtn = (Button) v.findViewById(R.id.testBtn) ;
+//        testBtn.setOnClickListener(new Button.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if( testFlag == false){
+//                    String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.RECORD_AUDIO};
+//                    int permissionReadStorage = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE);
+//                    int permissionWriteStorage = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+//                    int permissionAudio = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.RECORD_AUDIO);
+//                    if(permissionReadStorage == PackageManager.PERMISSION_DENIED || permissionWriteStorage == PackageManager.PERMISSION_DENIED||permissionAudio == PackageManager.PERMISSION_DENIED) {
+//                        Toast.makeText(getActivity(), " permission x", Toast.LENGTH_SHORT).show();
+//                        requestPermissions(permissions, REQUEST_EXTERNAL_STORAGE);
+//                        return;
+//                    } else {
+//                        //녹음 시작 클릭
+//                        Log.e(LOG_TAG2, "permission 승인");
+//                        testBtn.setText("테스트 종료");
+//                        recodeTxt.setVisibility(View.VISIBLE);
+//                        recordTimer.setVisibility(View.VISIBLE);
+//                        logo.setVisibility(View.INVISIBLE);
+//                        recordTime=0;
+//                        mTimer =  new Timer();
+//                        mTimer.schedule(new CustomTimer(), 2000, 1000);
+//                        try{
+//                            now_bright_status = android.provider.Settings.System.getInt(getContext().getContentResolver(),
+//                                    android.provider.Settings.System.SCREEN_BRIGHTNESS);
+//                            params.screenBrightness = (float) 1 / 100;
+//                            getActivity().getWindow().setAttributes(params);
+//                        }catch(Exception e){
+//                            Log.e("Exception e "+e.getMessage(), null);
+//                        }
+//                        testFlag = true;
+//
+//                        recordStartDt= dayTimeDefalt.format(new Date(System.currentTimeMillis()));
+//                        recordStartDtL= System.currentTimeMillis();
+//
+//                        startTest();
+//                    }
+//                }else{
+//                    testFlag = false;
+//                    stopTest(v);
+//                    //기존 밝기로 복귀
+//                    params.screenBrightness = (float) now_bright_status/100;
+//                    getActivity().getWindow().setAttributes(params);
+//                    //타이머 종료
+//                    mTimer.cancel();
+//                    testBtn.setText("테스트 시작");
+//                    recodeTxt.setVisibility(View.INVISIBLE);
+//                    recordTimer.setVisibility(View.INVISIBLE);
+//                    logo.setVisibility(View.VISIBLE);
+//                    recordTime = 0;
+//                }
+//            }
+//        });
 
         //xml 내에서 onclick으로 가능하다. 하지만 그건 activity 내에서만 가능하고 프래그먼트에서는 onclickListener()로 해야함
         recodeBtn.setOnClickListener(new Button.OnClickListener() {
@@ -262,7 +321,9 @@ public class RecordFragment extends Fragment  {
                         }
                     }, 5000);
 
+                    //타이머 종료
                     mTimer.cancel();
+
                     recodeBtn.setText("녹음 시작");
                     recodeTxt.setVisibility(View.INVISIBLE);
                     recordTimer.setVisibility(View.INVISIBLE);
@@ -286,15 +347,107 @@ public class RecordFragment extends Fragment  {
         return v;
     }
 
+
+    public void startTest() {
+        android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO);
+        int recBufSize = AudioRecord.getMinBufferSize(sampleRate, channelConfiguration, audioEncoding);;
+        mp3buffer = new byte[(int) (7200 + recBufSize * 2 * 1.25)];
+        SimpleLame.init(sampleRate, 1, sampleRate, 32);
+        record = new AudioRecord(MediaRecorder.AudioSource.MIC,  sampleRate, channelConfiguration, audioEncoding, recBufSize);
+        String permission = "android.permission.RECORD_AUDIO";
+        int result  = getActivity().checkCallingOrSelfPermission(permission);
+        record.startRecording();
+        int recordingState = record.getRecordingState();
+        Log.e(RecordFragment.class.getSimpleName(), "RecordingState() after startRecording() = " + String.valueOf(recordingState));
+        Log.v(LOG_TAG2, "Recording has started");
+        mShouldContinue = true;
+        Audio_RecordingTest();
+        state = 1;
+    }
+
+    public void stopTest(View v) {
+        state = 0;
+        mShouldContinue = false;
+        record.stop();
+        record.release();
+        record = null;
+//        Toast.makeText(getActivity(), "stopped Recording", Toast.LENGTH_SHORT).show();
+    }
+
+    void Audio_RecordingTest(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                long shortsRead = 0;
+                byte[] frameBytes = new byte[frameByteSize];
+                byte[] frameBytesForSnoring = new byte[frameByteSizeForSnoring];
+                audioCalculator = new AudioCalculator();
+                long recordStartingTIme = 0L;
+                AllAnalysisRawDataList = new ArrayList<AnalysisRawData>();
+                double times=0.0;
+                int i = 0;
+                boolean isRecording = false;
+                int recordingLength=0;
+                System.out.println("==========thread test===="+mShouldContinue);
+                baos = new ByteArrayOutputStream();
+                while (mShouldContinue) {
+                    times = (((double) (frameBytes.length / (44100d * 16 * 1))) * 8) * i;
+                    int numberOfShort = record.read(audioData, 0, audioData.length);
+                    shortsRead += numberOfShort;
+                    frameBytes = shortToByte(audioData,numberOfShort);
+                    //실제로는 1초 이후 분석한다.
+                    // 소리가 발생하면 녹음을 시작하고, 1분이상 소리가 발생하지 않으면 녹음을 하지 않는다.
+                        Log.v(LOG_TAG2,(calcTime(times)+"("+String.format("%.2f", times) + "s) 녹음 시작!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
+                    i++;
+                    int amplitude = 0;
+                    double decibel = 0;
+                    double frequency = 0;
+                    audioCalculator.setBytes(frameBytes);
+                    try{
+                        // 소리가 발생하면 녹음을 시작하고, 1분이상 소리가 발생하지 않으면 녹음을 하지 않는다.
+                        amplitude = audioCalculator.getAmplitude();
+                        decibel = audioCalculator.getDecibel();
+                        frequency = audioCalculator.getFrequency();
+                    }catch(ArrayIndexOutOfBoundsException e){
+                        Log.v(LOG_TAG2, e.getMessage());
+                        continue;
+                    }
+
+                    int encResult = SimpleLame.encode(audioData, audioData, numberOfShort, mp3buffer);
+                    System.out.println(encResult+"==========thread times encResult===="+times);
+                    System.out.println("==========amplitude"+amplitude+
+                                    "==========decibel"+decibel+"==========frequency"+frequency
+                            );
+
+                    if (encResult != 0) {
+                        baos.write(mp3buffer, 0, encResult);
+                    }
+                }
+                if (testFlag==false) {
+                    Log.v(LOG_TAG2,(calcTime(times)+"("+String.format("%.2f", times) + "s) 녹음 종료 버튼을 눌러서 현재 진행되던 녹음을 종료!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
+                    SimpleDateFormat dayTime = new SimpleDateFormat("yyyyMM_dd_HHmm");
+                    String fileName = dayTime.format(new Date(recordStartingTIme));
+                    byte[] waveData = baos.toByteArray();
+                    //TODO 녹음된 파일이 저장되는 시점
+                    WaveFormatConverter wfc = new WaveFormatConverter();
+                    String[] fileInfo = wfc.saveLongTermMp3Test(fileName, getContext(), waveData);
+                    recordStartingTIme = 0;
+                    isRecording = false;
+                }
+            }
+        }).start();
+    }
+
+
+
+
+
+
+
+
     @Override
     public void onResume() {
         super.onResume();
-        //다시 돌아왔을 경우에 텍스트를 종료에서 시작으로 바꿈
-//        recodeBtn.setText("녹음 시작");
-//        recodeTxt.setVisibility(View.INVISIBLE);
-//        recordTimer.setVisibility(View.INVISIBLE);
-//        logo.setVisibility(View.VISIBLE);
-//        recordTime = 0;
     }
 
     class CustomTimer extends TimerTask {

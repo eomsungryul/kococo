@@ -190,4 +190,34 @@ public class WaveFormatConverter {
 
 	}
 
+
+	public String[] saveLongTermMp3Test(String fileName, Context x, byte[] waveData) {
+//		File myDir = new File(Environment.getExternalStorageDirectory(), "rec_data/");
+		//Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+		String savePath = x.getFilesDir().getAbsolutePath(); // 이경로는 adb pull 이 안됨.
+		savePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath(); //테스트하려고 임시로 쓴 경로
+		System.out.println("============savePath======="+savePath);
+		File myDir = new File(savePath);
+		if(!myDir.exists()){
+			myDir.mkdirs();
+		}
+		String filename = "test.mp3";
+		try {
+			File path=new File(myDir,filename);
+			FileOutputStream outFile = new FileOutputStream(path);
+			outFile.write(waveData,0,waveData.length);
+			outFile.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			filename = "e1";
+		} catch (IOException e) {
+			filename = "e2";
+			e.printStackTrace();
+		}
+		String[] fileInfo = new String[2];
+		fileInfo[0] = myDir.toString();
+		fileInfo[1] = filename;
+		return fileInfo;
+	}
+
 }
