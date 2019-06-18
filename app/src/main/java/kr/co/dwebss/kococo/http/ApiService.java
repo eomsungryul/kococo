@@ -50,7 +50,7 @@ public interface ApiService {
 
     //@Query 를 이용하면 ?key=value 식으로 보내진다.
     @GET("api/record/search/findByUserAppId")
-    Call<JsonObject> getRecordList(@Query("userAppId") String userAppId,@Query("sort") String sort);
+    Call<JsonObject> getRecordList(@Query("userAppId") String userAppId,@Query("sort") String sort,@Query("size") int size);
 
     //@Path 를 이용하면 Rest 방식으로 호출 할 수 있다.
     @GET("api/record/{recordId}")
