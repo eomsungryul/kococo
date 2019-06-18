@@ -33,10 +33,8 @@ public class SettingFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_setting, container, false);
-
         //res/string.xml을 사용하기 위한
         res = getResources();
-
 
         // Adapter 생성
         SettingListAdapter adapter = new SettingListAdapter(getContext()) ;

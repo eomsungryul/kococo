@@ -18,6 +18,7 @@ package kr.co.dwebss.kococo.activity;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -26,6 +27,9 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.TableLayout;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -47,6 +51,7 @@ import kr.co.dwebss.kococo.fragment.StatFragment;
 import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.main.SectionsPagerAdapter;
 import kr.co.dwebss.kococo.util.FindAppIdUtil;
+import kr.co.dwebss.kococo.util.TabLayoutUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -70,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
 
     Retrofit retrofit;
     ApiService apiService;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,11 +162,10 @@ public class MainActivity extends AppCompatActivity {
         tabs = (TabLayout)findViewById(R.id.tablayouts);
         tabs.setupWithViewPager(viewPager);
         setupTabIcons();
+
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-//                onSlideChanged(position); // change color of the dots
-            }
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
             @Override
             public void onPageSelected(int position) {}
             @Override
@@ -195,6 +198,63 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
     }
 
+    public void tabDisable(){
+        //뷰 페이저 쪽의 페이지 리스너를 클리어한다.
+        viewPager.clearOnPageChangeListeners();
+        //탭쪽의 페이지 리스너를 클리어한다.
+        tabs.clearOnTabSelectedListeners();
+        //탭 터치시 탭바 이동을 막는 부분
+        TabLayoutUtils.enableTabs(tabs,false);
+        //스와이프 막는 부분
+        viewPager.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return true;
+            }
+        });
+    }
+    public void tabEnable(){
+        TabLayoutUtils.enableTabs(tabs,true);
+        tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                //다시 리스너를 만들때는 뷰페이저를 이동하라고 해줘야 뷰페이저가 움직임..
+                viewPager.setCurrentItem(tab.getPosition());
+            }
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+                System.out.println("============onTabUnselected");
+            }
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+                System.out.println("============onTabReselected");
+            }
+        });
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
+            @Override
+            public void onPageSelected(int position) {
+                //그냥 스와이프 할 시에 탭아이콘이 움직이지않음.. 그래서 추가해야함
+                tabs.getTabAt(position).select();
+            }
+            @Override
+            public void onPageScrollStateChanged(int state) {}
+        });
+        //스와이프 막는 부분
+        viewPager.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return false;
+            }
+        });
+
+
+
+    }
+
+
+
     // 화면전환이 일어난 경우에만 호출된다고 생각하지만 Locale 이나 각종 설정값이 바꼇을 경우도 호출
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -220,7 +280,16 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFrag(new RecordFragment(), "RecodeFragment");
+        adapter.addFrag(new RecordFragment(new RecordFragment.TabEventUtil() {
+            @Override
+            public void tabEvent(boolean flag) {
+                if(flag){
+                    tabDisable();
+                }else{
+                    tabEnable();
+                }
+            }
+        }), "RecodeFragment");
         adapter.addFrag(new DiaryFragment(), "Diary");
         adapter.addFrag(new StatFragment(), "Stat");
         adapter.addFrag(new SettingFragment(), "Setting");
