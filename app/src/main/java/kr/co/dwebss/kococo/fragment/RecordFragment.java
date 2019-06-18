@@ -160,6 +160,7 @@ public class RecordFragment extends Fragment  {
     int recordTime=0;
 
     Handler timerMessegeHandler;
+    Timer mTimer;
 
     public RecordFragment() {
         // Required empty public constructor
@@ -223,13 +224,14 @@ public class RecordFragment extends Fragment  {
                         recordTimer.setVisibility(View.VISIBLE);
                         logo.setVisibility(View.INVISIBLE);
                         recordTime=0;
-                        Timer mTimer =  new Timer();
+                        mTimer =  new Timer();
                         mTimer.schedule(new CustomTimer(), 2000, 1000);
 
                         recodeFlag = true;
                         recordStartDt= dayTimeDefalt.format(new Date(System.currentTimeMillis()));
                         recordStartDtL= System.currentTimeMillis();
                         start();
+
 
                     }
                 }else{
@@ -260,6 +262,7 @@ public class RecordFragment extends Fragment  {
                         }
                     }, 5000);
 
+                    mTimer.cancel();
                     recodeBtn.setText("녹음 시작");
                     recodeTxt.setVisibility(View.INVISIBLE);
                     recordTimer.setVisibility(View.INVISIBLE);
