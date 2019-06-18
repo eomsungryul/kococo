@@ -16,7 +16,8 @@ public class DateFormatter{
     SimpleDateFormat stringtoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     SimpleDateFormat transFormat = new SimpleDateFormat("yyyy년 MM월 dd일");
     SimpleDateFormat DateTimeToStringFormat = new SimpleDateFormat("HH:mm");
-    SimpleDateFormat DateSecondToStringFormat = new SimpleDateFormat("H'시'm'분's'초'", Locale.KOREA);
+//    SimpleDateFormat DateSecondToStringFormat = new SimpleDateFormat("H'시'm'분's'초'", Locale.KOREA);
+    SimpleDateFormat DateSecondToStringFormat = new SimpleDateFormat("H'시'm'분'", Locale.KOREA);
 
     public DateFormatter() {
     }
@@ -62,7 +63,9 @@ public class DateFormatter{
 //                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(date))
 //        );
 //        String.format("%d시간 %d분 %d 초",hours, minutes, seconds)
-        if(hours==0){
+        if(hours==0&&minutes==0){
+            result = String.format("%d 초", seconds);
+        }else if(hours==0){
             result = String.format("%d분 %d 초", minutes, seconds);
         }else{
             result = String.format("%d시간 %d분",hours, minutes);

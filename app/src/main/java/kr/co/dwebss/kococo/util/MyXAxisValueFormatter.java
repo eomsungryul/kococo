@@ -17,7 +17,7 @@ public class MyXAxisValueFormatter implements IAxisValueFormatter
 
     private long referenceTimestamp; // minimum timestamp in your data set
     private long standardMinite; // minimum timestamp in your data set
-
+    String oldVal;
 
     //시작시간은 기존 HH:mm를 받고 그걸로
     public MyXAxisValueFormatter(long referenceTimestamp) {
@@ -26,6 +26,7 @@ public class MyXAxisValueFormatter implements IAxisValueFormatter
         Date mDate = new Date(referenceTimestamp);
         int hours = mDate.getHours();
         int minutes = mDate.getMinutes();
+        oldVal = new String();
         this.standardMinite= (hours*60)+minutes;
 
     }
@@ -53,7 +54,19 @@ public class MyXAxisValueFormatter implements IAxisValueFormatter
         long minutes = (long) ((timestamp) % 60);
         long hours   = (long) ((timestamp /60) % 24);
 //        System.out.println("=======MyXAxisValueFormatter===hours========"+hours+"==========minutes========"+minutes);
-        return String.format("%02d:%02d",hours, minutes);
+        String now = String.format("%02d:%02d",hours, minutes);
+        if("".equals(oldVal)){
+            oldVal=now;
+            return now;
+        }else{
+            if(oldVal.equals(now)){
+                oldVal=now;
+                return "";
+            }else{
+                oldVal=now;
+                return now;
+            }
+        }
     }
 }
 

@@ -72,7 +72,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class ResultActivity extends AppCompatActivity implements OnSeekBarChangeListener {
+public class ResultActivity extends AppCompatActivity {
     Retrofit retrofit;
     ApiService apiService;
 
@@ -119,6 +119,11 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
     RecordDataGroupByUtil rd = new RecordDataGroupByUtil();
     RecordListAdapter adapter;
 
+    SimpleDateFormat stringtoDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+    SimpleDateFormat DateTimeToStringFormat = new SimpleDateFormat("HH:mm");
+
+    String  firstData;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
@@ -144,7 +149,6 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             bt.setOnClickListener(new Button.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    adapter.destroyMp();
                     ResultActivity.super.onBackPressed();
                 }
             });
@@ -154,8 +158,6 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             Date from = new Date();
             SimpleDateFormat stringtoDateFormat = new SimpleDateFormat("yyyy-MM-dd");
             SimpleDateFormat transFormat = new SimpleDateFormat("yy/MM/dd");
-            SimpleDateFormat stringtoDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-            SimpleDateFormat DateTimeToStringFormat = new SimpleDateFormat("HH:mm");
             SimpleDateFormat DateSecondToStringFormat = new SimpleDateFormat("HH:mm:ss");
             try {
                 recordStartD =  stringtoDateFormat.parse(responseData.get("recordStartD").toString().replace("\"",""));
@@ -190,7 +192,9 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             // 하단에 녹음 검출리스트 파일 리스트  Adapter 생성
             adapter = new RecordListAdapter(this, new RecordListAdapter.GraphClickListener() {
                 @Override
-                public void clickBtn() {
+                public void clickBtn(RecordData listViewItem) {
+
+                    changeGraph(listViewItem);
                 }
             }) ;
 
@@ -206,6 +210,7 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                 for(int i=0; i<analysisList.size(); i++){
                     try {
                     JsonObject analysisObj = (JsonObject) analysisList.get(i);
+
                     analysisObj.get("analysisStartDt");
                     JsonArray analysisDetailsList = analysisObj.getAsJsonArray("analysisDetailsList");
                     //초기화
@@ -213,6 +218,10 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                     osaCnt=0;
                     grindCnt=0;
                     recordData = new RecordData();
+                    recordData.setResponseObj(analysisList.get(i).toString());
+                    if(i==0){
+                      firstData = analysisList.get(i).toString();
+                    }
                     recordData.setAnalysisFileNm(jncu.JsonStringNullCheck(analysisObj,"analysisFileNm"));
                     recordData.setAnalysisFileAppPath(jncu.JsonStringNullCheck(analysisObj,"analysisFileAppPath"));
                     recordData.setAnalysisId(analysisObj.get("analysisId").getAsInt());
@@ -256,7 +265,9 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                             int termTypeCd =  analysisDetailsObj.get("termTypeCd").getAsInt();
                             recordData.setTermStartDt(analysisDetailsObj.get("termStartDt").toString().replace("\"",""));
                             recordData.setTermEndDt(analysisDetailsObj.get("termEndDt").toString().replace("\"",""));
-                            if(termTypeCd==200102){
+                            if(termTypeCd==200101){
+                                snoreCnt++;
+                            }else if(termTypeCd==200102){
                                 grindCnt++;
                             }else{
                                 osaCnt++;
@@ -294,27 +305,32 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
                             }
                         }
                         String detectedTxt = "";
-                        if(grindCnt>0){
-                            detectedTxt = detectedTxt+"이갈이 : "+grindCnt+"회";
+                        if(snoreCnt>0){
+                            detectedTxt = detectedTxt+"코골이 "+snoreCnt+"회";
                         }
-                        if(osaCnt>0){
-                            if(grindCnt>0){
+                        if(grindCnt>0){
+                            if(snoreCnt>0){
                                 detectedTxt = detectedTxt+", ";
                             }
-                            detectedTxt = detectedTxt+"무호흡 : "+osaCnt+"회";
+                            detectedTxt = detectedTxt+"이갈이 "+grindCnt+"회";
+                        }
+                        if(osaCnt>0){
+                            if(grindCnt>0||snoreCnt>0){
+                                detectedTxt = detectedTxt+", ";
+                            }
+                            detectedTxt = detectedTxt+"무호흡 "+osaCnt+"회";
                         }
                         if("".equals(detectedTxt)){
                             recordData.setTitle(df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
                                     +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지\n"
 //                                            +df.longToStringFormat(kococoTerm)
-                                            +"소리가 났습니다."
+                                            +"소리가 발생했습니다."
                                     );
                         }else{
                             recordData.setTitle(df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
-                                    +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지\n"
-//                                    +df.longToStringFormat(kococoTerm)
-                                            +"코를 골았습니다. "
-                                    +"("+detectedTxt+")");
+                                    +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지 "
+                                    +df.longToStringFormat(kococoTerm)+" 동안\n"
+                                    +detectedTxt +"\n 발생했습니다. ");
                         }
                         //~시~분~초부터 ~시~분~초까지 코를 골았습니다. \n (무호흡 0회, )
                         adapter.addItem(recordData) ;
@@ -395,6 +411,9 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
             xAxis.setTextColor(Color.WHITE);
             xAxis.setValueFormatter(xAxisFormatter);
             xAxis.setXOffset(1f);
+
+            xAxis.setLabelCount(2);
+
 
             //시작과 끝점을 정해줘야 그래프가 제대로잘 나옴
             float endMinites = (recordEndDT.getTime()-referenceTimestamp)/(60*1000);
@@ -527,11 +546,139 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
         }else{
             Toast.makeText(getApplicationContext(),"error",Toast.LENGTH_LONG);
         }
+        if(firstData!=null){
+            clickFirstBtn(firstData);
+        }
 
+    }
 
+    private void clickFirstBtn(String firstData) {
+        RecordData firstDt = new RecordData();
+        firstDt.setResponseObj(firstData);
+        changeGraph(firstDt);
+    }
 
+    private void changeGraph(RecordData listViewItem) {
 
+        soundEntries = new ArrayList<>();
+        snoreEntries = new ArrayList<>();
+        osaEntries = new ArrayList<>();
+        grindEntries = new ArrayList<>();
+        emptyEntries = new ArrayList<>();
 
+        System.out.println("==================recordData.getResponseObj()==================="+listViewItem.getResponseObj());
+        try {
+            JsonObject analysisObj = new JsonParser().parse(listViewItem.getResponseObj()).getAsJsonObject();
+            JsonArray analysisDetailsList = analysisObj.getAsJsonArray("analysisDetailsList");
+
+            Date analysisStartDt =  stringtoDateTimeFormat.parse(jncu.JsonStringNullCheck(analysisObj,"analysisStartDt"));
+            Date analysisEndDt = stringtoDateTimeFormat.parse(jncu.JsonStringNullCheck(analysisObj,"analysisEndDt"));
+
+            JsonObject recordEntryData = new JsonObject();
+            recordEntryData.addProperty("filePath",jncu.JsonStringNullCheck(analysisObj,"analysisFileAppPath")+"/"+jncu.JsonStringNullCheck(analysisObj,"analysisFileNm"));
+            //그래프 클릭 시에 전체 재생
+            recordEntryData.addProperty("termStartDt",0);
+            recordEntryData.addProperty("termEndDt",analysisEndDt.getTime()-analysisStartDt.getTime());
+            recordEntryData.addProperty("analysisId",jncu.JsonStringNullCheck(analysisObj,"analysisId"));
+
+            if(analysisObj.has("recordingData")){
+                String analysisDataRawStr =analysisObj.get("recordingData").getAsString();
+                JsonArray analysisDataArr = new JsonParser().parse(analysisDataRawStr).getAsJsonArray();
+                JsonArray analysisDataArrGroupByMinite =rd.groupByMinites(analysisDataArr,DateTimeToStringFormat.format(recordStartDT));
+                if(analysisDataArrGroupByMinite.size()>0){
+                    for(int k =0; k<analysisDataArrGroupByMinite.size(); k++){
+                        JsonObject analysisRawData = (JsonObject) analysisDataArrGroupByMinite.get(k);
+                        int time = analysisRawData.get("TIME").getAsInt();
+                        soundEntries.add(new BarEntry(time, analysisRawData.get("DB").getAsFloat(), recordEntryData));
+                    }
+                }
+            }
+
+            if(analysisDetailsList.size()>0){
+                for(int j=0; j<analysisDetailsList.size(); j++){
+                    JsonObject analysisDetailsObj = (JsonObject) analysisDetailsList.get(j);
+                    int termTypeCd =  analysisDetailsObj.get("termTypeCd").getAsInt();
+                    //데이터를 넣을때는 발생시간 - 최초시간을 넣어야함
+                    if(analysisDetailsObj.has("analysisData")){
+                        String analysisRawStr =analysisDetailsObj.get("analysisData").getAsString();
+                        JsonArray analysisRawDataArr = new JsonParser().parse(analysisRawStr).getAsJsonArray();
+
+                        if(analysisRawDataArr.size()>0){
+                            JsonArray analysisRawDataArrGroupByMinite =rd.groupByMinites(analysisRawDataArr,DateTimeToStringFormat.format(recordStartDT));
+
+                            for(int k =0; k<analysisRawDataArrGroupByMinite.size(); k++){
+                                JsonObject analysisRawData = (JsonObject) analysisRawDataArrGroupByMinite.get(k);
+                                int time = analysisRawData.get("TIME").getAsInt();
+
+                                if(termTypeCd==200101){
+                                    snoreEntries.add(new BarEntry(time, analysisRawData.get("DB").getAsFloat(), recordEntryData));
+                                }else if(termTypeCd==200102){
+                                    grindEntries.add(new BarEntry(time, analysisRawData.get("DB").getAsFloat(), recordEntryData));
+                                }else{
+                                    osaEntries.add(new BarEntry(time, analysisRawData.get("DB").getAsFloat(), recordEntryData));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Long startMinites = (analysisStartDt.getTime()-referenceTimestamp)/(60*1000);
+            Long endMinites = (analysisEndDt.getTime()-referenceTimestamp)/(60*1000);
+            System.out.println("===startMinites===="+startMinites);
+            System.out.println("===endMinites===="+endMinites);
+
+            //X 좌표 보여주기
+            chart.getXAxis().setAxisMinimum(startMinites);
+            chart.getXAxis().setAxisMaximum(endMinites);
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        BarDataSet set1;
+        set1 = new BarDataSet(snoreEntries, "Data Set");
+        set1.setColors(Color.rgb(255, 104, 89));
+        set1.setDrawValues(false);
+        set1.setValueTextColor(Color.WHITE);
+
+        BarDataSet grindSet;
+        grindSet = new BarDataSet(grindEntries, "Data Set");
+        grindSet.setColors(Color.rgb(255, 207, 68));
+        grindSet.setDrawValues(false);
+        grindSet.setValueTextColor(Color.WHITE);
+
+        BarDataSet osaSet;
+        osaSet = new BarDataSet(osaEntries, "Data Set");
+        osaSet.setColors(Color.rgb(177, 93, 255));
+        osaSet.setDrawValues(false);
+        osaSet.setValueTextColor(Color.WHITE);
+
+        BarDataSet soundSet;
+        soundSet = new BarDataSet(soundEntries, "Data Set");
+        soundSet.setColors(Color.rgb(123, 109, 93));
+        soundSet.setDrawValues(false);
+        soundSet.setValueTextColor(Color.WHITE);
+
+        BarDataSet emptySet;
+        emptySet = new BarDataSet(emptyEntries, "Data Set");
+        emptySet.setColors(Color.TRANSPARENT);
+        //값을 보여줄건지 말건지 여부
+        emptySet.setDrawValues(false);
+        emptySet.setValueTextColor(Color.WHITE);
+        emptySet.setVisible(false);
+
+        ArrayList<IBarDataSet> dataSets = new ArrayList<>();
+        dataSets.add(soundSet);
+        dataSets.add(set1);
+        dataSets.add(grindSet);
+        dataSets.add(osaSet);
+        dataSets.add(emptySet);
+
+        BarData data = new BarData(dataSets);
+        chart.setData(data);
+
+        chart.invalidate();
     }
 
     //getSupportActionBar 사용하려면 추가해야함
@@ -550,44 +697,13 @@ public class ResultActivity extends AppCompatActivity implements OnSeekBarChange
         Log.v(TAG, "onConfigurationChanged " + newConfig.screenWidthDp + "," + newConfig.screenHeightDp);
     }
 
-    @Override
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        System.out.println("============onProgressChanged=============");
-        ArrayList<BarEntry> values = new ArrayList<>();
-        BarDataSet set1;
-        if (chart.getData() != null &&
-                chart.getData().getDataSetCount() > 0) {
-            set1 = (BarDataSet) chart.getData().getDataSetByIndex(0);
-            set1.setValues(values);
-            chart.getData().notifyDataChanged();
-            chart.notifyDataSetChanged();
-        } else {
-            set1 = new BarDataSet(values, "Data Set");
-            set1.setColors(ColorTemplate.VORDIPLOM_COLORS);
-            set1.setDrawValues(false);
-
-            ArrayList<IBarDataSet> dataSets = new ArrayList<>();
-            dataSets.add(set1);
-
-            BarData data = new BarData(dataSets);
-            chart.setData(data);
-//            chart.setFitBars(true);
-        }
-        chart.invalidate();
-    }
-
-    @Override
-    public void onStartTrackingTouch(SeekBar seekBar) {}
-
-    @Override
-    public void onStopTrackingTouch(SeekBar seekBar) {}
 
     // MediaPlayer는 시스템 리소스를 잡아먹는다.
     // MediaPlayer는 필요이상으로 사용하지 않도록 주의해야 한다.
     //Fragment에서는 onDestoryView , activity에서는 onDestory
     @Override
     public void onDestroy() {
+        adapter.destroyMp();
         super.onDestroy();
-//         MediaPlayer 해지
     }
 }

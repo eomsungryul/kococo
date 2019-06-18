@@ -138,6 +138,7 @@ public class RecordFragment extends Fragment  {
     int recordTime=0;
 
     Handler timerMessegeHandler;
+    Timer mTimer;
 
     //재생할때 필요한
     MediaPlayer mediaPlayer;
@@ -219,13 +220,14 @@ public class RecordFragment extends Fragment  {
                         recordTimer.setVisibility(View.VISIBLE);
                         logo.setVisibility(View.INVISIBLE);
                         recordTime=0;
-                        Timer mTimer =  new Timer();
+                        mTimer =  new Timer();
                         mTimer.schedule(new CustomTimer(), 2000, 1000);
 
                         recodeFlag = true;
                         recordStartDt= dayTimeDefalt.format(new Date(System.currentTimeMillis()));
                         recordStartDtL= System.currentTimeMillis();
                         start();
+
 
                     }
                 }else{
@@ -256,6 +258,7 @@ public class RecordFragment extends Fragment  {
                         }
                     }, 5000);
 
+                    mTimer.cancel();
                     recodeBtn.setText("녹음 시작");
                     recodeTxt.setVisibility(View.INVISIBLE);
                     recordTimer.setVisibility(View.INVISIBLE);
