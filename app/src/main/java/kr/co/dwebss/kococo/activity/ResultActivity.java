@@ -20,6 +20,8 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -37,7 +39,9 @@ import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
@@ -56,9 +60,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.adapter.RecordListAdapter;
+import kr.co.dwebss.kococo.fragment.RecordFragment;
 import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.model.RecordData;
 import kr.co.dwebss.kococo.util.DateFormatter;
@@ -82,11 +89,9 @@ public class ResultActivity extends AppCompatActivity {
 
     JsonObject responseData;
 
-    Date recordStartD;
-    Date recordEndD;
-    Date recordStartDT;
-    Date recordEndDT;
+    Date recordStartD,recordEndD,recordStartDT,recordEndDT;
     Long recordTerm;
+    String recordStartDTToString;
 
     //검출된 시간 초기화
     Long kococoTerm =0L;
@@ -107,15 +112,9 @@ public class ResultActivity extends AppCompatActivity {
     MediaPlayerUtility mpu;
     DateFormatter df = new DateFormatter();
 
-    int playingId;
-
-    int recordId;
-    int analysisId;
+    int playingId,recordId,analysisId;
     String analysisServerUploadPath;
-
-    int snoreCnt=0;
-    int osaCnt=0;
-    int grindCnt=0;
+    int snoreCnt=0,osaCnt=0,grindCnt=0;
 
     RecordDataGroupByUtil rd = new RecordDataGroupByUtil();
     RecordListAdapter adapter;
@@ -124,6 +123,13 @@ public class ResultActivity extends AppCompatActivity {
     SimpleDateFormat DateTimeToStringFormat = new SimpleDateFormat("HH:mm");
 
     String  firstData;
+
+    //타이머 관련
+    Timer mTimer =  new Timer();
+    CustomTimer ct = new CustomTimer();
+    float recordTime=0f;
+    float barWidth=0f;
+    boolean timerFlag=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,29 +162,23 @@ public class ResultActivity extends AppCompatActivity {
 
             //상단 헤더 날짜 텍스트 날짜가 넘어가면 시작~종료 아니면 그냥 시작 날짜로 보여준다.
             TextView dateTxtHeader = (TextView) findViewById(R.id.date_txt_header);
-            Date from = new Date();
             SimpleDateFormat stringtoDateFormat = new SimpleDateFormat("yyyy-MM-dd");
             SimpleDateFormat transFormat = new SimpleDateFormat("yy/MM/dd");
-            SimpleDateFormat DateSecondToStringFormat = new SimpleDateFormat("HH:mm:ss");
             try {
                 recordStartD =  stringtoDateFormat.parse(responseData.get("recordStartD").toString().replace("\"",""));
                 recordEndD =  stringtoDateFormat.parse(responseData.get("recordEndD").toString().replace("\"",""));
-
+                recordStartDTToString = responseData.get("recordStartDt").toString().replace("\"","");
                 recordStartDT =  stringtoDateTimeFormat.parse(responseData.get("recordStartDt").toString().replace("\"",""));
                 recordEndDT =  stringtoDateTimeFormat.parse(responseData.get("recordEndDt").toString().replace("\"",""));
                 recordTerm = recordEndDT.getTime()-recordStartDT.getTime();
                 recordId = responseData.get("recordId").getAsInt();
                 referenceTimestamp = recordStartDT.getTime();
-
             } catch (ParseException e) {
                 e.printStackTrace();
             }
 
             //시간 HH:mm ~ HH:mm
             String recodeText = DateTimeToStringFormat.format(recordStartDT)+" ~ "+DateTimeToStringFormat.format(recordEndDT);
-//            TextView recodeTextView = findViewById(R.id.recodeTextView);
-//            recodeTextView.setText(recodeText);
-
             if(recordStartD.equals(recordEndD)){
                 if(recordStartDT.getHours()==recordEndDT.getHours()&&recordEndDT.getMinutes()==recordStartDT.getMinutes()){
                     dateTxtHeader.setText(transFormat.format(recordStartD)+" "+DateTimeToStringFormat.format(recordStartDT));
@@ -193,12 +193,25 @@ public class ResultActivity extends AppCompatActivity {
             // 하단에 녹음 검출리스트 파일 리스트  Adapter 생성
             adapter = new RecordListAdapter(this, new RecordListAdapter.GraphClickListener() {
                 @Override
-                public void clickBtn(RecordData listViewItem) {
-
+                public void clickBtn(RecordData listViewItem, Boolean playFlag) {
+                    //ttt
                     changeGraph(listViewItem);
+                    if(!playFlag){
+                        //재생일 시에
+                        recordTime = 0-barWidth;
+                        timerFlag =true;
+                        mTimer =  new Timer();
+                        ct = new CustomTimer();
+                        mTimer.schedule(ct, 0, 1000);
+                    }else{
+                        timerFlag =false;
+                        ct.cancel();
+                        mTimer.cancel();
+                        chart.getXAxis().removeAllLimitLines();
+                        chart.invalidate();
+                    }
                 }
             }) ;
-
 
             //listView 생성
             ListView listview = (ListView) findViewById(R.id.recordListview);
@@ -206,7 +219,6 @@ public class ResultActivity extends AppCompatActivity {
 
             // 녹음 검출리스트 추가.
             JsonArray analysisList = responseData.getAsJsonArray("analysisList");
-
             if(analysisList.size()>0){
                 for(int i=0; i<analysisList.size(); i++){
                     try {
@@ -244,13 +256,11 @@ public class ResultActivity extends AppCompatActivity {
                     recordEntryData.addProperty("termEndDt",analysisEndDt.getTime()-analysisStartDt.getTime());
                     recordEntryData.addProperty("analysisId",recordData.getAnalysisId());
 
-
                       if(analysisObj.has("recordingData")){
                           String analysisDataRawStr =analysisObj.get("recordingData").getAsString();
                           JsonArray analysisDataArr = new JsonParser().parse(analysisDataRawStr).getAsJsonArray();
 
-                          JsonArray analysisDataArrGroupByMinite =rd.groupByMinites(analysisDataArr,DateTimeToStringFormat.format(recordStartDT));
-
+                          JsonArray analysisDataArrGroupByMinite =rd.groupByMinites(analysisDataArr,jncu.JsonStringNullCheck(analysisObj,"analysisStartDt"));
                           if(analysisDataArrGroupByMinite.size()>0){
                               for(int k =0; k<analysisDataArrGroupByMinite.size(); k++){
                                   JsonObject analysisRawData = (JsonObject) analysisDataArrGroupByMinite.get(k);
@@ -281,7 +291,7 @@ public class ResultActivity extends AppCompatActivity {
                                 JsonArray analysisRawDataArr = new JsonParser().parse(analysisRawStr).getAsJsonArray();
 
                                 if(analysisRawDataArr.size()>0){
-                                    JsonArray analysisRawDataArrGroupByMinite =rd.groupByMinites(analysisRawDataArr,DateTimeToStringFormat.format(recordStartDT));
+                                    JsonArray analysisRawDataArrGroupByMinite =rd.groupByMinites(analysisRawDataArr,jncu.JsonStringNullCheck(analysisObj,"analysisStartDt"));
 
                                         for(int k =0; k<analysisRawDataArrGroupByMinite.size(); k++){
                                             JsonObject analysisRawData = (JsonObject) analysisRawDataArrGroupByMinite.get(k);
@@ -307,36 +317,36 @@ public class ResultActivity extends AppCompatActivity {
                         }
                         String detectedTxt = "";
                         if(snoreCnt>0){
-                            detectedTxt = detectedTxt+"코골이 "+snoreCnt+"회";
+                            detectedTxt = detectedTxt+"코골이가 "+snoreCnt+"회";
                         }
                         if(grindCnt>0){
                             if(snoreCnt>0){
                                 detectedTxt = detectedTxt+", ";
                             }
-                            detectedTxt = detectedTxt+"이갈이 "+grindCnt+"회";
+                            detectedTxt = detectedTxt+"이갈이가 "+grindCnt+"회";
                         }
                         if(osaCnt>0){
                             if(grindCnt>0||snoreCnt>0){
                                 detectedTxt = detectedTxt+", ";
                             }
-                            detectedTxt = detectedTxt+"무호흡 "+osaCnt+"회";
+                            detectedTxt = detectedTxt+"무호흡이 "+osaCnt+"회";
                         }
                         if("".equals(detectedTxt)){
-                            recordData.setTitle(df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
+                            recordData.setTitle(
+                                    df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
                                     +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지\n"
-//                                            +df.longToStringFormat(kococoTerm)
-                                            +"소리가 발생했습니다."
+                                    +"소리가 발생했습니다."
                                     );
                         }else if(osaCnt==0||grindCnt==0||snoreCnt==0){
-                            recordData.setTitle(df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
-                                    +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지 "
-                                    +df.longToStringFormat(kococoTerm)+" 동안\n"
+                            recordData.setTitle(
+                                    df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
+                                    +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지\n"
                                     +detectedTxt +" 발생했습니다. ");
                         }else{
-                            recordData.setTitle(df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
-                                    +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지 "
-                                    +df.longToStringFormat(kococoTerm)+" 동안\n"
-                                    +detectedTxt +"\n 발생했습니다. ");
+                            recordData.setTitle(
+                                    df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
+                                    +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지\n"
+                                    +detectedTxt +"\n발생했습니다. ");
                         }
                         //~시~분~초부터 ~시~분~초까지 코를 골았습니다. \n (무호흡 0회, )
                         adapter.addItem(recordData) ;
@@ -344,8 +354,6 @@ public class ResultActivity extends AppCompatActivity {
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
-
-
                 }
             }else{
                 TextView nullTextView = (TextView) findViewById(R.id.nullTextView);
@@ -377,17 +385,28 @@ public class ResultActivity extends AppCompatActivity {
             //터치를 제한시키는 부분인데 값을 어떻게 쓰는지를 모르겠음
 //            chart.setMaxHighlightDistance (1.5f);
 //            chart.setHighlightFullBarEnabled(true);
+
             chart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
                 @Override
                 public void onValueSelected(Entry e, Highlight h) {
-                    System.out.println("=========클릭했다~~~"+e.getData());
+//                    System.out.println("=========클릭했다~~~"+e.getData());
                     if(adapter.getPlayBtnFlag()){
                         adapter.stopActivityMp(playingId);
+                        timerFlag =false;
+                        ct.cancel();
+                        mTimer.cancel();
+                        chart.getXAxis().removeAllLimitLines();
+                        chart.invalidate();
                     }
                     //데이터 넣을 시에 재생 파일 패스 및 재생 구간을 넣으면된다.
                     if(e.getData()!=null){
                         JsonObject graphData= (JsonObject) e.getData();
                         playingId = graphData.get("analysisId").getAsInt();
+                        recordTime = ((graphData.get("termStartDt").getAsInt())/(60*1000))-barWidth;
+                        timerFlag =true;
+                        mTimer =  new Timer();
+                        ct = new CustomTimer();
+                        mTimer.schedule(ct, 0, 1000);
                         try {
                             adapter.playActivityMp(graphData.get("analysisId").getAsInt(),graphData.get("termStartDt").getAsInt(),graphData.get("termEndDt").getAsInt(),graphData.get("filePath").getAsString(),getApplicationContext());
                             //                        adapter.playGraphMp(graphData.get("termStartDt").getAsInt(),graphData.get("termEndDt").getAsInt(),graphData.get("filePath").getAsString(),getApplicationContext());
@@ -400,12 +419,16 @@ public class ResultActivity extends AppCompatActivity {
                 public void onNothingSelected() {
                     if(adapter.getPlayBtnFlag()){
                         adapter.stopActivityMp(playingId);
+                        timerFlag =false;
+                        ct.cancel();
+                        mTimer.cancel();
+                        chart.getXAxis().removeAllLimitLines();
+                        chart.invalidate();
                     }
                 }
             });
 
             MyXAxisValueFormatter xAxisFormatter = new MyXAxisValueFormatter(referenceTimestamp);
-//            MyXAxisValueFormatter xAxisFormatter = new MyXAxisValueFormatter(0);
             XAxis xAxis = chart.getXAxis();
             xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
             //데이터의 분할 정도
@@ -417,15 +440,12 @@ public class ResultActivity extends AppCompatActivity {
             xAxis.setTextColor(Color.WHITE);
             xAxis.setValueFormatter(xAxisFormatter);
             xAxis.setXOffset(1f);
-
             xAxis.setLabelCount(2);
-
 
             //시작과 끝점을 정해줘야 그래프가 제대로잘 나옴
             float endMinites = (recordEndDT.getTime()-referenceTimestamp)/(60*1000);
             xAxis.setAxisMinimum(0);
             xAxis.setAxisMaximum(endMinites);
-            System.out.println("=========recordEndDT.getTime()-referenceTimestamp===recordTerm============"+endMinites);
 
             chart.setScaleYEnabled(false);
             chart.getAxisLeft().setDrawGridLines(false);
@@ -439,6 +459,7 @@ public class ResultActivity extends AppCompatActivity {
             //범주 보이게 할꺼냐 말꺼냐
             chart.getLegend().setEnabled(true);
             chart = (BarChart) findViewById(R.id.chart1);
+            chart.setFitBars(true);
 
             //마지막 데이터 정제
             emptyEntries = rd.addZeroData(endMinites,soundEntries,snoreEntries,osaEntries,grindEntries);
@@ -450,6 +471,7 @@ public class ResultActivity extends AppCompatActivity {
             //값을 보여줄건지 말건지 여부
             set1.setDrawValues(false);
             set1.setValueTextColor(Color.WHITE);
+            set1.setHighLightColor(Color.rgb(255, 104, 89));
 
             BarDataSet grindSet;
             grindSet = new BarDataSet(grindEntries, "이갈이");
@@ -457,13 +479,14 @@ public class ResultActivity extends AppCompatActivity {
             //값을 보여줄건지 말건지 여부
             grindSet.setDrawValues(false);
             grindSet.setValueTextColor(Color.WHITE);
+            grindSet.setHighLightColor(Color.rgb(255, 207, 68));
 
             BarDataSet osaSet;
             osaSet = new BarDataSet(osaEntries, "무호흡");
             osaSet.setColors(Color.rgb(177, 93, 255));
             //값을 보여줄건지 말건지 여부
             osaSet.setDrawValues(false);
-            osaSet.setValueTextColor(Color.WHITE);
+            osaSet.setHighLightColor(Color.rgb(177, 93, 255));
 
             BarDataSet soundSet;
             soundSet = new BarDataSet(soundEntries, "소리");
@@ -471,6 +494,7 @@ public class ResultActivity extends AppCompatActivity {
             //값을 보여줄건지 말건지 여부
             soundSet.setDrawValues(false);
             soundSet.setValueTextColor(Color.WHITE);
+            soundSet.setHighLightColor(Color.rgb(123, 109, 93));
 
             BarDataSet emptySet;
             emptySet = new BarDataSet(emptyEntries, "Data Set");
@@ -479,6 +503,7 @@ public class ResultActivity extends AppCompatActivity {
             emptySet.setDrawValues(false);
             emptySet.setValueTextColor(Color.WHITE);
             emptySet.setVisible(false);
+            emptySet.setHighLightColor(Color.TRANSPARENT);
 
             chart.getLegend().setTextColor(Color.WHITE);
             chart.getLegend().setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
@@ -500,13 +525,12 @@ public class ResultActivity extends AppCompatActivity {
             BarData data = new BarData(dataSets);
             //바의 두께를 바꿀수 있는
 //            data.setBarWidth(3000f);
-            chart.setData(data);
             chart.setFitBars(true);
 
 //            chart.getBarData().setBarWidth(800f);
 //            chart.groupBars(0,32f ,12f);
+            chart.setData(data);
             chart.invalidate();
-
             FloatingActionButton consultBtn = (FloatingActionButton) findViewById(R.id.consultBtn);
             consultBtn.setOnClickListener(new FloatingActionButton.OnClickListener() {
                 @Override
@@ -536,32 +560,14 @@ public class ResultActivity extends AppCompatActivity {
                             System.out.println(" =============getProfile===========Throwable: "+t.getMessage());
                         }
                     });
-
-
                 }
             });
-
-
-//
-//            //뒤로가기 버튼
-//            Button allBtn = (Button) findViewById(R.id.allBtn);
-//            bt.setOnClickListener(new Button.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    System.out.println("==========allBtnallBtnallBtnallBtn=======");
-//                    chart.setScaleMinima(0f, 0f);
-//                    chart.fitScreen();
-//                }
-//            });
-
-
         }else{
             Toast.makeText(getApplicationContext(),"error",Toast.LENGTH_LONG);
         }
         if(firstData!=null){
             clickFirstBtn(firstData);
         }
-
     }
 
     private void clickFirstBtn(String firstData) {
@@ -571,36 +577,39 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void changeGraph(RecordData listViewItem) {
-
         soundEntries = new ArrayList<>();
         snoreEntries = new ArrayList<>();
         osaEntries = new ArrayList<>();
         grindEntries = new ArrayList<>();
         emptyEntries = new ArrayList<>();
-
-        System.out.println("==================recordData.getResponseObj()==================="+listViewItem.getResponseObj());
+        Date analysisStartDt = null,analysisEndDt = null;
         try {
             JsonObject analysisObj = new JsonParser().parse(listViewItem.getResponseObj()).getAsJsonObject();
             JsonArray analysisDetailsList = analysisObj.getAsJsonArray("analysisDetailsList");
 
-            Date analysisStartDt =  stringtoDateTimeFormat.parse(jncu.JsonStringNullCheck(analysisObj,"analysisStartDt"));
-            Date analysisEndDt = stringtoDateTimeFormat.parse(jncu.JsonStringNullCheck(analysisObj,"analysisEndDt"));
+            analysisStartDt =  stringtoDateTimeFormat.parse(jncu.JsonStringNullCheck(analysisObj,"analysisStartDt"));
+            analysisEndDt = stringtoDateTimeFormat.parse(jncu.JsonStringNullCheck(analysisObj,"analysisEndDt"));
 
-            JsonObject recordEntryData = new JsonObject();
-            recordEntryData.addProperty("filePath",jncu.JsonStringNullCheck(analysisObj,"analysisFileAppPath")+"/"+jncu.JsonStringNullCheck(analysisObj,"analysisFileNm"));
-            //그래프 클릭 시에 전체 재생
-            recordEntryData.addProperty("termStartDt",0);
-            recordEntryData.addProperty("termEndDt",analysisEndDt.getTime()-analysisStartDt.getTime());
-            recordEntryData.addProperty("analysisId",jncu.JsonStringNullCheck(analysisObj,"analysisId"));
+            String filePath = jncu.JsonStringNullCheck(analysisObj,"analysisFileAppPath")+"/"+jncu.JsonStringNullCheck(analysisObj,"analysisFileNm");
+            long termEndDt = analysisEndDt.getTime()-analysisStartDt.getTime();
+            String analysisId = jncu.JsonStringNullCheck(analysisObj,"analysisId");
 
             if(analysisObj.has("recordingData")){
                 String analysisDataRawStr =analysisObj.get("recordingData").getAsString();
                 JsonArray analysisDataArr = new JsonParser().parse(analysisDataRawStr).getAsJsonArray();
-                JsonArray analysisDataArrGroupByMinite =rd.groupByMinites(analysisDataArr,DateTimeToStringFormat.format(recordStartDT));
+                JsonArray analysisDataArrGroupByMinite =rd.groupByMinites(analysisDataArr,recordStartDTToString);
                 if(analysisDataArrGroupByMinite.size()>0){
                     for(int k =0; k<analysisDataArrGroupByMinite.size(); k++){
                         JsonObject analysisRawData = (JsonObject) analysisDataArrGroupByMinite.get(k);
                         int time = analysisRawData.get("TIME").getAsInt();
+
+                        JsonObject recordEntryData = new JsonObject();
+                        recordEntryData.addProperty("filePath",filePath);
+                        //그래프 클릭 시에 전체 재생
+                        recordEntryData.addProperty("termStartDt",time*60*1000);
+                        recordEntryData.addProperty("termEndDt",termEndDt);
+                        recordEntryData.addProperty("analysisId",analysisId);
+
                         soundEntries.add(new BarEntry(time, analysisRawData.get("DB").getAsFloat(), recordEntryData));
                     }
                 }
@@ -616,11 +625,19 @@ public class ResultActivity extends AppCompatActivity {
                         JsonArray analysisRawDataArr = new JsonParser().parse(analysisRawStr).getAsJsonArray();
 
                         if(analysisRawDataArr.size()>0){
-                            JsonArray analysisRawDataArrGroupByMinite =rd.groupByMinites(analysisRawDataArr,DateTimeToStringFormat.format(recordStartDT));
+                            JsonArray analysisRawDataArrGroupByMinite =rd.groupByMinites(analysisRawDataArr,recordStartDTToString);
 
                             for(int k =0; k<analysisRawDataArrGroupByMinite.size(); k++){
                                 JsonObject analysisRawData = (JsonObject) analysisRawDataArrGroupByMinite.get(k);
                                 int time = analysisRawData.get("TIME").getAsInt();
+                                //x 축이 기준이 10:10이고   10:11분에 그려져있으면 1분후의 재생을 해야함
+
+                                JsonObject recordEntryData = new JsonObject();
+                                recordEntryData.addProperty("filePath",filePath);
+                                //그래프 클릭 시에 전체 재생
+                                recordEntryData.addProperty("termStartDt",time*60*1000);
+                                recordEntryData.addProperty("termEndDt",termEndDt);
+                                recordEntryData.addProperty("analysisId",analysisId);
 
                                 if(termTypeCd==200101){
                                     snoreEntries.add(new BarEntry(time, analysisRawData.get("DB").getAsFloat(), recordEntryData));
@@ -634,25 +651,22 @@ public class ResultActivity extends AppCompatActivity {
                     }
                 }
             }
-
-            Long startMinites = (analysisStartDt.getTime()-referenceTimestamp)/(60*1000);
-            Long endMinites = (analysisEndDt.getTime()-referenceTimestamp)/(60*1000);
-            System.out.println("===startMinites===="+startMinites);
-            System.out.println("===endMinites===="+endMinites);
+//            Long startMinites = (analysisStartDt.getTime()-referenceTimestamp)/(60*1000);
+//            Long endMinites = (analysisEndDt.getTime()-referenceTimestamp)/(60*1000)+1;
 
             //X 좌표 보여주기
-            chart.getXAxis().setAxisMinimum(startMinites);
-            chart.getXAxis().setAxisMaximum(endMinites);
+//            chart.getXAxis().setAxisMinimum(startMinites);
+//            chart.getXAxis().setAxisMaximum(endMinites);
 
         } catch (ParseException e) {
             e.printStackTrace();
         }
 
-        BarDataSet set1;
-        set1 = new BarDataSet(snoreEntries, "코골이");
-        set1.setColors(Color.rgb(255, 104, 89));
-        set1.setDrawValues(false);
-        set1.setValueTextColor(Color.WHITE);
+        BarDataSet snoreSet;
+        snoreSet = new BarDataSet(snoreEntries, "코골이");
+        snoreSet.setColors(Color.rgb(255, 104, 89));
+        snoreSet.setDrawValues(false);
+        snoreSet.setValueTextColor(Color.WHITE);
 
         BarDataSet grindSet;
         grindSet = new BarDataSet(grindEntries, "이갈이");
@@ -672,24 +686,33 @@ public class ResultActivity extends AppCompatActivity {
         soundSet.setDrawValues(false);
         soundSet.setValueTextColor(Color.WHITE);
 
-        BarDataSet emptySet;
-        emptySet = new BarDataSet(emptyEntries, "Data Set");
-        emptySet.setColors(Color.TRANSPARENT);
-        //값을 보여줄건지 말건지 여부
-        emptySet.setDrawValues(false);
-        emptySet.setValueTextColor(Color.WHITE);
-        emptySet.setVisible(false);
+        //하이라이트 못하게 하는 법 BarDataSet emptySet.setHighlightEnabled(false); 이지만 클릭이벤트 기능을 써야되기에 하이라이트 색을 안바뀌게 해야함
+        snoreSet.setHighLightColor(Color.rgb(255, 104, 89));
+        grindSet.setHighLightColor(Color.rgb(255, 207, 68));
+        osaSet.setHighLightColor(Color.rgb(177, 93, 255));
+        soundSet.setHighLightColor(Color.rgb(123, 109, 93));
 
         ArrayList<IBarDataSet> dataSets = new ArrayList<>();
         dataSets.add(soundSet);
-        dataSets.add(set1);
+        dataSets.add(snoreSet);
         dataSets.add(grindSet);
         dataSets.add(osaSet);
-        dataSets.add(emptySet);
-
         BarData data = new BarData(dataSets);
-        chart.setData(data);
 
+        MyXAxisValueFormatter xAxisFormatter = new MyXAxisValueFormatter(analysisStartDt.getTime());
+        XAxis xAxis = chart.getXAxis();
+        float endMinites = (analysisEndDt.getTime()-analysisStartDt.getTime())/(60*1000);
+        xAxis.setAxisMinimum(0);
+        xAxis.setAxisMaximum(endMinites+1);
+        xAxis.setValueFormatter(xAxisFormatter);
+
+        //바를 양옆이 반으로 짤리는 현상을 수정하는 방법
+        chart.setFitBars(true);
+        barWidth = data.getBarWidth()/2;
+        chart.getXAxis().setAxisMinimum(-barWidth);
+        chart.getXAxis().setAxisMaximum(soundEntries.size()-barWidth);
+
+        chart.setData(data);
         chart.invalidate();
     }
 
@@ -709,13 +732,36 @@ public class ResultActivity extends AppCompatActivity {
         Log.v(TAG, "onConfigurationChanged " + newConfig.screenWidthDp + "," + newConfig.screenHeightDp);
     }
 
-
     // MediaPlayer는 시스템 리소스를 잡아먹는다.
     // MediaPlayer는 필요이상으로 사용하지 않도록 주의해야 한다.
     //Fragment에서는 onDestoryView , activity에서는 onDestory
     @Override
     public void onDestroy() {
+        if(timerFlag){
+            ct.cancel();
+            mTimer.cancel();
+        }
         adapter.destroyMp();
         super.onDestroy();
+    }
+
+    public class CustomTimer extends TimerTask {
+        @Override
+        public void run() {
+            recordTime+= (float) (1/60.00);
+            System.out.println("=========recordTime============="+recordTime);
+            LimitLine ll1 = new LimitLine(recordTime);
+            ll1.setLineWidth(1f);
+            //점선으로 그릴 경우
+//                    ll1.enableDashedLine(10f, 10f, 0f);
+            //라벨 위치
+//                    ll1.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_TOP);
+//                        ll1.setTextSize(10f);
+            chart.getXAxis().removeAllLimitLines(); // reset all limit lines to avoid overlapping lines
+            chart.getXAxis().addLimitLine(ll1);
+            chart.invalidate();
+
+        }
+
     }
 }

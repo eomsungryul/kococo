@@ -71,7 +71,7 @@ public class RecordListAdapter extends BaseAdapter {
 
 
     public interface GraphClickListener{
-        void clickBtn(RecordData listViewItem);
+        void clickBtn(RecordData listViewItem,Boolean playFlag);
     }
 
     // Adapter에 사용되는 데이터의 개수를 리턴. : 필수 구현
@@ -193,7 +193,9 @@ public class RecordListAdapter extends BaseAdapter {
                 cdt = new CountDownTimer(endTime-startTime, 100) {
                     public void onTick(long millisUntilFinished) {
 //                        System.out.println("=============================onTick"+millisUntilFinished);
-                        if(MediaPlayerUtility.getTime(mediaPlayer)>=endTime){
+                        if(mediaPlayer==null){
+                            stopMp(playBtn);
+                        }else if(MediaPlayerUtility.getTime(mediaPlayer)>=endTime){
                             stopMp(playBtn);
                         }
                         if(!isPlaying){
@@ -214,8 +216,10 @@ public class RecordListAdapter extends BaseAdapter {
     }
 
     public void stopMp(ImageButton playBtn){
-        mediaPlayer.stop();
-        mediaPlayer.reset();
+        if(mediaPlayer!=null){
+            mediaPlayer.stop();
+            mediaPlayer.reset();
+        }
         playBtn.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
         playBtnFlag = false;
         isPlaying=false;
@@ -284,10 +288,9 @@ public class RecordListAdapter extends BaseAdapter {
     }
 
     public void rowClickEvt(int position,RecordData listViewItem,ImageButton playBtn) {
-//              Toast.makeText(context, "파일정보 : "+position+" : "+listViewItem.getAnalysisFileAppPath()+"/"+listViewItem.getAnalysisFileNm(), Toast.LENGTH_SHORT).show();
-        System.out.println("===============파일getResponseObj정보 : "+position+" : "+listViewItem.getResponseObj()+"/"+listViewItem.getAnalysisFileNm());
+//        System.out.println("===============파일getResponseObj정보 : "+position+" : "+listViewItem.getResponseObj()+"/"+listViewItem.getAnalysisFileNm());
         //후에 액티비티에 접근할때 사용한다.
-        graphClickListener.clickBtn(listViewItem);
+        graphClickListener.clickBtn(listViewItem,playBtnFlag);
         //재생버튼 누를 시 정지버튼으로 변경하는 메소드
         //재생중이거나 해당버튼이 재생position 값과 다른 경우에만 초기화를 해줌
         if(isPlaying && playPosition != position){
@@ -310,7 +313,7 @@ public class RecordListAdapter extends BaseAdapter {
             playBtn.setImageResource(R.drawable.baseline_pause_white_48dp);
             playBtnFlag = true;
             playPosition = position;
-            System.out.println("=============position==============="+playPosition);
+//            System.out.println("=============position==============="+playPosition);
             SimpleDateFormat stringtoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             long startTerm = 0L;
             long endTerm = 0L;
