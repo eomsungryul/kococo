@@ -677,7 +677,7 @@ public class RecordingThread extends Thread {
                     //AllAnalysisRawDataList.add(maxARD);
                     int tmpTime = (int) Math.floor(times);
                     //1초 혹은 1분 단위로 기록
-                    if(tmpTime<31){
+                    if(tmpTime<31 || AllAnalysisRawDataList.size() <31){
                         Log.v(LOG_TAG2,(calcTime(times))+" 1번");
                         AllAnalysisRawDataList.add(maxARD);
                     }
@@ -691,7 +691,7 @@ public class RecordingThread extends Thread {
                     */
 
                     //Log.v(LOG_TAG2,(calcTime(times))+" "+calcTime((System.currentTimeMillis()/1000)%60));
-                    if(tmpTime>30) {
+                    if(tmpTime>30 && AllAnalysisRawDataList.size()>0) { //녹음이 새로 시작할 때 리스트가 0인 경우라면 오류가 발생한다. 앞에서 리스트가 31 미만이면 리스트를 추가하게 되어있으므로 size가 0인 경우는 없음.
 
                         double tmpCM = (times+(int) (recordFragment.getRecordStartDtl() / 1000) % 60);
                         double tmpBeforeCM = (AllAnalysisRawDataList.get(AllAnalysisRawDataList.size()-1).getTimes()+(int) (recordFragment.getRecordStartDtl() / 1000) % 60);
