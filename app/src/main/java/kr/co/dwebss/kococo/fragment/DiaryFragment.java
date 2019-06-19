@@ -63,13 +63,10 @@ public class DiaryFragment extends Fragment {
             retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();
             apiService = retrofit.create(ApiService.class);
 
-            apiService.getRecordList(userAppId,"recordId,desc").enqueue(new Callback<JsonObject>() {
+            apiService.getRecordList(userAppId,"recordId,desc",1000).enqueue(new Callback<JsonObject>() {
                 @Override
                 public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
                     System.out.println(" ============getRecordList============response: "+response);
-                    //저장 시에 뒤로가기
-//                Toast.makeText(v.getContext(),response.body(),Toast.LENGTH_LONG).show();
-                    Gson gson = new Gson();
                     JsonObject jsonObject = response.body();
                     JsonObject resultData = jsonObject.getAsJsonObject("_embedded");
                     JsonArray recordList = resultData.getAsJsonArray("record");
@@ -79,7 +76,6 @@ public class DiaryFragment extends Fragment {
                     ListView listview = (ListView) v.findViewById(R.id.diaryListview);
                     listview.setAdapter(adapter);
                     adapter.addItems(recordList) ;
-
                     adapter.notifyDataSetChanged();
                 }
                 @Override

@@ -36,6 +36,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
@@ -326,6 +327,11 @@ public class ResultActivity extends AppCompatActivity {
 //                                            +df.longToStringFormat(kococoTerm)
                                             +"소리가 발생했습니다."
                                     );
+                        }else if(osaCnt==0||grindCnt==0||snoreCnt==0){
+                            recordData.setTitle(df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
+                                    +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지 "
+                                    +df.longToStringFormat(kococoTerm)+" 동안\n"
+                                    +detectedTxt +" 발생했습니다. ");
                         }else{
                             recordData.setTitle(df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
                                     +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지 "
@@ -430,7 +436,8 @@ public class ResultActivity extends AppCompatActivity {
             // setting data
             // add a nice and smooth animation
             chart.animateY(1500);
-            chart.getLegend().setEnabled(false);
+            //범주 보이게 할꺼냐 말꺼냐
+            chart.getLegend().setEnabled(true);
             chart = (BarChart) findViewById(R.id.chart1);
 
             //마지막 데이터 정제
@@ -438,28 +445,28 @@ public class ResultActivity extends AppCompatActivity {
             chart.getAxisLeft().setAxisMinimum(0f);
 
             BarDataSet set1;
-            set1 = new BarDataSet(snoreEntries, "Data Set");
+            set1 = new BarDataSet(snoreEntries, "코골이");
             set1.setColors(Color.rgb(255, 104, 89));
             //값을 보여줄건지 말건지 여부
             set1.setDrawValues(false);
             set1.setValueTextColor(Color.WHITE);
 
             BarDataSet grindSet;
-            grindSet = new BarDataSet(grindEntries, "Data Set");
+            grindSet = new BarDataSet(grindEntries, "이갈이");
             grindSet.setColors(Color.rgb(255, 207, 68));
             //값을 보여줄건지 말건지 여부
             grindSet.setDrawValues(false);
             grindSet.setValueTextColor(Color.WHITE);
 
             BarDataSet osaSet;
-            osaSet = new BarDataSet(osaEntries, "Data Set");
+            osaSet = new BarDataSet(osaEntries, "무호흡");
             osaSet.setColors(Color.rgb(177, 93, 255));
             //값을 보여줄건지 말건지 여부
             osaSet.setDrawValues(false);
             osaSet.setValueTextColor(Color.WHITE);
 
             BarDataSet soundSet;
-            soundSet = new BarDataSet(soundEntries, "Data Set");
+            soundSet = new BarDataSet(soundEntries, "소리");
             soundSet.setColors(Color.rgb(123, 109, 93));
             //값을 보여줄건지 말건지 여부
             soundSet.setDrawValues(false);
@@ -473,6 +480,11 @@ public class ResultActivity extends AppCompatActivity {
             emptySet.setValueTextColor(Color.WHITE);
             emptySet.setVisible(false);
 
+            chart.getLegend().setTextColor(Color.WHITE);
+            chart.getLegend().setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
+            chart.getLegend().setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
+            chart.getLegend().setOrientation(Legend.LegendOrientation.HORIZONTAL);
+            chart.getLegend().setDrawInside(false);
 //            chart.setViewPortOffsets(0f, 60f, 30f, 0f);
             //X 간격을 조정 할 수있지만 줌 기능이 정지됨
 //            chart.setVisibleXRange(0f,30000f);
@@ -637,25 +649,25 @@ public class ResultActivity extends AppCompatActivity {
         }
 
         BarDataSet set1;
-        set1 = new BarDataSet(snoreEntries, "Data Set");
+        set1 = new BarDataSet(snoreEntries, "코골이");
         set1.setColors(Color.rgb(255, 104, 89));
         set1.setDrawValues(false);
         set1.setValueTextColor(Color.WHITE);
 
         BarDataSet grindSet;
-        grindSet = new BarDataSet(grindEntries, "Data Set");
+        grindSet = new BarDataSet(grindEntries, "이갈이");
         grindSet.setColors(Color.rgb(255, 207, 68));
         grindSet.setDrawValues(false);
         grindSet.setValueTextColor(Color.WHITE);
 
         BarDataSet osaSet;
-        osaSet = new BarDataSet(osaEntries, "Data Set");
+        osaSet = new BarDataSet(osaEntries, "무호흡");
         osaSet.setColors(Color.rgb(177, 93, 255));
         osaSet.setDrawValues(false);
         osaSet.setValueTextColor(Color.WHITE);
 
         BarDataSet soundSet;
-        soundSet = new BarDataSet(soundEntries, "Data Set");
+        soundSet = new BarDataSet(soundEntries, "소리감지");
         soundSet.setColors(Color.rgb(123, 109, 93));
         soundSet.setDrawValues(false);
         soundSet.setValueTextColor(Color.WHITE);
