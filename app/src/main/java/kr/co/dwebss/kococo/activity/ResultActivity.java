@@ -401,15 +401,17 @@ public class ResultActivity extends AppCompatActivity {
                 public void onValueSelected(Entry e, Highlight h) {
 //                    System.out.println("=========클릭했다~~~"+e.getData());
                     if(adapter.getPlayBtnFlag()){
+                        seekBar.setEnabled(false);
                         adapter.stopActivityMp(playingId);
                         timerFlag =false;
                         ct.cancel();
                         mTimer.cancel();
-                        chart.getXAxis().removeAllLimitLines();
-                        chart.invalidate();
+//                        chart.getXAxis().removeAllLimitLines();
+//                        chart.invalidate();
                     }
                     //데이터 넣을 시에 재생 파일 패스 및 재생 구간을 넣으면된다.
                     if(e.getData()!=null){
+                        seekBar.setEnabled(true);
                         JsonObject graphData= (JsonObject) e.getData();
                         playingId = graphData.get("analysisId").getAsInt();
                         recordTime = ((graphData.get("termStartDt").getAsInt())/(60*1000))-barWidth;
@@ -428,6 +430,8 @@ public class ResultActivity extends AppCompatActivity {
                 @Override
                 public void onNothingSelected() {
                     if(adapter.getPlayBtnFlag()){
+                        seekBar.setEnabled(false);
+//                        seekBar.setProgress(0);
                         adapter.stopActivityMp(playingId);
                         timerFlag =false;
                         ct.cancel();
