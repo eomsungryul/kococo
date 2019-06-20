@@ -62,13 +62,12 @@ public class RecordListAdapter extends BaseAdapter {
 
     private GraphClickListener graphClickListener;
     int pos = 0;
+
     // ListViewAdapter의 생성자
     public RecordListAdapter(Context context, GraphClickListener graphClickListener) {
         this.context = context;
         this.graphClickListener = graphClickListener;
     }
-
-
 
     public interface GraphClickListener{
         void clickBtn(RecordData listViewItem,Boolean playFlag);
@@ -83,6 +82,7 @@ public class RecordListAdapter extends BaseAdapter {
     // position에 위치한 데이터를 화면에 출력하는데 사용될 View를 리턴. : 필수 구현
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+
         pos = position;
         final Context context = parent.getContext();
         viewGroup = parent;
@@ -94,10 +94,7 @@ public class RecordListAdapter extends BaseAdapter {
         }
 
         // 화면에 표시될 View(Layout이 inflate된)으로부터 위젯에 대한 참조 획득
-//        ImageView iconImageView = (ImageView) convertView.findViewById(R.id.imageView1) ;
         TextView timeTextView = (TextView) convertView.findViewById(R.id.recordTimeText) ;
-//        TextView nameTextView = (TextView) convertView.findViewById(R.id.recordNameText) ;
-//        TextView descTextView = (TextView) convertView.findViewById(R.id.textView2) ;
 
         // Data Set(listViewItemList)에서 position에 위치한 데이터 참조 획득
         RecordData listViewItem = listViewItemList.get(position);
@@ -105,19 +102,19 @@ public class RecordListAdapter extends BaseAdapter {
         // 아이템 내 각 위젯에 데이터 반영
 //        iconImageView.setImageDrawable(listViewItem.getIcon());
         timeTextView.setText(listViewItem.getTitle());
-//        nameTextView.setText(title[0]);
-//        System.out.println("===========listViewItem.getTitle()==========="+listViewItem.getTitle());
-//        descTextView.setText(listViewItem.getDesc());
 
         playBtnFlag = false;
         //lisrViews내의 아이콘 버튼 참조 및 onclick추가
         ImageButton playBtn = (ImageButton) convertView.findViewById(R.id.recordPlay);
 
-        System.out.println("===================filePath = :"+listViewItem.getAnalysisFileAppPath()+"/"+listViewItem.getAnalysisFileNm());
+//        System.out.println("===================filePath = :"+listViewItem.getAnalysisFileAppPath()+"/"+listViewItem.getAnalysisFileNm());
+        System.out.println("===================recordPlay = :"+R.id.recordPlay);
+        System.out.println("===================position = :"+position);
 
         playBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
+                System.out.println("=========onClick==========position = :"+position);
                 rowClickEvt(position,listViewItem,playBtn);
             }
         });
@@ -128,16 +125,7 @@ public class RecordListAdapter extends BaseAdapter {
                 rowClickEvt(position,listViewItem,playBtn);
             }
         });
-//
-//        nameTextView.setOnClickListener(new TextView.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                rowClickEvt(position,listViewItem,playBtn);
-//            }
-//        });
-        //{"userAppId":"7dc9e960-b0db-4c1c-81b5-2c8f2ce7ca4f","recordId":116,"recordStartD":"2019-05-30","recordStartDt":"2019-05-30T15:13:46","recordEndD":"2019-05-30","recordEndDt":"2019-05-30T15:14:46","consultingYn":"N","consultingReplyYn":"N","analysisList":[{"analysisId":93,"analysisStartD":"2019-05-30T00:00:00","analysisStartDt":"2019-05-30T15:13:50","analysisEndD":"2019-05-30T00:00:00","analysisEndDt":"2019-05-30T15:14:49","analysisFileNm":"snoring-20191330_1513-30_1514_1559196886407.wav","analysisFileAppPath":"/data/user/0/kr.co.dwebss.kococo/files/rec_data/29","analysisServerUploadYn":"N","analysisDetailsList":[{"analysisId":93,"analysisId":97,"termTypeCd":200102,"termStartDt":"2019-05-30T15:14:37","termEndDt":"2019-05-30T15:14:42","claimYn":"N"}],"_links":{"record":{"href":"http://52.79.88.47:8080/kococo/api/record/116"}}}],"_links":{"self":{"href":"http://52.79.88.47:8080/kococo/api/record/116"},"record":{"href":"http://52.79.88.47:8080/kococo/api/record/116"},"admin":{"href":"http://52.79.88.47:8080/kococo/api/record/116/admin"},"user":{"href":"http://52.79.88.47:8080/kococo/api/record/116/user"},"sleepStatusCd":{"href":"http://52.79.88.47:8080/kococo/api/record/116/sleepStatusCd"}}}
 
-        //신고하기 버튼
         //신고하기를 클릭 할 시에 데이터를 보낸다!
         ImageButton reportBtn = (ImageButton) convertView.findViewById(R.id.recordReport);
         reportBtn.setOnClickListener(new Button.OnClickListener() {
@@ -225,11 +213,7 @@ public class RecordListAdapter extends BaseAdapter {
         isPlaying=false;
     }
 
-
-
-    public void playActivityMp(int adi,int startTime, int endTime , String filePath, Context context)throws IOException {
-//        View v = viewGroup.getChildAt(position);
-//        ImageButton playBtn = (ImageButton) v.findViewById(R.id.recordPlay);
+    public void playActivityMp(int adi,int startTime, int endTime , String filePath, Context context) throws IOException {
         View v;
         ImageButton playBtn;
         if(isPlaying && analysisId != adi){
@@ -247,6 +231,12 @@ public class RecordListAdapter extends BaseAdapter {
             playBtnFlag = false;
             isPlaying = false;
         }
+
+        if(mediaPlayer.isPlaying()){
+            mediaPlayer.stop();
+            mediaPlayer.reset();
+        }
+
         System.out.println("==========123====test============"+getCount()+viewGroup.getChildCount());
         for(int i=0; i<getCount();i++){
             v = viewGroup.getChildAt(i);
@@ -282,10 +272,6 @@ public class RecordListAdapter extends BaseAdapter {
         }
     }
 
-    public void playGraphMp(int termStartDt, int termEndDt, String filePath, Context applicationContext) throws IOException {
-        System.out.println("=============termStartDt()======="+termStartDt+"====termEndDt=="+termEndDt);
-//        playMp(termStartDt, termEndDt , filePath, applicationContext, playBtn);
-    }
 
     public void rowClickEvt(int position,RecordData listViewItem,ImageButton playBtn) {
 //        System.out.println("===============파일getResponseObj정보 : "+position+" : "+listViewItem.getResponseObj()+"/"+listViewItem.getAnalysisFileNm());
@@ -297,6 +283,12 @@ public class RecordListAdapter extends BaseAdapter {
             //재생 중지 버튼
             for(int i=0; i<getCount();i++){
                 View v2 = viewGroup.getChildAt(i);
+
+                if (v2 == null) {
+                    LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    v2 = inflater.inflate(R.layout.layout_record_row, viewGroup, false);
+                }
+
                 ImageButton playBtn2 = (ImageButton) v2.findViewById(R.id.recordPlay);
                 playBtn2.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
             }
@@ -313,7 +305,7 @@ public class RecordListAdapter extends BaseAdapter {
             playBtn.setImageResource(R.drawable.baseline_pause_white_48dp);
             playBtnFlag = true;
             playPosition = position;
-//            System.out.println("=============position==============="+playPosition);
+            System.out.println("=============playPosition==============="+playPosition);
             SimpleDateFormat stringtoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             long startTerm = 0L;
             long endTerm = 0L;
@@ -341,6 +333,7 @@ public class RecordListAdapter extends BaseAdapter {
             stopMp(playBtn);
         }
     }
+
     public boolean getPlayBtnFlag(){
         return playBtnFlag;
     }
