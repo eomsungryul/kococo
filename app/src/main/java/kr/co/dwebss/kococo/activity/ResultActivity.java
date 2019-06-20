@@ -20,8 +20,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -33,7 +31,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SeekBar;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,7 +38,6 @@ import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
@@ -49,7 +45,6 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
-import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -65,7 +60,6 @@ import java.util.TimerTask;
 
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.adapter.RecordListAdapter;
-import kr.co.dwebss.kococo.fragment.RecordFragment;
 import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.model.RecordData;
 import kr.co.dwebss.kococo.util.DateFormatter;
@@ -123,6 +117,8 @@ public class ResultActivity extends AppCompatActivity {
     SimpleDateFormat DateTimeToStringFormat = new SimpleDateFormat("HH:mm");
 
     String  firstData;
+
+    SeekBar seekBar;
 
     //타이머 관련
     Timer mTimer =  new Timer();
@@ -194,10 +190,17 @@ public class ResultActivity extends AppCompatActivity {
             adapter = new RecordListAdapter(this, new RecordListAdapter.GraphClickListener() {
                 @Override
                 public void clickBtn(RecordData listViewItem, Boolean playFlag) {
-                    //ttt
                     changeGraph(listViewItem);
-                    if(!playFlag){
-                        //재생일 시에
+                    if(playFlag){
+                        //재생일 시에 ttt
+                        long playTime = 0;
+                        try {
+                            playTime = stringtoDateTimeFormat.parse(listViewItem.getAnalysisEndDt()).getTime()-stringtoDateTimeFormat.parse(listViewItem.getAnalysisStartDt()).getTime();
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        seekBar.setEnabled(true);
+                        seekBar.setMax((int) (playTime/1000));
                         recordTime = 0-barWidth;
                         timerFlag =true;
                         mTimer =  new Timer();
@@ -207,8 +210,9 @@ public class ResultActivity extends AppCompatActivity {
                         timerFlag =false;
                         ct.cancel();
                         mTimer.cancel();
-                        chart.getXAxis().removeAllLimitLines();
-                        chart.invalidate();
+//                        chart.getXAxis().removeAllLimitLines();
+//                        chart.invalidate();
+                        seekBar.setEnabled(false);
                     }
                 }
             }) ;
@@ -530,8 +534,8 @@ public class ResultActivity extends AppCompatActivity {
 
             BarData data = new BarData(dataSets);
             //바의 두께를 바꿀수 있는
-//            data.setBarWidth(3000f);
             chart.setFitBars(true);
+//            data.setBarWidth(0.5f);
 
 //            chart.getBarData().setBarWidth(800f);
 //            chart.groupBars(0,32f ,12f);
@@ -568,7 +572,39 @@ public class ResultActivity extends AppCompatActivity {
                     });
                 }
             });
-        }else{
+
+            //seekbar start
+            seekBar = (SeekBar)findViewById(R.id.seekbar);
+            seekBar.setMax(256*7-1);
+            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                    timerFlag=false;
+                    ct.cancel();
+                    mTimer.cancel();
+                    adapter.getMediaPlayer().pause();
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    seekBar.getProgress();
+                    adapter.getMediaPlayer().seekTo(seekBar.getProgress()*1000);
+                    adapter.getMediaPlayer().start();
+                    mTimer =  new Timer();
+                    ct = new CustomTimer();
+                    mTimer.schedule(ct, 0, 1000);
+                    timerFlag=true;
+                }
+            });
+
+            //재생버튼 누를 때 까지 못 움직이게 한다.
+            seekBar.setEnabled(false);
+
+            }else{
             Toast.makeText(getApplicationContext(),"error",Toast.LENGTH_LONG);
         }
         if(firstData!=null){
@@ -698,13 +734,14 @@ public class ResultActivity extends AppCompatActivity {
         osaSet.setHighLightColor(Color.rgb(177, 93, 255));
         soundSet.setHighLightColor(Color.rgb(123, 109, 93));
 
-
         ArrayList<IBarDataSet> dataSets = new ArrayList<>();
         dataSets.add(soundSet);
         dataSets.add(snoreSet);
         dataSets.add(grindSet);
         dataSets.add(osaSet);
+
         BarData data = new BarData(dataSets);
+
 
         MyXAxisValueFormatter xAxisFormatter = new MyXAxisValueFormatter(analysisStartDt.getTime());
         XAxis xAxis = chart.getXAxis();
@@ -715,6 +752,8 @@ public class ResultActivity extends AppCompatActivity {
 
         //바를 양옆이 반으로 짤리는 현상을 수정하는 방법
         chart.setFitBars(true);
+        //default 가 0.9f란다 그러니까 1f 하면 꽉찬다.
+        data.setBarWidth(1f);
         barWidth = data.getBarWidth()/2;
         chart.getXAxis().setAxisMinimum(-barWidth);
         chart.getXAxis().setAxisMaximum(soundEntries.size()-barWidth);
@@ -755,18 +794,26 @@ public class ResultActivity extends AppCompatActivity {
     public class CustomTimer extends TimerTask {
         @Override
         public void run() {
-            recordTime+= (float) (1/60.00);
-            System.out.println("=========recordTime============="+recordTime);
-            LimitLine ll1 = new LimitLine(recordTime);
-            ll1.setLineWidth(1f);
-            //점선으로 그릴 경우
-//                    ll1.enableDashedLine(10f, 10f, 0f);
-            //라벨 위치
-//                    ll1.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_TOP);
-//                        ll1.setTextSize(10f);
-            chart.getXAxis().removeAllLimitLines(); // reset all limit lines to avoid overlapping lines
-            chart.getXAxis().addLimitLine(ll1);
-            chart.invalidate();
+//            recordTime+= (float) (1/60.00);
+//            System.out.println("=========recordTime============="+recordTime);
+//            LimitLine ll1 = new LimitLine(recordTime);
+//            ll1.setLineWidth(1f);
+//            //점선으로 그릴 경우
+////                    ll1.enableDashedLine(10f, 10f, 0f);
+//            //라벨 위치
+////                    ll1.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_TOP);
+////                        ll1.setTextSize(10f);
+//            chart.getXAxis().removeAllLimitLines(); // reset all limit lines to avoid overlapping lines
+//            chart.getXAxis().addLimitLine(ll1);
+//            chart.invalidate();
+
+//            while(isPlaying) {
+//                sb.setProgress(mp.getCurrentPosition());
+//            }
+            if(timerFlag){
+                seekBar.setProgress(adapter.getMediaPlayer().getCurrentPosition()/1000);
+//                System.out.println("====재생중===="+adapter.getMediaPlayer().getCurrentPosition()/1000);
+            }
 
         }
 

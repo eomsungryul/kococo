@@ -203,6 +203,7 @@ public class RecordListAdapter extends BaseAdapter {
                     }
                 }.start();
             isPlaying=true;
+            playBtnFlag= true;
         }else{
             Toast.makeText(context,"파일이 존재하지않습니다.",Toast.LENGTH_SHORT).show();
             playBtn.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
@@ -296,8 +297,6 @@ public class RecordListAdapter extends BaseAdapter {
 
     public void rowClickEvt(int position,RecordData listViewItem,ImageButton playBtn) {
 //        System.out.println("===============파일getResponseObj정보 : "+position+" : "+listViewItem.getResponseObj()+"/"+listViewItem.getAnalysisFileNm());
-        //후에 액티비티에 접근할때 사용한다.
-        graphClickListener.clickBtn(listViewItem,playBtnFlag);
         //재생버튼 누를 시 정지버튼으로 변경하는 메소드
         //재생중이거나 해당버튼이 재생position 값과 다른 경우에만 초기화를 해줌
         if(isPlaying && playPosition != position){
@@ -350,10 +349,16 @@ public class RecordListAdapter extends BaseAdapter {
         }else{
             stopMp(playBtn);
         }
+        //후에 액티비티에 접근할때 사용한다.
+        graphClickListener.clickBtn(listViewItem,playBtnFlag);
     }
 
     public boolean getPlayBtnFlag(){
         return playBtnFlag;
+    }
+
+    public MediaPlayer getMediaPlayer(){
+        return mediaPlayer;
     }
 
     public void destroyMp() {
