@@ -326,7 +326,7 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         <ListView
             android:id="@+id/recordListview"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:divider="#ffffff"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="parent"

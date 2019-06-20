@@ -334,18 +334,24 @@ public class ResultActivity extends AppCompatActivity {
                         if("".equals(detectedTxt)){
                             recordData.setTitle(
                                     df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
-                                    +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지\n"
+                                    +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지 "
+                                    +df.longToStringFormat(((stringtoDateTimeFormat.parse(recordData.getAnalysisEndDt()).getTime()
+                                    -stringtoDateTimeFormat.parse(recordData.getAnalysisStartDt()).getTime())))+"동안\n"
                                     +"소리가 발생했습니다."
                                     );
                         }else if(osaCnt==0||grindCnt==0||snoreCnt==0){
                             recordData.setTitle(
                                     df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
-                                    +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지\n"
+                                    +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지 "
+                                    +df.longToStringFormat(((stringtoDateTimeFormat.parse(recordData.getAnalysisEndDt()).getTime()
+                                    -stringtoDateTimeFormat.parse(recordData.getAnalysisStartDt()).getTime())))+"동안\n"
                                     +detectedTxt +" 발생했습니다. ");
                         }else{
                             recordData.setTitle(
                                     df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
-                                    +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지\n"
+                                    +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지 "
+                                    +df.longToStringFormat(((stringtoDateTimeFormat.parse(recordData.getAnalysisEndDt()).getTime()
+                                            -stringtoDateTimeFormat.parse(recordData.getAnalysisStartDt()).getTime())))+"동안\n"
                                     +detectedTxt +"\n발생했습니다. ");
                         }
                         //~시~분~초부터 ~시~분~초까지 코를 골았습니다. \n (무호흡 0회, )
@@ -597,7 +603,7 @@ public class ResultActivity extends AppCompatActivity {
             if(analysisObj.has("recordingData")){
                 String analysisDataRawStr =analysisObj.get("recordingData").getAsString();
                 JsonArray analysisDataArr = new JsonParser().parse(analysisDataRawStr).getAsJsonArray();
-                JsonArray analysisDataArrGroupByMinite =rd.groupByMinites(analysisDataArr,recordStartDTToString);
+                JsonArray analysisDataArrGroupByMinite =rd.groupByMinitesInAnalysisRange(analysisDataArr,recordStartDT,analysisStartDt);
                 if(analysisDataArrGroupByMinite.size()>0){
                     for(int k =0; k<analysisDataArrGroupByMinite.size(); k++){
                         JsonObject analysisRawData = (JsonObject) analysisDataArrGroupByMinite.get(k);
@@ -625,7 +631,7 @@ public class ResultActivity extends AppCompatActivity {
                         JsonArray analysisRawDataArr = new JsonParser().parse(analysisRawStr).getAsJsonArray();
 
                         if(analysisRawDataArr.size()>0){
-                            JsonArray analysisRawDataArrGroupByMinite =rd.groupByMinites(analysisRawDataArr,recordStartDTToString);
+                            JsonArray analysisRawDataArrGroupByMinite =rd.groupByMinitesInAnalysisRange(analysisRawDataArr,recordStartDT,analysisStartDt);
 
                             for(int k =0; k<analysisRawDataArrGroupByMinite.size(); k++){
                                 JsonObject analysisRawData = (JsonObject) analysisRawDataArrGroupByMinite.get(k);
@@ -691,6 +697,7 @@ public class ResultActivity extends AppCompatActivity {
         grindSet.setHighLightColor(Color.rgb(255, 207, 68));
         osaSet.setHighLightColor(Color.rgb(177, 93, 255));
         soundSet.setHighLightColor(Color.rgb(123, 109, 93));
+
 
         ArrayList<IBarDataSet> dataSets = new ArrayList<>();
         dataSets.add(soundSet);
