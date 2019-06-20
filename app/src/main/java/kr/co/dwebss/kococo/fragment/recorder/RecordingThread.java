@@ -246,7 +246,11 @@ public class RecordingThread extends Thread {
                         }
                         ansDList.add(ansd);
                     }else{
-                        snoringTermList.remove(snoringTermList.size()-1);
+                        if(snoringTermList!=null && snoringTermList.size()>0) {
+                            snoringTermList.remove(snoringTermList.size() - 1);
+                        }else{
+                            Log.e(LOG_TAG3,"snoringTermList!=null && snoringTermList.size()>0, line 252");
+                        }
                     }
                 }
                 for ( int s = 0 ; s < grindingTermList.size() ; s ++) {
@@ -286,7 +290,11 @@ public class RecordingThread extends Thread {
                         }
                         ansDList.add(ansd);
                     }else{
-                        grindingTermList.remove(grindingTermList.size()-1);
+                        if(grindingTermList!=null && grindingTermList.size()>0) {
+                            grindingTermList.remove(grindingTermList.size() - 1);
+                        }else{
+                            Log.e(LOG_TAG3,"grindingTermList!=null && grindingTermList.size()>0, line 296");
+                        }
                     }
                 }
                 for(StartEnd se : osaTermList) {
@@ -307,7 +315,11 @@ public class RecordingThread extends Thread {
                         }
                         ansDList.add(ansd);
                     }else{
-                        osaTermList.remove(osaTermList.size()-1);
+                        if(osaTermList!=null && osaTermList.size()>0) {
+                            osaTermList.remove(osaTermList.size()-1);
+                        }else{
+                            Log.e(LOG_TAG3,"osaTermList!=null && osaTermList.size()>0, line 296");
+                        }
                     }
                 }
                 ans.add("analysisDetailsList", ansDList);
@@ -332,10 +344,14 @@ public class RecordingThread extends Thread {
             if(allFHAndDB!=null && tmpMaxDb>40) {
                 Log.v(LOG_TAG3, (calcTime(times) + " " + hz + " " + db + " " + amp + " " + decibel + ", 100db: " + tmpMaxDb + "db, max: " + SleepCheck.getMaxDB()) + ", min: " + SleepCheck.getMinDB() + " " + SleepCheck.noiseChkSum + " " + SleepCheck.noiseChkCnt);
             }
-            if(SleepCheck.snoringCheck(decibel, times, snoringTermList, grindingTermList, maxARD)==0){
+            SleepCheck.snoringCheck(allFHAndDB, decibel, times, snoringTermList, grindingTermList, maxARD);
+            if(SleepCheck.CHECKED_STATUS==SleepCheck.CHECKED_ERROR){ //발생하지 않을 것 같지만 아주 만약을 위해 0 리턴하는 방어코드를 삽입하였다.
                 continue;
+            }else if(SleepCheck.CHECKED_STATUS==SleepCheck.allFHAndDb_NEED_INITIALIZE){ //allFHAndDB가 초기화 되어야 한다.
+                allFHAndDB = null;
             }
-            if(SleepCheck.osaCheck(decibel, times, osaTermList, snoringTermList)==0){
+            SleepCheck.osaCheck(decibel, times, osaTermList, snoringTermList);
+            if(SleepCheck.CHECKED_STATUS==SleepCheck.CHECKED_ERROR){ //발생하지 않을 것 같지만 아주 만약을 위해 0 리턴하는 방어코드를 삽입하였다.
                 continue;
             }
 
