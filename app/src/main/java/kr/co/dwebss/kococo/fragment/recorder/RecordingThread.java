@@ -32,6 +32,7 @@ public class RecordingThread extends Thread {
     static List<StartEnd> snoringTermList;
     public static List<StartEnd> osaTermList;
     static List<StartEnd> grindingTermList;
+    List<StartEnd> noiseTermListForOsaList;
     List<AnalysisRawData> AllAnalysisRawDataList;
 
     ByteArrayOutputStream baos;
@@ -68,6 +69,7 @@ public class RecordingThread extends Thread {
         snoringTermList = new ArrayList<StartEnd>();
         grindingTermList = new ArrayList<StartEnd>();
         osaTermList = new ArrayList<StartEnd>();
+        noiseTermListForOsaList = new ArrayList<StartEnd>();
         AllAnalysisRawDataList = new ArrayList<AnalysisRawData>();
         JsonArray ansList = new JsonArray();
 
@@ -162,11 +164,12 @@ public class RecordingThread extends Thread {
                 snoringTermList = new ArrayList<StartEnd>();
                 grindingTermList = new ArrayList<StartEnd>();
                 osaTermList = new ArrayList<StartEnd>();
+                noiseTermListForOsaList = new ArrayList<StartEnd>();
                 AllAnalysisRawDataList = new ArrayList<AnalysisRawData>();
                 isOSATermTimeOccur = false;
 //                    } else if (isRecording == true && (SleepCheck.noiseCheck(decibel)==0 || recodeFlag==false) ) {
                 //} else if (isRecording == true && SleepCheck.noiseCheck(decibel) <= 100) {
-            } else if (isRecording == true && SleepCheck.noiseCheck(decibel) <= 0) {
+            } else if (isRecording == true && SleepCheck.noiseCheck(decibel) <= 100) {
                 Log.v(LOG_TAG2,(calcTime(times)+"("+String.format("%.2f", times) + "s) 녹음 종료!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
                 AllAnalysisRawDataList.add(maxARD);
                 SimpleDateFormat dayTime = new SimpleDateFormat("yyyyMM_dd_HHmm");
@@ -350,8 +353,14 @@ public class RecordingThread extends Thread {
             }else if(SleepCheck.CHECKED_STATUS==SleepCheck.allFHAndDb_NEED_INITIALIZE){ //allFHAndDB가 초기화 되어야 한다.
                 allFHAndDB = null;
             }
-            SleepCheck.osaCheck(decibel, times, osaTermList, snoringTermList);
-            if(SleepCheck.CHECKED_STATUS==SleepCheck.CHECKED_ERROR){ //발생하지 않을 것 같지만 아주 만약을 위해 0 리턴하는 방어코드를 삽입하였다.
+            SleepCheck.osaCheck(decibel, times, osaTermList, snoringTermList, noiseTermListForOsaList );
+            if (SleepCheck.CHECKED_STATUS == SleepCheck.CHECKED_ERROR) { // 발생하지 않을 것 같지만 아주 만약을 위해 0 리턴하는 방어코드를
+                // 삽입하였다.
+                continue;
+            }
+            SleepCheck.someNoiseCheck(times, amplitude, noiseTermListForOsaList);
+            if (SleepCheck.CHECKED_STATUS == SleepCheck.CHECKED_ERROR) { // 발생하지 않을 것 같지만 아주 만약을 위해 0 리턴하는 방어코드를
+                // 삽입하였다.
                 continue;
             }
 
