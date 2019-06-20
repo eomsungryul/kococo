@@ -73,8 +73,8 @@ public class Radix2FFT {
         // set output
         output.setSize(fftSize);
         final double[] outputItems = output.getItemsArray();
-        //for (int i = 0; i < fftSize; i++) {
-        for (int i = 0; i < 41; i++) {
+        for (int i = 0; i < fftSize; i++) {
+        //for (int i = 0; i < 41; i++) {
             outputItems[i] = calculateOutputValue(dft[i]);
         }
     }
