@@ -67,6 +67,7 @@ public class RecordListAdapter extends BaseAdapter {
     public RecordListAdapter(Context context, GraphClickListener graphClickListener) {
         this.context = context;
         this.graphClickListener = graphClickListener;
+
     }
 
     public interface GraphClickListener{
@@ -220,6 +221,13 @@ public class RecordListAdapter extends BaseAdapter {
             //재생 중지 버튼
             for(int i=0; i<getCount();i++){
                 View v2 = viewGroup.getChildAt(i);
+
+                // 널만 안나게 대응.. 우선..
+                if (v2 == null) {
+                    LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    v2 = inflater.inflate(R.layout.layout_record_row, viewGroup, false);
+                }
+
                 ImageButton playBtn2 = (ImageButton) v2.findViewById(R.id.recordPlay);
                 playBtn2.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
             }
@@ -240,10 +248,13 @@ public class RecordListAdapter extends BaseAdapter {
         System.out.println("==========123====test============"+getCount()+viewGroup.getChildCount());
         for(int i=0; i<getCount();i++){
             v = viewGroup.getChildAt(i);
-            RecordData rd =listViewItemList.get(i);
 
-            TextView timeTextView = (TextView) v.findViewById(R.id.recordTimeText) ;
-            System.out.println("========123======timeTextView.getText()============"+timeTextView.getText());
+            if(v==null){
+                LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                v = inflater.inflate(R.layout.layout_record_row, viewGroup, false);
+            }
+
+            RecordData rd =listViewItemList.get(i);
 
             System.out.println("=======123======rd.getanalysisId()======="+rd.getAnalysisId()+"====position=="+adi);
             if(rd.getAnalysisId()==adi){
@@ -262,6 +273,12 @@ public class RecordListAdapter extends BaseAdapter {
         ImageButton playBtn;
         for(int i=0; i<getCount();i++){
             v = viewGroup.getChildAt(i);
+
+            if(v==null){
+                LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                v = inflater.inflate(R.layout.layout_record_row, viewGroup, false);
+            }
+
             RecordData rd =listViewItemList.get(i);
             if(rd.getAnalysisId()==position){
                 playBtn = (ImageButton) v.findViewById(R.id.recordPlay);
