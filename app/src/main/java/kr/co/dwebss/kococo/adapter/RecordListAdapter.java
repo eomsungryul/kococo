@@ -50,7 +50,7 @@ public class RecordListAdapter extends BaseAdapter {
     private ArrayList<RecordData> listViewItemList = new ArrayList<RecordData>() ;
     Boolean playBtnFlag = false;
     Boolean isPlaying = false;
-    int playPosition;
+    int playPosition = -1;
     Context context;
     ViewGroup viewGroup;
 
@@ -104,7 +104,7 @@ public class RecordListAdapter extends BaseAdapter {
 //        iconImageView.setImageDrawable(listViewItem.getIcon());
         timeTextView.setText(listViewItem.getTitle());
 
-        playBtnFlag = false;
+//        playBtnFlag = false;
         //lisrViews내의 아이콘 버튼 참조 및 onclick추가
         ImageButton playBtn = (ImageButton) convertView.findViewById(R.id.recordPlay);
 
@@ -141,6 +141,12 @@ public class RecordListAdapter extends BaseAdapter {
                 v.getContext().startActivity(i);
             }
         });
+
+        if(playPosition==position){
+            playBtn.setImageResource(R.drawable.baseline_pause_white_48dp);
+        }else{
+            playBtn.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
+        }
 
         return convertView;
     }
@@ -221,13 +227,11 @@ public class RecordListAdapter extends BaseAdapter {
             //재생 중지 버튼
             for(int i=0; i<getCount();i++){
                 View v2 = viewGroup.getChildAt(i);
-
                 // 널만 안나게 대응.. 우선..
                 if (v2 == null) {
                     LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                     v2 = inflater.inflate(R.layout.layout_record_row, viewGroup, false);
                 }
-
                 ImageButton playBtn2 = (ImageButton) v2.findViewById(R.id.recordPlay);
                 playBtn2.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
             }
@@ -300,12 +304,10 @@ public class RecordListAdapter extends BaseAdapter {
             //재생 중지 버튼
             for(int i=0; i<getCount();i++){
                 View v2 = viewGroup.getChildAt(i);
-
                 if (v2 == null) {
                     LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                     v2 = inflater.inflate(R.layout.layout_record_row, viewGroup, false);
                 }
-
                 ImageButton playBtn2 = (ImageButton) v2.findViewById(R.id.recordPlay);
                 playBtn2.setImageResource(R.drawable.baseline_play_arrow_white_48dp);
             }
@@ -322,7 +324,6 @@ public class RecordListAdapter extends BaseAdapter {
             playBtn.setImageResource(R.drawable.baseline_pause_white_48dp);
             playBtnFlag = true;
             playPosition = position;
-            System.out.println("=============playPosition==============="+playPosition);
             SimpleDateFormat stringtoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             long startTerm = 0L;
             long endTerm = 0L;
