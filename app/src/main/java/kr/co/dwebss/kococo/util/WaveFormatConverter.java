@@ -97,37 +97,39 @@ public class WaveFormatConverter {
 	public String[] saveLongTermMp3(String fileName, Context x, byte[] waveData) {
 //		File myDir = new File(Environment.getExternalStorageDirectory(), "rec_data/");
 		//Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-		String savePath = x.getFilesDir().getAbsolutePath(); // 이경로는 adb pull 이 안됨.
-//		savePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath(); //테스트하려고 임시로 쓴 경로
-		System.out.println(savePath+"/rec_data/"+ "----------------------save rec_data/rec_data/rec_data/rec_data/rec_data/rec_data/");
-		subDirList(savePath+"/rec_data/");
-		folderCnt++;
-		File myDir = new File(savePath, "rec_data/"+folderCnt+"/");
-		if(!myDir.exists()){
-			myDir.mkdirs();
-		}
-
-		System.out.println(fileName+ "----------------------save start");
-		System.out.println(myDir.toString()+ "----------------------save wdawdawdawdawdawdawdadw");
-		String filename = "snoring-"+fileName+"_"+System.currentTimeMillis()+".mp3";
-		try {
-
-			File path=new File(myDir,filename);
-			FileOutputStream outFile = new FileOutputStream(path);
-			outFile.write(waveData,0,waveData.length);
-			outFile.close();
-//			filename = path.getAbsolutePath();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			filename = "e1";
-		} catch (IOException e) {
-			filename = "e2";
-			e.printStackTrace();
-		}
-		System.out.println(fileName+ "----------------------save end");
 		String[] fileInfo = new String[2];
-		fileInfo[0] = myDir.toString();
-		fileInfo[1] = filename;
+		if(x!=null){
+			String savePath = x.getFilesDir().getAbsolutePath(); // 이경로는 adb pull 이 안됨.
+
+//		savePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath(); //테스트하려고 임시로 쓴 경로
+//		System.out.println(savePath+"/rec_data/"+ "----------------------save rec_data/rec_data/rec_data/rec_data/rec_data/rec_data/");
+			subDirList(savePath+"/rec_data/");
+			folderCnt++;
+			File myDir = new File(savePath, "rec_data/"+folderCnt+"/");
+			if(!myDir.exists()){
+				myDir.mkdirs();
+			}
+//		System.out.println(fileName+ "----------------------save start");
+//		System.out.println(myDir.toString()+ "----------------------save wdawdawdawdawdawdawdadw");
+			String filename = "snoring-"+fileName+"_"+System.currentTimeMillis()+".mp3";
+			try {
+				File path=new File(myDir,filename);
+				FileOutputStream outFile = new FileOutputStream(path);
+				outFile.write(waveData,0,waveData.length);
+				outFile.close();
+//			filename = path.getAbsolutePath();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				filename = "e1";
+			} catch (IOException e) {
+				filename = "e2";
+				e.printStackTrace();
+			}
+			fileInfo[0] = myDir.toString();
+			fileInfo[1] = filename;
+//		System.out.println(fileName+ "----------------------save end");
+		}
+		fileInfo = new String[2];
 		return fileInfo;
 	}
 
