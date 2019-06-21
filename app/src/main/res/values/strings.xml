@@ -46,7 +46,7 @@
     <!--settingFragment-->
     <string name="profile">프로필</string>
     <string name="expertConsultationHistory">전문가 상담 내역</string>
-    <string name="commentsAndSuggestions">사용자 신고 내역</string>
+    <string name="userMp3FileManage">사용자 음성 파일 관리</string>
 
     <!--profileActivity-->
     <string name="pfAge">나이</string>
@@ -55,8 +55,14 @@
     <string name="pfHeight">신장</string>
 
 
+    <!--mp3ManageActivity-->
+    <string name="mp3ManageTxt">파일 저장 기간</string>
+    <string name="mp3ManageDay">일</string>
 
 
+
+    <!--btn-->
+    <string name="saveBtn">저장하기</string>
 
 
     <!--error property-->

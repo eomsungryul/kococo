@@ -147,22 +147,21 @@ public class FindAppIdUtil {
 
                     JsonObject result = response.body();
                     System.out.println("=====================파일이없어요======================"+response);
-                    APP_ID = result.get("userAppId").toString().replace("\"" ,"");
-//                    Toast.makeText(MainActivity.this, "파일이 읍네요"+APP_ID,Toast.LENGTH_SHORT).show();
-
-                    FileOutputStream fos = null;
-                    //MODE_PRIVATE 모드는 파일을 생성하여(또는 동일한 이름의 파일을 대체하여) 해당 파일을 여러분의 애플리케이션에 대해 전용으로만든다.
-                    try {
-                        fos = context.openFileOutput("appId.txt", Context.MODE_PRIVATE);
-                        PrintWriter out = new PrintWriter(fos);
-                        out.println(APP_ID);
-                        out.close();
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
+                    if(result.has("userAppId")){
+                        APP_ID = result.get("userAppId").toString().replace("\"" ,"");
+                        FileOutputStream fos = null;
+                        //MODE_PRIVATE 모드는 파일을 생성하여(또는 동일한 이름의 파일을 대체하여) 해당 파일을 여러분의 애플리케이션에 대해 전용으로만든다.
+                        try {
+                            fos = context.openFileOutput("appId.txt", Context.MODE_PRIVATE);
+                            PrintWriter out = new PrintWriter(fos);
+                            out.println(APP_ID);
+                            out.close();
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                    }else{
+                        Toast.makeText(context, "알수 없는 오류가 났습니다. 관리자에게 문의해주세요",Toast.LENGTH_SHORT).show();
                     }
-//                    catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
                 }
                 @Override
                 public void onFailure(Call<JsonObject> call, Throwable t) {

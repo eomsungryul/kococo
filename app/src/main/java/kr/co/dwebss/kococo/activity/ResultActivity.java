@@ -807,6 +807,7 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     public class CustomTimer extends TimerTask {
+        Integer currentPosition;
         @Override
         public void run() {
 //            recordTime+= (float) (1/60.00);
@@ -826,7 +827,12 @@ public class ResultActivity extends AppCompatActivity {
 //                sb.setProgress(mp.getCurrentPosition());
 //            }
             if(timerFlag){
-                seekBar.setProgress(adapter.getMediaPlayer().getCurrentPosition()/1000);
+                if(adapter.getMediaPlayer()!=null){
+                    currentPosition = adapter.getMediaPlayer().getCurrentPosition();
+                    if(currentPosition != null){
+                        seekBar.setProgress(adapter.getMediaPlayer().getCurrentPosition()/1000);
+                    }
+                }
 //                System.out.println("====재생중===="+adapter.getMediaPlayer().getCurrentPosition()/1000);
             }
 
