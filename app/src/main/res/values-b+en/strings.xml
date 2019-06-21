@@ -57,6 +57,7 @@
 
     <!--mp3ManageActivity-->
     <string name="mp3ManageTxt">File Store Term</string>
+    <string name="mp3ManageDay">Day</string>
 
 
     <!--btn-->

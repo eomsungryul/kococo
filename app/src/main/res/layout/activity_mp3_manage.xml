@@ -96,8 +96,8 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         android:weightSum="16"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="@+id/topLayout"
-        app:layout_constraintVertical_bias="0.191"
-        tools:layout_editor_absoluteX="0dp">
+        app:layout_constraintVertical_bias="0.194"
+        tools:layout_editor_absoluteX="-16dp">
 
         <TextView
             android:id="@+id/file_store_day_term_txt"
@@ -120,20 +120,39 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
 
         <!-- 팝업 백그라운드는 기본적으로 흰색이기떄문에 커스텀을 해야함
         android:popupBackground="#121212"-->
+        <TextView
+            android:id="@+id/file_store_day_term_txt2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="4dp"
+            android:text="@string/mp3ManageDay"
+            android:textSize="16dp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.996"
+            app:layout_constraintStart_toEndOf="@+id/file_store_day_term_val"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.4" />
+
         <Spinner
             android:id="@+id/file_store_day_term_val"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:layout_marginStart="4dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
-            android:layout_marginEnd="4dp"
+            android:layout_marginEnd="8dp"
             android:layout_marginBottom="4dp"
             android:popupBackground="#121212"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.962"
-            app:layout_constraintStart_toEndOf="@+id/pf_age_txt"
+            app:layout_constraintHorizontal_bias="0.901"
+            app:layout_constraintStart_toEndOf="@+id/file_store_day_term_txt"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.428" />
 

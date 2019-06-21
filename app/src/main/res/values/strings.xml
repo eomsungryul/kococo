@@ -57,6 +57,7 @@
 
     <!--mp3ManageActivity-->
     <string name="mp3ManageTxt">파일 저장 기간</string>
+    <string name="mp3ManageDay">일</string>
 
 
 
