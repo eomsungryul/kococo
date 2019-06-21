@@ -16,7 +16,11 @@
 package kr.co.dwebss.kococo.activity;
 
 import android.content.res.Configuration;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TabLayout;
@@ -32,17 +36,33 @@ import android.view.View;
 import android.widget.TableLayout;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.BuildConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 
+import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import dalvik.system.DexClassLoader;
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.fragment.DiaryFragment;
 import kr.co.dwebss.kococo.fragment.RecordFragment;
@@ -181,8 +201,89 @@ public class MainActivity extends AppCompatActivity {
         apiService.getApiCode().enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                JsonObject result = response.body();
-                System.out.println(" ============getApiCode2============result: "+result);
+
+                JsonArray codeList = response.body().getAsJsonObject("_embedded").getAsJsonArray("code");
+                Gson gson = new Gson();
+                Map<String,Object> map = new HashMap<String,Object>();
+                String version = "";
+                for(JsonElement je : codeList){
+                    map = (Map<String,Object>) gson.fromJson(je.getAsJsonObject(), map.getClass());
+                    if(map.get("code").equals(999999.0)){
+                        Log.e("yrseo","Version: "+version);
+                        version = String.valueOf(map.get("codeValue"));
+                        break;
+                    }
+                }
+                Log.e("yrseo", codeList.toString());
+                System.out.println(" ============getApiCode2============result: "+codeList);
+
+
+                try{
+                    FirebaseStorage storage = FirebaseStorage.getInstance("gs://kococo-2996f.appspot.com/");
+                    StorageReference storageRef = storage.getReference();
+                    StorageReference pathReference = storageRef.child("libs/SoundAnalysis_"+version+".jar");
+                    File path = getFilesDir();
+                    File[] files = path.listFiles();
+                    String filename = "";
+                    boolean isCurrentPatch = false;
+                    if(version == null || version.equals("")){
+
+                    }else {
+                        for (int i = 0; i < files.length; i++) {
+                            filename = files[i].getName();
+
+                            if (filename.indexOf("jar") > -1) {
+                                Log.e("yrseo", filename);
+                                if (filename.indexOf("version") > -1) {
+                                    isCurrentPatch = true;
+                                } else {
+                                    new File(filename).delete();
+                                }
+                            }
+                        }
+                    }
+                    if(isCurrentPatch){
+                        Log.e("yrseo", "정상 버전임(version: "+version+"): " + filename);
+                    }else{
+                        File file = new File(path, "SoundAnalysis_"+version+".jar");
+                        if(path.exists()) {
+                            FileDownloadTask fileDownloadTask = pathReference.getFile(file);
+                            fileDownloadTask.addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                                @Override
+                                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                    //다운로드 성공
+                                    Log.e("yrseo", "다운로드 성공: " + file.getPath());
+
+                                    final File tmpDir = getDir("dex", 0);
+
+                                    final DexClassLoader classloader = new DexClassLoader(file.getPath(), tmpDir.getAbsolutePath(), null, this.getClass().getClassLoader());
+                                    try {
+                                        final Class<Object> classToLoad = (Class<Object>) classloader.loadClass("kr.co.dwebss.soundanalysis.SleepCheck");
+                                    } catch (ClassNotFoundException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception exception) {
+                                    //다운로드 실패
+                                    Log.e("yrseo", "다운로드 실패: "+exception.getMessage());
+                                    exception.printStackTrace();
+                                }
+                            }).addOnProgressListener(new OnProgressListener<FileDownloadTask.TaskSnapshot>() {
+                                @Override
+                                //진행상태 표시
+                                public void onProgress(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                    int progress = (int) ((100 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount());
+                                    Log.e("yrseo", "다운로드 진행 중: " + progress);
+                                }
+                            });
+                        }
+                    }
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+
             }
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {
