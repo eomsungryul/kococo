@@ -178,10 +178,12 @@ public class ProfileActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if(getIntent().hasExtra("responseData")){
             responseData = new JsonParser().parse(getIntent().getStringExtra("responseData")).getAsJsonObject();
-            pfAge.setSelection(ageAdapter.getPosition(responseData.get("userAge").getAsInt()));
-            pfGender.setSelection(genderAdapter.getPosition(responseData.get("userGender").getAsString()));
-            pfHeight.setSelection(heightAdapter.getPosition(responseData.get("userHeight").getAsInt()));
-            pfWeight.setSelection(weightAdapter.getPosition(responseData.get("userWeight").getAsInt()));
+            if(responseData.has("userAge")&&responseData.has("userGender")&&responseData.has("userHeight")&&responseData.has("userWeight")){
+                pfAge.setSelection(ageAdapter.getPosition(responseData.get("userAge").getAsInt()));
+                pfGender.setSelection(genderAdapter.getPosition(responseData.get("userGender").getAsString()));
+                pfHeight.setSelection(heightAdapter.getPosition(responseData.get("userHeight").getAsInt()));
+                pfWeight.setSelection(weightAdapter.getPosition(responseData.get("userWeight").getAsInt()));
+            }
         }
     }
 
