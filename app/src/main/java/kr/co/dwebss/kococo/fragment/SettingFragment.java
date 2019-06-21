@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Spinner;
 
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.adapter.DiaryListAdapter;
