@@ -129,7 +129,6 @@ public class WaveFormatConverter {
 			fileInfo[1] = filename;
 //		System.out.println(fileName+ "----------------------save end");
 		}
-		fileInfo = new String[2];
 		return fileInfo;
 	}
 

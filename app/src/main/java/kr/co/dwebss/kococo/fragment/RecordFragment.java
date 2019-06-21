@@ -38,6 +38,7 @@ import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.activity.ResultActivity;
 import kr.co.dwebss.kococo.fragment.recorder.RecordingThread;
 import kr.co.dwebss.kococo.http.ApiService;
+import kr.co.dwebss.kococo.util.FileUtil;
 import kr.co.dwebss.kococo.util.FindAppIdUtil;
 import kr.co.dwebss.kococo.util.SimpleLame;
 import okhttp3.MediaType;
@@ -185,6 +186,10 @@ public class RecordFragment extends Fragment  {
 
         retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();
         apiService = retrofit.create(ApiService.class);
+
+//        file 삭제 테스트
+//        FileUtil fu = new FileUtil();
+//        fu.removeFiles(getContext().getFilesDir().getAbsolutePath()+"/rec_data/"+"1/snoring-20190405_1604-05_1605_1559718321865.mp3");
 
 //        testBtn = (Button) v.findViewById(R.id.testBtn) ;
 //        testFlag = false;
