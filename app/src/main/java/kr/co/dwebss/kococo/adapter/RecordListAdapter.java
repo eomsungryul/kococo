@@ -174,9 +174,8 @@ public class RecordListAdapter extends BaseAdapter {
 //        mediaPlayer = MediaPlayer.create(context, Uri.parse("/data/data/kr.co.dwebss.kococo/files/rec_data/23/snoring-20191029_0410-29_0410_1559113854914.wav"));
 //        mediaPlayer = MediaPlayer.create(context, R.raw.queen);
         Log.v(LOG_TAG,( "======== play() startTime : " +startTime+" /endTime : "+endTime+"/filePath : "+filePath));
-
         File file = new File(filePath);
-        if(file.exists()){
+        if(file.exists()&&!"/".equals(filePath)){
             //만일 지금 재생중이라면 멈추고 버튼도 재생버튼으로 바꾼다
                 mediaPlayer = MediaPlayer.create(context, Uri.parse(filePath));
                 //구간 재생

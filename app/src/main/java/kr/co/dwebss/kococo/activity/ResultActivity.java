@@ -411,19 +411,22 @@ public class ResultActivity extends AppCompatActivity {
                     }
                     //데이터 넣을 시에 재생 파일 패스 및 재생 구간을 넣으면된다.
                     if(e.getData()!=null){
-                        seekBar.setEnabled(true);
                         JsonObject graphData= (JsonObject) e.getData();
-                        playingId = graphData.get("analysisId").getAsInt();
-                        recordTime = ((graphData.get("termStartDt").getAsInt())/(60*1000))-barWidth;
-                        timerFlag =true;
-                        mTimer =  new Timer();
-                        ct = new CustomTimer();
-                        mTimer.schedule(ct, 0, 1000);
-                        try {
-                            adapter.playActivityMp(graphData.get("analysisId").getAsInt(),graphData.get("termStartDt").getAsInt(),graphData.get("termEndDt").getAsInt(),graphData.get("filePath").getAsString(),getApplicationContext());
-                            //                        adapter.playGraphMp(graphData.get("termStartDt").getAsInt(),graphData.get("termEndDt").getAsInt(),graphData.get("filePath").getAsString(),getApplicationContext());
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
+                        if(!"/".equals(graphData.get("filePath").getAsString())){
+                            seekBar.setEnabled(true);
+                            playingId = graphData.get("analysisId").getAsInt();
+                            recordTime = ((graphData.get("termStartDt").getAsInt())/(60*1000))-barWidth;
+                            timerFlag =true;
+                            mTimer =  new Timer();
+                            ct = new CustomTimer();
+                            mTimer.schedule(ct, 0, 1000);
+                            try {
+                                adapter.playActivityMp(graphData.get("analysisId").getAsInt(),graphData.get("termStartDt").getAsInt(),graphData.get("termEndDt").getAsInt(),graphData.get("filePath").getAsString(),getApplicationContext());
+                            } catch (IOException e1) {
+                                e1.printStackTrace();
+                            }
+                        }else{
+                            Toast.makeText(getApplicationContext(),"파일이 존재하지않습니다.",Toast.LENGTH_SHORT).show();
                         }
                     }
                 }
@@ -713,24 +716,32 @@ public class ResultActivity extends AppCompatActivity {
         snoreSet.setColors(Color.rgb(255, 104, 89));
         snoreSet.setDrawValues(false);
         snoreSet.setValueTextColor(Color.WHITE);
+        snoreSet.setBarBorderColor(Color.rgb(55,55,65));
+        snoreSet.setBarBorderWidth(1f);
 
         BarDataSet grindSet;
         grindSet = new BarDataSet(grindEntries, "이갈이");
         grindSet.setColors(Color.rgb(255, 207, 68));
         grindSet.setDrawValues(false);
         grindSet.setValueTextColor(Color.WHITE);
+        grindSet.setBarBorderColor(Color.rgb(55,55,65));
+        grindSet.setBarBorderWidth(1f);
 
         BarDataSet osaSet;
         osaSet = new BarDataSet(osaEntries, "무호흡");
         osaSet.setColors(Color.rgb(177, 93, 255));
         osaSet.setDrawValues(false);
         osaSet.setValueTextColor(Color.WHITE);
+        osaSet.setBarBorderColor(Color.rgb(55,55,65));
+        osaSet.setBarBorderWidth(1f);
 
         BarDataSet soundSet;
         soundSet = new BarDataSet(soundEntries, "소리감지");
         soundSet.setColors(Color.rgb(123, 109, 93));
         soundSet.setDrawValues(false);
         soundSet.setValueTextColor(Color.WHITE);
+        soundSet.setBarBorderColor(Color.rgb(55,55,65));
+        soundSet.setBarBorderWidth(1f);
 
         //하이라이트 못하게 하는 법 BarDataSet emptySet.setHighlightEnabled(false); 이지만 클릭이벤트 기능을 써야되기에 하이라이트 색을 안바뀌게 해야함
         snoreSet.setHighLightColor(Color.rgb(255, 104, 89));
