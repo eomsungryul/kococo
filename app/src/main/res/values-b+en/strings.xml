@@ -45,9 +45,9 @@
     <string name="apneaRow">Apnea</string>
 
     <!--settingFragment-->
-    <string name="profile">profile</string>
+    <string name="profile">Profile</string>
     <string name="expertConsultationHistory">Expert consultation history</string>
-    <string name="commentsAndSuggestions">Comments and suggestions</string>
+    <string name="userMp3FileManage">User Mp3 File Manage</string>
 
     <!--profileActivity-->
     <string name="pfAge">Age</string>
@@ -55,7 +55,14 @@
     <string name="pfWeight">Weight</string>
     <string name="pfHeight">Height</string>
 
+    <!--mp3ManageActivity-->
+    <string name="mp3ManageTxt">File Store Term</string>
 
+
+    <!--btn-->
+    <string name="saveBtn">Save</string>
+
+    <!--error property-->
     <string name="error_server">server error</string>
     <string name="error_server_getRecordList">get record list error</string>
 </resources>

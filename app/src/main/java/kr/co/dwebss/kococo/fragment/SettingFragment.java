@@ -22,7 +22,6 @@ public class SettingFragment extends Fragment {
         // Required empty public constructor
     }
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,7 +47,8 @@ public class SettingFragment extends Fragment {
         ListView listview2 = (ListView) v.findViewById(R.id.settingListview2);
         listview2.setAdapter(adapter2);
         adapter2.addItem(res.getString(R.string.expertConsultationHistory),2) ;
-        adapter2.addItem(res.getString(R.string.commentsAndSuggestions),3) ;
+        adapter2.addItem(res.getString(R.string.userMp3FileManage),3) ;
+
         // 두 번째 아이템 추가.
 //        adapter.addItem(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_36dp),
 //                "Circle", "StatData Circle Black 36dp") ;

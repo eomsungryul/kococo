@@ -30,6 +30,7 @@ import com.google.gson.JsonObject;
 import java.util.ArrayList;
 
 import kr.co.dwebss.kococo.R;
+import kr.co.dwebss.kococo.activity.Mp3ManageActivity;
 import kr.co.dwebss.kococo.activity.ProfileActivity;
 import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.model.Setting;
@@ -98,10 +99,11 @@ public class SettingListAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
 
-                if(position==0){
+                Setting item = (Setting) getItem(position);
+
+                if(item.getSeq()==1){
                     //프로필 페이지
-//                    Toast.makeText(context,"페이지 준비중입니다. ",Toast.LENGTH_SHORT).show();
-                    apiService.getProfile(fau.getAppid(v.getContext())).enqueue(new Callback<JsonObject>() {
+                    apiService.getProfile(userAppId).enqueue(new Callback<JsonObject>() {
                         @Override
                         public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
                             System.out.println(" ========================response: "+response.body());
@@ -114,19 +116,28 @@ public class SettingListAdapter extends BaseAdapter {
                             System.out.println(" ========================Throwable: "+t.getMessage());
                         }
                     });
-
-                Intent intent = new Intent(context, ProfileActivity.class);
-//                intent.putExtra("responseData",testDt); /*송신*/
-                v.getContext().startActivity(intent);
-
-                }else if(position==1){
+                }else if(item.getSeq()==2){
                     //전문가 상담내역 페이지
-                    Toast.makeText(context,"페이지 준비중입니다. ",Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(context,"페이지 준비중입니다. ",Toast.LENGTH_SHORT).show();
+//                    Intent intent = new Intent(context, ProfileActivity.class);
+//                    v.getContext().startActivity(intent);
 
-                }else if(position==2){
-                    //사용자 신고 내역
-                    Toast.makeText(context,"준비중입니다. ",Toast.LENGTH_SHORT).show();
-//                    getClaimList(context,userAppId);
+                }else if(item.getSeq()==3){
+                    //사용자 음성 파일 관리
+//                    Toast.makeText(context,"준비중입니다. ",Toast.LENGTH_SHORT).show();
+                    apiService.getProfile(userAppId).enqueue(new Callback<JsonObject>() {
+                        @Override
+                        public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                            System.out.println(" ========================response: "+response.body());
+                            Intent intent = new Intent(v.getContext(), Mp3ManageActivity.class);
+                            intent.putExtra("responseData",response.body().toString()); /*송신*/
+                            v.getContext().startActivity(intent);
+                        }
+                        @Override
+                        public void onFailure(Call<JsonObject> call, Throwable t) {
+                            System.out.println(" ========================Throwable: "+t.getMessage());
+                        }
+                    });
                 }
             }
         });
@@ -134,18 +145,6 @@ public class SettingListAdapter extends BaseAdapter {
         return convertView;
     }
 
-    private void getClaimList(Context context,String userAppId) {
-        apiService.getClaimList(userAppId).enqueue(new Callback<JsonObject>() {
-            @Override
-            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                System.out.println(userAppId+" =============getClaimList===========response: "+response.body());
-            }
-            @Override
-            public void onFailure(Call<JsonObject> call, Throwable t) {
-                System.out.println(" ========================Throwable: "+ t);
-            }
-        });
-    }
 
 
     // 지정한 위치(position)에 있는 데이터와 관계된 아이템(row)의 ID를 리턴. : 필수 구현
