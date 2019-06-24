@@ -183,7 +183,7 @@ public class ResultActivity extends AppCompatActivity {
                 }
             }else{
                 dateTxtHeader.setText(transFormat.format(recordStartD)+" "
-                        + DateTimeToStringFormat.format(recordStartDT)+"\n  ~ "+transFormat.format(recordEndD)+" "+DateTimeToStringFormat.format(recordEndDT));
+                        + DateTimeToStringFormat.format(recordStartDT)+" ~ "+transFormat.format(recordEndD)+" "+DateTimeToStringFormat.format(recordEndDT));
             }
 
             // 하단에 녹음 검출리스트 파일 리스트  Adapter 생성
@@ -226,97 +226,97 @@ public class ResultActivity extends AppCompatActivity {
             if(analysisList.size()>0){
                 for(int i=0; i<analysisList.size(); i++){
                     try {
-                    JsonObject analysisObj = (JsonObject) analysisList.get(i);
+                        JsonObject analysisObj = (JsonObject) analysisList.get(i);
 
-                    analysisObj.get("analysisStartDt");
-                    JsonArray analysisDetailsList = analysisObj.getAsJsonArray("analysisDetailsList");
-                    //초기화
-                    snoreCnt=0;
-                    osaCnt=0;
-                    grindCnt=0;
-                    recordData = new RecordData();
-                    recordData.setResponseObj(analysisList.get(i).toString());
-                    if(i==0){
-                      firstData = analysisList.get(i).toString();
-                    }
-                    recordData.setAnalysisFileNm(jncu.JsonStringNullCheck(analysisObj,"analysisFileNm"));
-                    recordData.setAnalysisFileAppPath(jncu.JsonStringNullCheck(analysisObj,"analysisFileAppPath"));
-                    recordData.setAnalysisId(analysisObj.get("analysisId").getAsInt());
-                    recordData.setAnalysisStartDt(jncu.JsonStringNullCheck(analysisObj,"analysisStartDt"));
-                    recordData.setAnalysisEndDt(jncu.JsonStringNullCheck(analysisObj,"analysisEndDt"));
-                    recordData.setAnalysisEndDt(jncu.JsonStringNullCheck(analysisObj,"analysisEndDt"));
-                    analysisId = analysisObj.get("analysisId").getAsInt();
-                    analysisServerUploadPath = jncu.JsonStringNullCheck(analysisObj,"analysisFileAppPath")+"/"+jncu.JsonStringNullCheck(analysisObj,"analysisFileNm");
+                        analysisObj.get("analysisStartDt");
+                        JsonArray analysisDetailsList = analysisObj.getAsJsonArray("analysisDetailsList");
+                        //초기화
+                        snoreCnt=0;
+                        osaCnt=0;
+                        grindCnt=0;
+                        recordData = new RecordData();
+                        recordData.setResponseObj(analysisList.get(i).toString());
+                        if(i==0){
+                            firstData = analysisList.get(i).toString();
+                        }
+                        recordData.setAnalysisFileNm(jncu.JsonStringNullCheck(analysisObj,"analysisFileNm"));
+                        recordData.setAnalysisFileAppPath(jncu.JsonStringNullCheck(analysisObj,"analysisFileAppPath"));
+                        recordData.setAnalysisId(analysisObj.get("analysisId").getAsInt());
+                        recordData.setAnalysisStartDt(jncu.JsonStringNullCheck(analysisObj,"analysisStartDt"));
+                        recordData.setAnalysisEndDt(jncu.JsonStringNullCheck(analysisObj,"analysisEndDt"));
+                        recordData.setAnalysisEndDt(jncu.JsonStringNullCheck(analysisObj,"analysisEndDt"));
+                        analysisId = analysisObj.get("analysisId").getAsInt();
+                        analysisServerUploadPath = jncu.JsonStringNullCheck(analysisObj,"analysisFileAppPath")+"/"+jncu.JsonStringNullCheck(analysisObj,"analysisFileNm");
 
-                    Date analysisStartDt =  stringtoDateTimeFormat.parse(recordData.getAnalysisStartDt());
-                    Date analysisEndDt = stringtoDateTimeFormat.parse(recordData.getAnalysisEndDt());
-                    JsonObject recordEntryData = new JsonObject();
-                    recordEntryData.addProperty("filePath",recordData.getAnalysisFileAppPath()+"/"+recordData.getAnalysisFileNm());
-                    //그래프 클릭 시에 구간만 재생하는
+                        Date analysisStartDt =  stringtoDateTimeFormat.parse(recordData.getAnalysisStartDt());
+                        Date analysisEndDt = stringtoDateTimeFormat.parse(recordData.getAnalysisEndDt());
+                        JsonObject recordEntryData = new JsonObject();
+                        recordEntryData.addProperty("filePath",recordData.getAnalysisFileAppPath()+"/"+recordData.getAnalysisFileNm());
+                        //그래프 클릭 시에 구간만 재생하는
 //                                recordEntryData.addProperty("termStartDt",termStartDt.getTime()-analysisStartDt.getTime());
 //                                recordEntryData.addProperty("termEndDt",termEndDt.getTime()-analysisStartDt.getTime());
-                    //그래프 클릭 시에 전체 재생
-                    recordEntryData.addProperty("termStartDt",0);
-                    recordEntryData.addProperty("termEndDt",analysisEndDt.getTime()-analysisStartDt.getTime());
-                    recordEntryData.addProperty("analysisId",recordData.getAnalysisId());
+                        //그래프 클릭 시에 전체 재생
+                        recordEntryData.addProperty("termStartDt",0);
+                        recordEntryData.addProperty("termEndDt",analysisEndDt.getTime()-analysisStartDt.getTime());
+                        recordEntryData.addProperty("analysisId",recordData.getAnalysisId());
 
-                      if(analysisObj.has("recordingData")){
-                          String analysisDataRawStr =analysisObj.get("recordingData").getAsString();
-                          JsonArray analysisDataArr = new JsonParser().parse(analysisDataRawStr).getAsJsonArray();
+                        if(analysisObj.has("recordingData")){
+                            String analysisDataRawStr =analysisObj.get("recordingData").getAsString();
+                            JsonArray analysisDataArr = new JsonParser().parse(analysisDataRawStr).getAsJsonArray();
 
-                          JsonArray analysisDataArrGroupByMinite =rd.groupByMinites(analysisDataArr,jncu.JsonStringNullCheck(analysisObj,"analysisStartDt"));
-                          if(analysisDataArrGroupByMinite.size()>0){
-                              for(int k =0; k<analysisDataArrGroupByMinite.size(); k++){
-                                  JsonObject analysisRawData = (JsonObject) analysisDataArrGroupByMinite.get(k);
-                                  int time = analysisRawData.get("TIME").getAsInt();
-                                  soundEntries.add(new BarEntry(time, analysisRawData.get("DB").getAsFloat(), recordEntryData));
-                              }
-                          }
-                      }
-
-                    if(analysisDetailsList.size()>0){
-                        for(int j=0; j<analysisDetailsList.size(); j++){
-                            JsonObject analysisDetailsObj = (JsonObject) analysisDetailsList.get(j);
-                            int termTypeCd =  analysisDetailsObj.get("termTypeCd").getAsInt();
-                            recordData.setTermStartDt(analysisDetailsObj.get("termStartDt").toString().replace("\"",""));
-                            recordData.setTermEndDt(analysisDetailsObj.get("termEndDt").toString().replace("\"",""));
-                            if(termTypeCd==200101){
-                                snoreCnt++;
-                            }else if(termTypeCd==200102){
-                                grindCnt++;
-                            }else{
-                                osaCnt++;
+                            JsonArray analysisDataArrGroupByMinite =rd.groupByMinites(analysisDataArr,jncu.JsonStringNullCheck(analysisObj,"analysisStartDt"));
+                            if(analysisDataArrGroupByMinite.size()>0){
+                                for(int k =0; k<analysisDataArrGroupByMinite.size(); k++){
+                                    JsonObject analysisRawData = (JsonObject) analysisDataArrGroupByMinite.get(k);
+                                    int time = analysisRawData.get("TIME").getAsInt();
+                                    soundEntries.add(new BarEntry(time, analysisRawData.get("DB").getAsFloat(), recordEntryData));
+                                }
                             }
-                            //데이터를 넣을때는 발생시간 - 최초시간을 넣어야함
+                        }
 
-                            if(analysisDetailsObj.has("analysisData")){
-                                String analysisRawStr =analysisDetailsObj.get("analysisData").getAsString();
+                        if(analysisDetailsList.size()>0){
+                            for(int j=0; j<analysisDetailsList.size(); j++){
+                                JsonObject analysisDetailsObj = (JsonObject) analysisDetailsList.get(j);
+                                int termTypeCd =  analysisDetailsObj.get("termTypeCd").getAsInt();
+                                recordData.setTermStartDt(analysisDetailsObj.get("termStartDt").toString().replace("\"",""));
+                                recordData.setTermEndDt(analysisDetailsObj.get("termEndDt").toString().replace("\"",""));
+                                if(termTypeCd==200101){
+                                    snoreCnt++;
+                                }else if(termTypeCd==200102){
+                                    grindCnt++;
+                                }else{
+                                    osaCnt++;
+                                }
+                                //데이터를 넣을때는 발생시간 - 최초시간을 넣어야함
+
+                                if(analysisDetailsObj.has("analysisData")){
+                                    String analysisRawStr =analysisDetailsObj.get("analysisData").getAsString();
 //                                    System.out.println("=================analysisRawStr======================"+analysisRawStr);
-                                JsonArray analysisRawDataArr = new JsonParser().parse(analysisRawStr).getAsJsonArray();
+                                    JsonArray analysisRawDataArr = new JsonParser().parse(analysisRawStr).getAsJsonArray();
 
-                                if(analysisRawDataArr.size()>0){
-                                    JsonArray analysisRawDataArrGroupByMinite =rd.groupByMinites(analysisRawDataArr,jncu.JsonStringNullCheck(analysisObj,"analysisStartDt"));
+                                    if(analysisRawDataArr.size()>0){
+                                        JsonArray analysisRawDataArrGroupByMinite =rd.groupByMinites(analysisRawDataArr,jncu.JsonStringNullCheck(analysisObj,"analysisStartDt"));
 
                                         for(int k =0; k<analysisRawDataArrGroupByMinite.size(); k++){
                                             JsonObject analysisRawData = (JsonObject) analysisRawDataArrGroupByMinite.get(k);
                                             int time = analysisRawData.get("TIME").getAsInt();
 
                                             if(termTypeCd==200101){
-    //                                                    snoreEntries.add(new BarEntry(minute*60*1000, analysisRawData.get("DB").getAsFloat(), recordEntryData));
+                                                //                                                    snoreEntries.add(new BarEntry(minute*60*1000, analysisRawData.get("DB").getAsFloat(), recordEntryData));
                                                 snoreEntries.add(new BarEntry(time, analysisRawData.get("DB").getAsFloat(), recordEntryData));
                                             }else if(termTypeCd==200102){
-    //                                                    grindEntries.add(new BarEntry(minute*60*1000, analysisRawData.get("DB").getAsFloat(), recordEntryData));
+                                                //                                                    grindEntries.add(new BarEntry(minute*60*1000, analysisRawData.get("DB").getAsFloat(), recordEntryData));
                                                 grindEntries.add(new BarEntry(time, analysisRawData.get("DB").getAsFloat(), recordEntryData));
                                             }else{
-    //                                                    osaEntries.add(new BarEntry(minute*60*1000, analysisRawData.get("DB").getAsFloat(), recordEntryData));
+                                                //                                                    osaEntries.add(new BarEntry(minute*60*1000, analysisRawData.get("DB").getAsFloat(), recordEntryData));
                                                 osaEntries.add(new BarEntry(time, analysisRawData.get("DB").getAsFloat(), recordEntryData));
                                             }
                                         }
                                     }
                                 }
 
-                            kococoTerm += (stringtoDateTimeFormat.parse(recordData.getTermEndDt()).getTime()
-                                    -stringtoDateTimeFormat.parse(recordData.getTermStartDt()).getTime());
+                                kococoTerm += (stringtoDateTimeFormat.parse(recordData.getTermEndDt()).getTime()
+                                        -stringtoDateTimeFormat.parse(recordData.getTermStartDt()).getTime());
                             }
                         }
                         String detectedTxt = "";
@@ -338,25 +338,25 @@ public class ResultActivity extends AppCompatActivity {
                         if("".equals(detectedTxt)){
                             recordData.setTitle(
                                     df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
-                                    +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지 "
-                                    +df.longToStringFormat(((stringtoDateTimeFormat.parse(recordData.getAnalysisEndDt()).getTime()
-                                    -stringtoDateTimeFormat.parse(recordData.getAnalysisStartDt()).getTime())))+"동안\n"
-                                    +"소리가 발생했습니다."
-                                    );
+                                            +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지 "
+                                            +df.longToStringFormat(((stringtoDateTimeFormat.parse(recordData.getAnalysisEndDt()).getTime()
+                                            -stringtoDateTimeFormat.parse(recordData.getAnalysisStartDt()).getTime())))+"동안\n"
+                                            +"소리가 발생했습니다."
+                            );
                         }else if(osaCnt==0||grindCnt==0||snoreCnt==0){
                             recordData.setTitle(
                                     df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
-                                    +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지 "
-                                    +df.longToStringFormat(((stringtoDateTimeFormat.parse(recordData.getAnalysisEndDt()).getTime()
-                                    -stringtoDateTimeFormat.parse(recordData.getAnalysisStartDt()).getTime())))+"동안\n"
-                                    +detectedTxt +" 발생했습니다. ");
+                                            +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지 "
+                                            +df.longToStringFormat(((stringtoDateTimeFormat.parse(recordData.getAnalysisEndDt()).getTime()
+                                            -stringtoDateTimeFormat.parse(recordData.getAnalysisStartDt()).getTime())))+"동안\n"
+                                            +detectedTxt +" 발생했습니다. ");
                         }else{
                             recordData.setTitle(
                                     df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
-                                    +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지 "
-                                    +df.longToStringFormat(((stringtoDateTimeFormat.parse(recordData.getAnalysisEndDt()).getTime()
+                                            +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지 "
+                                            +df.longToStringFormat(((stringtoDateTimeFormat.parse(recordData.getAnalysisEndDt()).getTime()
                                             -stringtoDateTimeFormat.parse(recordData.getAnalysisStartDt()).getTime())))+"동안\n"
-                                    +detectedTxt +"\n발생했습니다. ");
+                                            +detectedTxt +"\n발생했습니다. ");
                         }
                         //~시~분~초부터 ~시~분~초까지 코를 골았습니다. \n (무호흡 0회, )
                         adapter.addItem(recordData) ;
@@ -549,6 +549,7 @@ public class ResultActivity extends AppCompatActivity {
             chart.setData(data);
             chart.invalidate();
             FloatingActionButton consultBtn = (FloatingActionButton) findViewById(R.id.consultBtn);
+
             consultBtn.setOnClickListener(new FloatingActionButton.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -611,7 +612,7 @@ public class ResultActivity extends AppCompatActivity {
             //재생버튼 누를 때 까지 못 움직이게 한다.
             seekBar.setEnabled(false);
 
-            }else{
+        }else{
             Toast.makeText(getApplicationContext(),"error",Toast.LENGTH_LONG);
         }
         if(firstData!=null){
@@ -736,7 +737,7 @@ public class ResultActivity extends AppCompatActivity {
         osaSet.setBarBorderWidth(1f);
 
         BarDataSet soundSet;
-        soundSet = new BarDataSet(soundEntries, "소리감지");
+        soundSet = new BarDataSet(soundEntries, "소음");
         soundSet.setColors(Color.rgb(123, 109, 93));
         soundSet.setDrawValues(false);
         soundSet.setValueTextColor(Color.WHITE);

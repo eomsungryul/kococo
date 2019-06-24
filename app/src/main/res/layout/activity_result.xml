@@ -40,7 +40,7 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         android:layout_height="45dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        android:weightSum="3"
+        android:weightSum="2"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
@@ -320,33 +320,50 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
         android:background="@color/background_light"
-        app:layout_constraintBottom_toTopOf="@+id/recordListScrollview"
-        app:layout_constraintTop_toBottomOf="@+id/seekbar" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/seekbar"
+        app:layout_constraintVertical_bias="0.0"
+        tools:layout_editor_absoluteX="0dp" />
 
-    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+
+    <!--app:layout_constrainedHeight="true" 로 할 시에 넘어가는 것을 방지 할 수 있다.-->
+    <android.support.constraint.ConstraintLayout
         android:id="@+id/recordListScrollview"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:fillViewport="true"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:weightSum="3"
+        app:layout_constrainedHeight="true"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/divider"
-        tools:layout_editor_absoluteX="-8dp">
+        app:layout_constraintVertical_bias="0.022">
+
+        <!--<relative-->
+        <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
+        <!--android:id="@+id/recordListScrollview"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="250dp"-->
+        <!--android:fillViewport="true"-->
+        <!--app:layout_constraintTop_toBottomOf="@+id/divider"-->
+        <!--tools:layout_editor_absoluteX="-8dp">-->
 
         <!--리스트뷰의 디폴트 선(item의 하단의 선 )을 없애는 법 :  android:divider = "#ffffff"-->
         <ListView
             android:id="@+id/recordListview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:divider="#ffffff"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="parent"
-            app:layout_constraintVertical_bias="0.0"
-            tools:layout_editor_absoluteX="140dp" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0"/>
 
-    </ScrollView>
+        <!--</relative>-->
+    </android.support.constraint.ConstraintLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/consultBtn"
@@ -365,23 +382,22 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0" />
 
-
     <!--<android.support.design.widget.FloatingActionButton-->
-        <!--android:id="@+id/testBtn"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_gravity="bottom|end"-->
-        <!--android:layout_margin="@dimen/fab_margin"-->
-        <!--android:layout_marginStart="16dp"-->
-        <!--android:layout_marginTop="8dp"-->
-        <!--android:layout_marginBottom="8dp"-->
-        <!--android:src="@drawable/baseline_edit_white_48dp"-->
-        <!--app:layout_constraintBottom_toBottomOf="parent"-->
-        <!--app:layout_constraintEnd_toEndOf="parent"-->
-        <!--app:layout_constraintHorizontal_bias="0.654"-->
-        <!--app:layout_constraintStart_toStartOf="parent"-->
-        <!--app:layout_constraintTop_toTopOf="parent"-->
-        <!--app:layout_constraintVertical_bias="0.987" />-->
+    <!--android:id="@+id/testBtn"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_gravity="bottom|end"-->
+    <!--android:layout_margin="@dimen/fab_margin"-->
+    <!--android:layout_marginStart="16dp"-->
+    <!--android:layout_marginTop="8dp"-->
+    <!--android:layout_marginBottom="8dp"-->
+    <!--android:src="@drawable/baseline_edit_white_48dp"-->
+    <!--app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--app:layout_constraintEnd_toEndOf="parent"-->
+    <!--app:layout_constraintHorizontal_bias="0.654"-->
+    <!--app:layout_constraintStart_toStartOf="parent"-->
+    <!--app:layout_constraintTop_toTopOf="parent"-->
+    <!--app:layout_constraintVertical_bias="0.987" />-->
 
 
     <TextView
@@ -405,3 +421,5 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
 
 
 </android.support.constraint.ConstraintLayout>
+
+

@@ -1,2 +1,2 @@
 set solib-search-path ./obj/local/arm64-v8a
-directory C:/_app/tools/sdk-tools-windows-3859397/ndk/19.2.5345600/build//../toolchains/llvm/prebuilt/windows-x86_64/sysroot jni C:/_app/tools/sdk-tools-windows-3859397/ndk/19.2.5345600/build//../sources/cxx-stl/system
+directory C:/_app/tools/sdk-tools-windows-3859397/ndk-bundle/build//../toolchains/llvm/prebuilt/windows-x86_64/sysroot jni C:/_app/tools/sdk-tools-windows-3859397/ndk-bundle/build//../sources/cxx-stl/system
