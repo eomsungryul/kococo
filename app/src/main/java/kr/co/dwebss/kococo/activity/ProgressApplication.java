@@ -28,6 +28,9 @@ import android.text.TextUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.DrawableImageViewTarget;
+
 import kr.co.dwebss.kococo.R;
 
 
@@ -65,8 +68,11 @@ public class ProgressApplication extends Application {
 
         }
 
+        ImageView img_loading_frame = (ImageView) progressDialog.findViewById(R.id.iv_frame_loading);
+        Glide.with(progressDialog.getContext())
+             .load(R.drawable.loading_bar)
+             .into(new DrawableImageViewTarget(img_loading_frame));
 
-        final ImageView img_loading_frame = (ImageView) progressDialog.findViewById(R.id.iv_frame_loading);
 //        final AnimationDrawable frameAnimation = (AnimationDrawable) img_loading_frame.getBackground();
 //        img_loading_frame.post(new Runnable() {
 //            @Override

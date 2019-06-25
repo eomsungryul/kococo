@@ -134,14 +134,14 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
             android:layout_marginEnd="4dp"
             android:layout_marginBottom="4dp"
             android:background="@drawable/bg_spinner"
-            android:popupBackground="#121212"
             android:entries="@array/statusArr"
+            android:popupBackground="#121212"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.029"
+            app:layout_constraintHorizontal_bias="0.15"
             app:layout_constraintStart_toEndOf="@+id/textView"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.461" />
+            app:layout_constraintVertical_bias="0.466" />
 
         <ImageView
             android:id="@+id/bedImg"
@@ -156,7 +156,7 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
             android:src="@drawable/baseline_hotel_white_48dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.433"
+            app:layout_constraintHorizontal_bias="0.196"
             app:layout_constraintStart_toEndOf="@+id/statusVal"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.357" />
