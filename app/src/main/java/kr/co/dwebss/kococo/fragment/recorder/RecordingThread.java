@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.List;
 
 import dalvik.system.DexClassLoader;
+import kr.co.dwebss.kococo.activity.StaticVariables;
 import kr.co.dwebss.kococo.fragment.RecordFragment;
 import kr.co.dwebss.kococo.fragment.recorderUtil.ShortValues;
 import kr.co.dwebss.kococo.util.AudioCalculator;
@@ -78,7 +79,7 @@ public class RecordingThread extends Thread {
         this.recordFragment = recordFragment;
 
         try{
-            final String libPath = recordFragment.getThisContext().getFilesDir().getAbsolutePath() + "/SoundAnalysis.jar";
+            final String libPath = recordFragment.getThisContext().getFilesDir().getAbsolutePath() + "/SoundAnalysis_" + StaticVariables.version + ".jar";
             Log.e("yrseo", libPath);
             final File tmpDir = recordFragment.getThisContext().getFilesDir();
             final DexClassLoader classloader = new DexClassLoader(libPath, tmpDir.getAbsolutePath(), null, this.getClass().getClassLoader());
