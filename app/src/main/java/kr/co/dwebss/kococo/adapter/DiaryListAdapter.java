@@ -15,6 +15,7 @@
  */
 package kr.co.dwebss.kococo.adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.constraint.ConstraintLayout;
@@ -30,6 +31,7 @@ import com.google.gson.JsonObject;
 import java.util.ArrayList;
 
 import kr.co.dwebss.kococo.R;
+import kr.co.dwebss.kococo.activity.ProgressApplication;
 import kr.co.dwebss.kococo.activity.ResultActivity;
 import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.model.Record;
@@ -48,9 +50,12 @@ public class DiaryListAdapter extends BaseAdapter {
     ApiService apiService;
 
     Record listViewItem;
+    ProgressApplication pa;
 
     // ListViewAdapter의 생성자
     public DiaryListAdapter() {
+        pa = new ProgressApplication();
+
     }
 
     // Adapter에 사용되는 데이터의 개수를 리턴. : 필수 구현
@@ -93,6 +98,7 @@ public class DiaryListAdapter extends BaseAdapter {
         diaryRow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                pa.progressON((Activity)v.getContext(),"");
                 getRecord(context,position);
             }
         });
@@ -112,6 +118,7 @@ public class DiaryListAdapter extends BaseAdapter {
                 Intent intent = new Intent(context, ResultActivity.class);
                 intent.putExtra("responseData",response.body().toString()); /*송신*/
                 context.startActivity(intent);
+                pa.progressOFF();
             }
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {
@@ -130,6 +137,11 @@ public class DiaryListAdapter extends BaseAdapter {
     @Override
     public Object getItem(int position) {
         return listViewItemList.get(position);
+    }
+
+    @Override
+    public boolean isEnabled(int position) {
+        return false;
     }
 
     // 아이템 데이터 추가를 위한 함수. 개발자가 원하는대로 작성 가능.

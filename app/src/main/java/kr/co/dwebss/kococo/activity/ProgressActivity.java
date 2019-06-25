@@ -13,21 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kr.co.dwebss.kococo.model;
+package kr.co.dwebss.kococo.activity;
 
-public abstract class RowData {
-    public abstract String getRowName();
+import android.app.Activity;
+import android.support.v7.app.AppCompatDialog;
 
-    public abstract String getRowSecondaryString();
+import kr.co.dwebss.kococo.R;
 
-    public abstract String getRowNameCount();
 
-    public abstract float getRowAmount();
+public class ProgressActivity extends Activity {
 
-    public abstract float getRowLimitAmount();
+    public void progressON() {
+        ProgressApplication.getInstance().progressON(this, null);
+    }
 
-    public abstract String getRowAmountString();
+    public void progressON(String message) {
+        ProgressApplication.getInstance().progressON(this, message);
+    }
 
-    public abstract int getRowColor();
-
+    public void progressOFF() {
+        ProgressApplication.getInstance().progressOFF();
+    }
 }

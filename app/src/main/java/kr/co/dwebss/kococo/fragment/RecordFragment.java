@@ -35,6 +35,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import kr.co.dwebss.kococo.R;
+import kr.co.dwebss.kococo.activity.ProgressActivity;
 import kr.co.dwebss.kococo.activity.ResultActivity;
 import kr.co.dwebss.kococo.fragment.recorder.RecordingThread;
 import kr.co.dwebss.kococo.http.ApiService;

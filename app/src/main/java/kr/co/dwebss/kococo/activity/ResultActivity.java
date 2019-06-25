@@ -36,6 +36,7 @@ import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.LegendEntry;
 import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
@@ -320,20 +321,25 @@ public class ResultActivity extends AppCompatActivity {
                             }
                         }
                         String detectedTxt = "";
-                        if(snoreCnt>0){
-                            detectedTxt = detectedTxt+"코골이가 "+snoreCnt+"회";
-                        }
-                        if(grindCnt>0){
-                            if(snoreCnt>0){
-                                detectedTxt = detectedTxt+", ";
+//                        if(snoreCnt>0){
+//                            detectedTxt = detectedTxt+"코골이가 "+snoreCnt+"회";
+//                        }
+                        if(osaCnt!=0||grindCnt!=0||snoreCnt!=0){
+                            detectedTxt+="(";
+                            if(grindCnt>0){
+    //                            if(snoreCnt>0){
+    //                                detectedTxt = detectedTxt+", ";
+    //                            }
+                                detectedTxt = detectedTxt+"이갈이 "+grindCnt+"회";
                             }
-                            detectedTxt = detectedTxt+"이갈이가 "+grindCnt+"회";
-                        }
-                        if(osaCnt>0){
-                            if(grindCnt>0||snoreCnt>0){
-                                detectedTxt = detectedTxt+", ";
+                            if(osaCnt>0){
+    //                            if(grindCnt>0||snoreCnt>0){
+                                if(grindCnt>0){
+                                    detectedTxt = detectedTxt+", ";
+                                }
+                                detectedTxt = detectedTxt+"무호흡 "+osaCnt+"회";
                             }
-                            detectedTxt = detectedTxt+"무호흡이 "+osaCnt+"회";
+                            detectedTxt+=")";
                         }
                         if("".equals(detectedTxt)){
                             recordData.setTitle(
@@ -341,22 +347,24 @@ public class ResultActivity extends AppCompatActivity {
                                             +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지 "
                                             +df.longToStringFormat(((stringtoDateTimeFormat.parse(recordData.getAnalysisEndDt()).getTime()
                                             -stringtoDateTimeFormat.parse(recordData.getAnalysisStartDt()).getTime())))+"동안\n"
-                                            +"소리가 발생했습니다."
+                                            +"소음이 감지되었습니다."
                             );
-                        }else if(osaCnt==0||grindCnt==0||snoreCnt==0){
+                        }else if(osaCnt==0&&grindCnt==0&&snoreCnt!=0){
                             recordData.setTitle(
                                     df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
                                             +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지 "
                                             +df.longToStringFormat(((stringtoDateTimeFormat.parse(recordData.getAnalysisEndDt()).getTime()
                                             -stringtoDateTimeFormat.parse(recordData.getAnalysisStartDt()).getTime())))+"동안\n"
-                                            +detectedTxt +" 발생했습니다. ");
+                                            +"코골이가 발생했습니다. ");
                         }else{
                             recordData.setTitle(
                                     df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisStartDt())
                                             +"부터 "+ df.returnStringISO8601ToHHmmssFormat(recordData.getAnalysisEndDt())+"까지 "
                                             +df.longToStringFormat(((stringtoDateTimeFormat.parse(recordData.getAnalysisEndDt()).getTime()
                                             -stringtoDateTimeFormat.parse(recordData.getAnalysisStartDt()).getTime())))+"동안\n"
-                                            +detectedTxt +"\n발생했습니다. ");
+//                                            +detectedTxt +"\n발생했습니다. "
+                                            +"코골이가 발생했습니다. "+detectedTxt
+                            );
                         }
                         //~시~분~초부터 ~시~분~초까지 코를 골았습니다. \n (무호흡 0회, )
                         adapter.addItem(recordData) ;
@@ -479,7 +487,7 @@ public class ResultActivity extends AppCompatActivity {
             chart.setFitBars(true);
 
             //마지막 데이터 정제
-            emptyEntries = rd.addZeroData(endMinites,soundEntries,snoreEntries,osaEntries,grindEntries);
+            emptyEntries = rd.addZeroData(0,endMinites,soundEntries,snoreEntries,osaEntries,grindEntries);
             chart.getAxisLeft().setAxisMinimum(0f);
 
             BarDataSet set1;
@@ -548,9 +556,10 @@ public class ResultActivity extends AppCompatActivity {
 //            chart.groupBars(0,32f ,12f);
             chart.setData(data);
             chart.invalidate();
-            FloatingActionButton consultBtn = (FloatingActionButton) findViewById(R.id.consultBtn);
-
-            consultBtn.setOnClickListener(new FloatingActionButton.OnClickListener() {
+//            FloatingActionButton consultBtn = (FloatingActionButton) findViewById(R.id.consultBtn);
+            Button consultBtn = (Button) findViewById(R.id.consultBtn);
+//            consultBtn.setOnClickListener(new FloatingActionButton.OnClickListener() {
+            consultBtn.setOnClickListener(new Button.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     apiService.getProfile(fau.getAppid(getApplicationContext())).enqueue(new Callback<JsonObject>() {
@@ -712,6 +721,25 @@ public class ResultActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+
+
+        MyXAxisValueFormatter xAxisFormatter = new MyXAxisValueFormatter(analysisStartDt.getTime());
+        XAxis xAxis = chart.getXAxis();
+        float endMinites = (analysisEndDt.getTime()-analysisStartDt.getTime())/(60*1000);
+        int startMinites=0;
+
+        if(endMinites<=2){
+            startMinites-=1;
+            endMinites+=2;
+        }else{
+            endMinites+=1;
+        }
+//        xAxis.setAxisMinimum(startMinites);
+//        xAxis.setAxisMaximum(endMinites);
+        xAxis.setValueFormatter(xAxisFormatter);
+        //마지막 데이터 정제
+        emptyEntries = rd.addZeroData(startMinites,endMinites,soundEntries,snoreEntries,osaEntries,grindEntries);
+
         BarDataSet snoreSet;
         snoreSet = new BarDataSet(snoreEntries, "코골이");
         snoreSet.setColors(Color.rgb(255, 104, 89));
@@ -750,21 +778,27 @@ public class ResultActivity extends AppCompatActivity {
         osaSet.setHighLightColor(Color.rgb(177, 93, 255));
         soundSet.setHighLightColor(Color.rgb(123, 109, 93));
 
+        BarDataSet emptySet;
+        emptySet = new BarDataSet(emptyEntries, "Data Set");
+        emptySet.setColors(Color.TRANSPARENT);
+        //값을 보여줄건지 말건지 여부
+        emptySet.setDrawValues(false);
+        emptySet.setValueTextColor(Color.WHITE);
+        emptySet.setVisible(true);
+        emptySet.setHighLightColor(Color.TRANSPARENT);
+
         ArrayList<IBarDataSet> dataSets = new ArrayList<>();
         dataSets.add(soundSet);
         dataSets.add(snoreSet);
         dataSets.add(grindSet);
         dataSets.add(osaSet);
+        dataSets.add(emptySet);
 
         BarData data = new BarData(dataSets);
 
 
-        MyXAxisValueFormatter xAxisFormatter = new MyXAxisValueFormatter(analysisStartDt.getTime());
-        XAxis xAxis = chart.getXAxis();
-        float endMinites = (analysisEndDt.getTime()-analysisStartDt.getTime())/(60*1000);
-        xAxis.setAxisMinimum(0);
-        xAxis.setAxisMaximum(endMinites+1);
-        xAxis.setValueFormatter(xAxisFormatter);
+        setLegend(chart);
+
 
         //바를 양옆이 반으로 짤리는 현상을 수정하는 방법
         chart.setFitBars(true);
@@ -772,7 +806,7 @@ public class ResultActivity extends AppCompatActivity {
         data.setBarWidth(1f);
         barWidth = data.getBarWidth()/2;
         chart.getXAxis().setAxisMinimum(-barWidth);
-        chart.getXAxis().setAxisMaximum(soundEntries.size()-barWidth);
+        chart.getXAxis().setAxisMaximum(emptyEntries.size()-barWidth);
 
         chart.setData(data);
         chart.invalidate();
@@ -839,5 +873,34 @@ public class ResultActivity extends AppCompatActivity {
 
         }
 
+    }
+
+    //범주를 설정해주는 곳
+    public void setLegend(BarChart chart){
+
+        LegendEntry soundLe = new LegendEntry();
+        soundLe.label="소음";
+        soundLe.formColor=Color.rgb(123, 109, 93);
+        LegendEntry snoreLe = new LegendEntry();
+        snoreLe.label="코골이";
+        snoreLe.formColor=Color.rgb(255, 104, 89);
+        LegendEntry grindLe = new LegendEntry();
+        grindLe.label="이갈이";
+        grindLe.formColor=Color.rgb(255, 207, 68);
+        LegendEntry osaLe = new LegendEntry();
+        osaLe.label="무호흡";
+        osaLe.formColor=Color.rgb(177, 93, 255);
+
+
+        ArrayList<LegendEntry> legendSets = new ArrayList<>();
+        legendSets.add(soundLe);
+        legendSets.add(snoreLe);
+        legendSets.add(grindLe);
+        legendSets.add(osaLe);
+        //범주 데이터 차트에 넣기
+        chart.getLegend().setCustom(legendSets);
+        //범주 크기 키우기
+        chart.getLegend().setFormSize(10f);
+        chart.getLegend().setTextSize(13f);
     }
 }

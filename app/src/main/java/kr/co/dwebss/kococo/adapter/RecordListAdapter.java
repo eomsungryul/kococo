@@ -109,13 +109,13 @@ public class RecordListAdapter extends BaseAdapter {
         ImageButton playBtn = (ImageButton) convertView.findViewById(R.id.recordPlay);
 
 //        System.out.println("===================filePath = :"+listViewItem.getAnalysisFileAppPath()+"/"+listViewItem.getAnalysisFileNm());
-        System.out.println("===================recordPlay = :"+R.id.recordPlay);
-        System.out.println("===================position = :"+position);
+//        System.out.println("===================recordPlay = :"+R.id.recordPlay);
+//        System.out.println("===================position = :"+position);
 
         playBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
-                System.out.println("=========onClick==========position = :"+position);
+//                System.out.println("=========onClick==========position = :"+position);
                 rowClickEvt(position,listViewItem,playBtn);
             }
         });

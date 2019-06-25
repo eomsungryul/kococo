@@ -55,6 +55,10 @@ public class StatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             rvh.primaryText.setText(rowData.getRowName());
             rvh.amountText.setText(rowData.getRowAmountString());
 
+            if(!"".equals(rowData.getRowNameCount())){
+                rvh.amountText.setText(rowData.getRowNameCount()+"회");
+            }
+
             int[] colors = new int[1];
             float[] fractions = new float[1];
             colors[0] = rowData.getRowColor();

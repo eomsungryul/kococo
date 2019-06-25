@@ -24,20 +24,22 @@ public class StatData extends RowData {
     private String mTime;
     private float mAmount;
     private String mLastFourDigits;
+    private String mCount;
     private int mColor;
     private DecimalFormat mFormatter;
 
-    public StatData(String name, String time, float amount, String lastFourDigits, int color) {
-        mName = name;
-        mAmount = amount;
-        mTime = time;
-        mLastFourDigits = lastFourDigits;
-        mColor = color;
+    public StatData(String name, String time, float amount, String lastFourDigits,String count, int color) {
+        this.mName = name;
+        this.mAmount = amount;
+        this.mTime = time;
+        this.mLastFourDigits = lastFourDigits;
+        this.mCount = count;
+        this.mColor = color;
 
-        mFormatter = (DecimalFormat) NumberFormat.getCurrencyInstance();
-        DecimalFormatSymbols symbols = mFormatter.getDecimalFormatSymbols();
+        this.mFormatter = (DecimalFormat) NumberFormat.getCurrencyInstance();
+        DecimalFormatSymbols symbols = this.mFormatter.getDecimalFormatSymbols();
         symbols.setCurrencySymbol("");
-        mFormatter.setDecimalFormatSymbols(symbols);
+        this.mFormatter.setDecimalFormatSymbols(symbols);
     }
 
     @Override
@@ -48,6 +50,11 @@ public class StatData extends RowData {
     @Override
     public String getRowSecondaryString() {
         return mLastFourDigits;
+    }
+
+    @Override
+    public String getRowNameCount() {
+        return mCount;
     }
 
     @Override
@@ -71,18 +78,4 @@ public class StatData extends RowData {
         return mColor;
     }
 
-    @Override
-    public boolean showSecondaryStringObfuscation() {
-        return true;
-    }
-
-    @Override
-    public boolean showAccentBar() {
-        return true;
-    }
-
-    @Override
-    public boolean showFractionBar() {
-        return false;
-    }
 }

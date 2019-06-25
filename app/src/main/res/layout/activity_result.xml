@@ -122,9 +122,10 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
 
         <!-- 팝업 백그라운드는 기본적으로 흰색이기떄문에 커스텀을 해야함
         android:popupBackground="#121212"-->
+        <!--android:backgroundTint="#ffffff"-->
+        <!--style="@style/Spinner"-->
         <Spinner
             android:id="@+id/statusVal"
-            style="@style/Spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
@@ -132,9 +133,9 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
             android:layout_marginTop="4dp"
             android:layout_marginEnd="4dp"
             android:layout_marginBottom="4dp"
-            android:backgroundTint="#ffffff"
-            android:entries="@array/statusArr"
+            android:background="@drawable/bg_spinner"
             android:popupBackground="#121212"
+            android:entries="@array/statusArr"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.029"
@@ -155,7 +156,7 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
             android:src="@drawable/baseline_hotel_white_48dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.05"
+            app:layout_constraintHorizontal_bias="0.433"
             app:layout_constraintStart_toEndOf="@+id/statusVal"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.357" />
@@ -365,22 +366,51 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         <!--</relative>-->
     </android.support.constraint.ConstraintLayout>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/consultBtn"
+    <!--android:src="@drawable/baseline_edit_white_48dp"-->
+
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:src="@drawable/baseline_edit_white_48dp"
+        android:layout_gravity="bottom|right"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.952"
+        app:layout_constraintHorizontal_bias="0.95"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintVertical_bias="0.965">
+
+        <!--<android.support.design.widget.FloatingActionButton-->
+            <!--android:id="@+id/consultBtn"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:src="@android:color/transparent" />-->
+
+        <!--<TextView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="center"-->
+            <!--android:elevation="8dp"-->
+            <!--android:text="전문가 상담"-->
+            <!--android:textAppearance="?android:attr/textAppearanceMedium"-->
+            <!--android:textColor="@android:color/white" />-->
+
+        <Button
+            android:id="@+id/consultBtn"
+            android:layout_width="100dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/button_shape_green"
+            android:text="전문가 상담"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.972"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.753" />
+    </FrameLayout>
 
     <!--<android.support.design.widget.FloatingActionButton-->
     <!--android:id="@+id/testBtn"-->

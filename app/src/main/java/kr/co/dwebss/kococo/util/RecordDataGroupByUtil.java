@@ -75,14 +75,12 @@ public class RecordDataGroupByUtil {
     }
 
 
-    public List<BarEntry> addZeroData(float endMinites,List<BarEntry> soundEntries, List<BarEntry> snoreEntries, List<BarEntry> osaEntries, List<BarEntry> grindEntries) {
+    public List<BarEntry> addZeroData(float startMinites ,float endMinites,List<BarEntry> soundEntries, List<BarEntry> snoreEntries, List<BarEntry> osaEntries, List<BarEntry> grindEntries) {
         List<BarEntry> result = new ArrayList<BarEntry>();
         int end = (int) endMinites;
-
-        for(int i=0;i<=end;i++){
+        for(int i = (int) startMinites; i<=end; i++){
             result.add(new BarEntry(i,0.1f));
         }
-
         return  result;
     }
 

@@ -89,7 +89,7 @@
         android:background="@android:color/transparent"
         android:tint="@color/background_red"
         android:scaleType="fitXY"
-        android:src="@drawable/baseline_notification_important_white_48dp"
+        android:src="@drawable/report_img"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"

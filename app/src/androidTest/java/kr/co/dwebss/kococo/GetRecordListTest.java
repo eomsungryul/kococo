@@ -36,7 +36,7 @@ public class GetRecordListTest {
         String userAppId = "";
 
         System.out.println(" ========================start GetRecordListTest");
-        apiService.getRecordList(userAppId,"recordId,desc").enqueue(new Callback<JsonObject>() {
+        apiService.getRecordList(userAppId,"recordId,desc",1000).enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
 

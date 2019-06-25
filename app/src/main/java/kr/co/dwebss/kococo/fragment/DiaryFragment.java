@@ -69,6 +69,7 @@ public class DiaryFragment extends Fragment {
                     System.out.println(" ============getRecordList============response: "+response);
                     JsonObject jsonObject = response.body();
                     JsonObject resultData = jsonObject.getAsJsonObject("_embedded");
+//                    JsonArray recordList = resultData.getAsJsonArray("recordOnly");
                     JsonArray recordList = resultData.getAsJsonArray("record");
                     // Adapter 생성
                     adapter = new DiaryListAdapter() ;

@@ -52,6 +52,9 @@ public interface ApiService {
     @GET("api/record/search/findByUserAppId")
     Call<JsonObject> getRecordList(@Query("userAppId") String userAppId,@Query("sort") String sort,@Query("size") int size);
 
+    @GET("api/recordOnly/search/findByUserAppId")
+    Call<JsonObject> getOnlyRecordList(@Query("userAppId") String userAppId,@Query("sort") String sort,@Query("size") int size);
+
     //@Path 를 이용하면 Rest 방식으로 호출 할 수 있다.
     @GET("api/record/{recordId}")
     Call<JsonObject> getRecord(@Path("recordId") Integer recordId);

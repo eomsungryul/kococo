@@ -135,15 +135,20 @@ public class StatFragment extends Fragment implements SeekBar.OnSeekBarChangeLis
                     long snoringTimes=result.get("snoringTimes").getAsLong();
                     long osaTimes=result.get("osaTimes").getAsLong();
                     long grindingTimes=result.get("grindingTimes").getAsLong();
+
+                    String osaCnt=result.get("osaCnt").getAsString();
+                    String grindingCnt=result.get("grindingCnt").getAsString();
+
+
                     int sleepScore=result.get("sleepScore").getAsInt();
                     DateFormatter df = new DateFormatter();
 
                     long totalTimes=recordedTimes+snoringTimes+osaTimes+grindingTimes;
 
-                    stats.add(new StatData(res.getString(R.string.goodSleepRow),df.longToStringFormat(recordedTimes), recordedTimes, "1", 0xFF1EB980));
-                    stats.add(new StatData(res.getString(R.string.snoreRow), df.longToStringFormat(snoringTimes),snoringTimes, "1", 0xFFFF6859));
-                    stats.add(new StatData(res.getString(R.string.grindRow),df.longToStringFormat(grindingTimes),grindingTimes, "1", 0xFFFFCF44));
-                    stats.add(new StatData(res.getString(R.string.apneaRow),df.longToStringFormat(osaTimes),osaTimes, "1", 0xFFB15DFF));
+                    stats.add(new StatData(res.getString(R.string.goodSleepRow),df.longToStringFormat(recordedTimes), recordedTimes, "1","", 0xFF1EB980));
+                    stats.add(new StatData(res.getString(R.string.snoreRow), df.longToStringFormat(snoringTimes),snoringTimes, "1","", 0xFFFF6859));
+                    stats.add(new StatData(res.getString(R.string.grindRow),df.longToStringFormat(grindingTimes),grindingTimes, "1",grindingCnt, 0xFFFFCF44));
+                    stats.add(new StatData(res.getString(R.string.apneaRow),df.longToStringFormat(osaTimes),osaTimes, "1",osaCnt, 0xFFB15DFF));
                     mAccountsSection = new Section(stats, "수면 점수", false);
 
                     mAccountsRV = v.findViewById(R.id.statView);

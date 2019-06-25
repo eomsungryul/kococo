@@ -104,7 +104,9 @@
     </style>
 
     <!--<item name="android:background">@color/background_gray</item>-->
+    <!--<item name="backgroundTint">#ffffff</item>-->
     <style name="Spinner" parent="Widget.AppCompat.Spinner">
         <item name="backgroundTint">#ffffff</item>
+        <!--<item name="android:background">@color/background_gray</item>-->
     </style>
 </resources>
