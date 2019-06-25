@@ -103,6 +103,19 @@
                 android:value="kr.co.dwebss.kococo.activity.MainActivity"/>
         </activity>
 
+        <activity
+            android:name="kr.co.dwebss.kococo.activity.UserConsultListActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
+            android:exported="false"
+            android:label="@string/appName"
+            android:parentActivityName="kr.co.dwebss.kococo.activity.MainActivity"
+            android:windowSoftInputMode="stateHidden"
+            >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="kr.co.dwebss.kococo.activity.MainActivity"/>
+        </activity>
+
     </application>
 
 </manifest>

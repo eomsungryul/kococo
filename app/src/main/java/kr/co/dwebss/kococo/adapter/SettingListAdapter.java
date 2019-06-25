@@ -23,7 +23,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.JsonObject;
 
@@ -32,6 +31,7 @@ import java.util.ArrayList;
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.activity.Mp3ManageActivity;
 import kr.co.dwebss.kococo.activity.ProfileActivity;
+import kr.co.dwebss.kococo.activity.UserConsultListActivity;
 import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.model.Setting;
 import kr.co.dwebss.kococo.util.FindAppIdUtil;
@@ -119,8 +119,8 @@ public class SettingListAdapter extends BaseAdapter {
                 }else if(item.getSeq()==2){
                     //전문가 상담내역 페이지
 //                    Toast.makeText(context,"페이지 준비중입니다. ",Toast.LENGTH_SHORT).show();
-//                    Intent intent = new Intent(context, ProfileActivity.class);
-//                    v.getContext().startActivity(intent);
+                    Intent intent = new Intent(context, UserConsultListActivity.class);
+                    v.getContext().startActivity(intent);
 
                 }else if(item.getSeq()==3){
                     //사용자 음성 파일 관리

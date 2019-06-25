@@ -59,6 +59,8 @@
     <string name="mp3ManageTxt">File Store Term</string>
     <string name="mp3ManageDay">Day</string>
 
+    <!--UserConsultListActivity-->
+    <string name="uclHeaderTxt">Consult History</string>
 
     <!--btn-->
     <string name="saveBtn">Save</string>
