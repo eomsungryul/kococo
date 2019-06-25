@@ -25,6 +25,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.JsonArray;
@@ -90,13 +91,18 @@ public class UserConsultListActivity extends AppCompatActivity {
                     JsonObject jsonObject = response.body();
                     JsonObject resultData = jsonObject.getAsJsonObject("_embedded");
                     JsonArray recordList = resultData.getAsJsonArray("recordOnly");
-                    // Adapter 생성
-                    adapter = new UserConsultListAdapter() ;
-                    //listView 생성
-                    ListView listview = (ListView) findViewById(R.id.counsultListview);
-                    listview.setAdapter(adapter);
-                    adapter.addItems(recordList) ;
-                    adapter.notifyDataSetChanged();
+                    if(recordList.size()>0){
+                        // Adapter 생성
+                        adapter = new UserConsultListAdapter() ;
+                        //listView 생성
+                        ListView listview = (ListView) findViewById(R.id.counsultListview);
+                        listview.setAdapter(adapter);
+                        adapter.addItems(recordList) ;
+                        adapter.notifyDataSetChanged();
+                    }else{
+                        TextView nullTextView = (TextView) findViewById(R.id.nullTextView);
+                        nullTextView.setText("전문가 상담 내역이 없습니다.");
+                    }
                 }
                 @Override
                 public void onFailure(Call<JsonObject> call, Throwable t) {
