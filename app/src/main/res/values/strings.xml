@@ -60,6 +60,8 @@
     <string name="mp3ManageDay">일</string>
 
 
+    <!--UserConsultListActivity-->
+    <string name="uclHeaderTxt">전문가 상담 내역</string>
 
     <!--btn-->
     <string name="saveBtn">저장하기</string>

@@ -63,14 +63,14 @@ public class DiaryFragment extends Fragment {
             retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();
             apiService = retrofit.create(ApiService.class);
 
-            apiService.getRecordList(userAppId,"recordId,desc",1000).enqueue(new Callback<JsonObject>() {
+            apiService.getOnlyRecordList(userAppId,"recordId,desc",1000).enqueue(new Callback<JsonObject>() {
                 @Override
                 public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
                     System.out.println(" ============getRecordList============response: "+response);
                     JsonObject jsonObject = response.body();
                     JsonObject resultData = jsonObject.getAsJsonObject("_embedded");
-//                    JsonArray recordList = resultData.getAsJsonArray("recordOnly");
-                    JsonArray recordList = resultData.getAsJsonArray("record");
+                    JsonArray recordList = resultData.getAsJsonArray("recordOnly");
+//                    JsonArray recordList = resultData.getAsJsonArray("record");
                     // Adapter 생성
                     adapter = new DiaryListAdapter() ;
                     //listView 생성

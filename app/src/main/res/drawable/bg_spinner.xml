@@ -6,7 +6,7 @@
             <corners android:radius="10dp" />
         </shape>
     </item>
-    <item android:left="25dp">
+    <item android:left="50dp">
         <bitmap android:src="@drawable/baseline_expand_more_white_18dp"  android:gravity="center_vertical|right" />
     </item>
 </layer-list>

@@ -73,6 +73,9 @@ public interface ApiService {
     @GET("api/statistics")
     Call<JsonObject> getStats(@Query("userappid") String userAppId,@Query("dateCd") String dateCd);
 
+    @GET("api/recordOnly/search/findByUserAppIdAndConsultingYn")
+    Call<JsonObject> getConsultList(@Query("userAppId") String userAppId,@Query("sort") String sort,@Query("consultingYn") String consultingYn);
+
 //    Call<JSONObject> addRecord(@Body JSONObject data);
 //    Call<JsonObject> addRecord(JsonObject data);
 

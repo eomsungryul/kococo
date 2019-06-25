@@ -122,6 +122,7 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         android:popupBackground="#121212"-->
         <Spinner
             android:id="@+id/pf_age_val"
+            android:background="@drawable/bg_spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
@@ -174,6 +175,7 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         android:popupBackground="#121212"-->
         <Spinner
             android:id="@+id/pf_gender_val"
+            android:background="@drawable/bg_spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
@@ -228,6 +230,7 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         android:popupBackground="#121212"-->
         <Spinner
             android:id="@+id/pf_height_val"
+            android:background="@drawable/bg_spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
@@ -281,6 +284,7 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         android:popupBackground="#121212"-->
         <Spinner
             android:id="@+id/pf_weight_val"
+            android:background="@drawable/bg_spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"

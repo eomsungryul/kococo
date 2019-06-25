@@ -25,6 +25,7 @@ public class Record implements Serializable {
     private Integer sleepStatusCd;
     private Integer sleepStatusCdId;
 
+
     public Record() {
     }
 
@@ -40,6 +41,15 @@ public class Record implements Serializable {
         this.recordEndD = recordEndD;
         this.recordStartDt = recordStartDt;
         this.recordEndDt = recordEndDt;
+    }
+
+    public Record(int recordId, String recordStartD, String recordEndD, String recordStartDt, String recordEndDt,Character consultingReplyYn) {
+        this.recordId = recordId;
+        this.recordStartD = recordStartD;
+        this.recordEndD = recordEndD;
+        this.recordStartDt = recordStartDt;
+        this.recordEndDt = recordEndDt;
+        this.consultingReplyYn = consultingReplyYn;
     }
 
 
