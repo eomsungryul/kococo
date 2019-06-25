@@ -1,6 +1,5 @@
 package kr.co.dwebss.kococo.fragment.recorder;
 
-import android.os.Environment;
 import android.os.Process;
 import android.util.Log;
 
@@ -12,7 +11,6 @@ import com.google.gson.JsonObject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -22,12 +20,13 @@ import java.util.List;
 import dalvik.system.DexClassLoader;
 import kr.co.dwebss.kococo.activity.StaticVariables;
 import kr.co.dwebss.kococo.fragment.RecordFragment;
-import kr.co.dwebss.kococo.fragment.recorderUtil.ShortValues;
 import kr.co.dwebss.kococo.util.AudioCalculator;
 import kr.co.dwebss.kococo.util.SimpleLame;
 import kr.co.dwebss.kococo.util.WaveFormatConverter;
 import kr.co.dwebss.soundanalysis.AnalysisRawData;
 import kr.co.dwebss.soundanalysis.StartEnd;
+
+import static kr.co.dwebss.kococo.activity.StaticVariables.isCorrectPatch;
 
 public class RecordingThread extends Thread {
     private static final String LOG_TAG2 = "audio_recording2";
@@ -74,64 +73,70 @@ public class RecordingThread extends Thread {
     Field allFHAndDb_NEED_INITIALIZE;
     Field noiseChkSum;
     Field noiseChkCnt;
+    int errLoginCnt = 0;
 
     public RecordingThread(RecordFragment recordFragment) {
         this.recordFragment = recordFragment;
 
         try{
-            final String libPath = recordFragment.getThisContext().getFilesDir().getAbsolutePath() + "/SoundAnalysis_" + StaticVariables.version + ".jar";
-            Log.e("yrseo", libPath);
-            final File tmpDir = recordFragment.getThisContext().getFilesDir();
-            final DexClassLoader classloader = new DexClassLoader(libPath, tmpDir.getAbsolutePath(), null, this.getClass().getClassLoader());
-
-            SleepCheck = (Class<Object>) classloader.loadClass("kr.co.dwebss.soundanalysis.SleepCheck");
-            AnalysisRawData = (Class<Object>) classloader.loadClass("kr.co.dwebss.soundanalysis.AnalysisRawData");
-
-            Field[] fields = SleepCheck.getFields();
-            for( Field field : fields ){
-                Log.e("yrseo", field.getType().getName()+" "+field.getName());
+            final String libPath = recordFragment.getThisContext().getFilesDir().getAbsolutePath() + "/libs/SoundAnalysis_" + StaticVariables.version + ".jar";
+            Log.e("yrseo", "libPath: "+libPath+" isExists: "+new File(libPath).exists());
+            final File tmpDir = new File(recordFragment.getThisContext().getFilesDir()+"/libs/dex");
+            Log.e("yrseo", "tmpDir: "+tmpDir+" isExists: "+tmpDir.exists());
+            if(!tmpDir.exists()){
+                tmpDir.mkdir();
             }
-            Log.e("yrseo", "--------------------------------------------");
+            if(isCorrectPatch) {
+                final DexClassLoader classloader = new DexClassLoader(libPath, tmpDir.getAbsolutePath(), null, this.getClass().getClassLoader());
+                SleepCheck = (Class<Object>) classloader.loadClass("kr.co.dwebss.soundanalysis.SleepCheck");
+                AnalysisRawData = (Class<Object>) classloader.loadClass("kr.co.dwebss.soundanalysis.AnalysisRawData");
 
-            Method[] methods = SleepCheck.getMethods();
-            StringBuffer sb = new StringBuffer();
-            for( Method method : methods ){
-                sb.append(method.getName());
-
-                Class<?>[] argTypes = method.getParameterTypes();
-                sb.append("(");
-                int size = argTypes.length;
-                for( Class<?> argType : argTypes ){
-                    String argName = argType.getName();
-                    sb.append(argName + " val");
-                    if( --size != 0 ){
-                        sb.append(", ");
-                    }
+                Field[] fields = SleepCheck.getFields();
+                for (Field field : fields) {
+                    Log.e("yrseo", field.getType().getName() + " " + field.getName());
                 }
-                sb.append(")");
+                Log.e("yrseo", "--------------------------------------------");
 
-                Class<?> returnType = method.getReturnType();
-                sb.append(" : " + returnType.getName());
+                Method[] methods = SleepCheck.getMethods();
+                StringBuffer sb = new StringBuffer();
+                for (Method method : methods) {
+                    sb.append(method.getName());
 
-                Log.e("yrseo", sb.toString());
-                sb.setLength(0);
+                    Class<?>[] argTypes = method.getParameterTypes();
+                    sb.append("(");
+                    int size = argTypes.length;
+                    for (Class<?> argType : argTypes) {
+                        String argName = argType.getName();
+                        sb.append(argName + " val");
+                        if (--size != 0) {
+                            sb.append(", ");
+                        }
+                    }
+                    sb.append(")");
+
+                    Class<?> returnType = method.getReturnType();
+                    sb.append(" : " + returnType.getName());
+
+                    Log.e("yrseo", sb.toString());
+                    sb.setLength(0);
+                }
+                Log.e("yrseo", "--------------------------------------------");
+
+                setMaxDB = SleepCheck.getMethod("setMaxDB", double.class);
+                setMinDB = SleepCheck.getMethod("setMinDB", double.class);
+                tmpMinDb = SleepCheck.getDeclaredField("tmpMinDb");
+                tmpMaxDb = SleepCheck.getDeclaredField("tmpMaxDb");
+                noiseCheckForStart = SleepCheck.getMethod("noiseCheckForStart", double.class);
+                noiseCheck = SleepCheck.getMethod("noiseCheck", double.class);
+                snoringCheck = SleepCheck.getMethod("snoringCheck", double[].class, double.class, double.class, java.util.List.class, java.util.List.class, AnalysisRawData.class);
+                osaCheck = SleepCheck.getMethod("osaCheck", double.class, double.class, java.util.List.class, java.util.List.class, java.util.List.class);
+                someNoiseCheck = SleepCheck.getMethod("someNoiseCheck", double.class, double.class, java.util.List.class);
+                CHECKED_STATUS = SleepCheck.getDeclaredField("CHECKED_STATUS");
+                CHECKED_ERROR = SleepCheck.getDeclaredField("CHECKED_ERROR");
+                allFHAndDb_NEED_INITIALIZE = SleepCheck.getDeclaredField("allFHAndDb_NEED_INITIALIZE");
+                noiseChkSum = SleepCheck.getDeclaredField("noiseChkSum");
+                noiseChkCnt = SleepCheck.getDeclaredField("noiseChkCnt");
             }
-            System.out.println("--------------------------------------------");
-
-            setMaxDB = SleepCheck.getMethod("setMaxDB", double.class);
-            setMinDB = SleepCheck.getMethod("setMinDB", double.class);
-            tmpMinDb = SleepCheck.getDeclaredField("tmpMinDb");
-            tmpMaxDb = SleepCheck.getDeclaredField("tmpMaxDb");
-            noiseCheckForStart = SleepCheck.getMethod("noiseCheckForStart", double.class);
-            noiseCheck = SleepCheck.getMethod("noiseCheck", double.class);
-            snoringCheck = SleepCheck.getMethod("snoringCheck", double[].class, double.class, double.class, java.util.List.class, java.util.List.class, AnalysisRawData.class);
-            osaCheck = SleepCheck.getMethod("osaCheck", double.class, double.class, java.util.List.class, java.util.List.class, java.util.List.class);
-            someNoiseCheck = SleepCheck.getMethod("someNoiseCheck", double.class, double.class, java.util.List.class);
-            CHECKED_STATUS = SleepCheck.getDeclaredField("CHECKED_STATUS");
-            CHECKED_ERROR = SleepCheck.getDeclaredField("CHECKED_ERROR");
-            allFHAndDb_NEED_INITIALIZE = SleepCheck.getDeclaredField("allFHAndDb_NEED_INITIALIZE");
-            noiseChkSum = SleepCheck.getDeclaredField("noiseChkSum");
-            noiseChkCnt = SleepCheck.getDeclaredField("noiseChkCnt");
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -160,6 +165,9 @@ public class RecordingThread extends Thread {
         double timesForMaxArd = 0.0;
 
         int recordingLength = 0;
+        double tmpMaxDbVal = 0;
+        int noiseChkSumVal = 0;
+        int noiseChkCntVal = 0;
 try {
     while (recordFragment.getShouldContinue()) {
         times = (((double) (frameBytes.length / (44100d * 16 * 1))) * 8) * i;
@@ -218,10 +226,14 @@ try {
         try {
             setMaxDB.invoke(SleepCheck, decibel);
             setMinDB.invoke(SleepCheck, decibel);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            kr.co.dwebss.soundanalysis.SleepCheck.setMaxDB(decibel);
+            kr.co.dwebss.soundanalysis.SleepCheck.setMaxDB(decibel);
+            if(errLoginCnt<6){
+                Log.e(LOG_TAG2, "패치 로드를 실패하여 jar 로직을 수행합니다. " + e.getMessage());
+                e.printStackTrace();
+                errLoginCnt++;
+            }
         }
 
         final String amp = String.valueOf(amplitude + "Amp");
@@ -237,7 +249,21 @@ try {
         // 소리가 발생하면 녹음을 시작하고, 1분이상 소리가 발생하지 않으면 녹음을 하지 않는다.
         //if (SleepCheck.noiseCheckForStart(decibel) >= 30 && isRecording == false
         //if (SleepCheck.noiseCheckForStart(decibel) >= 1 && isRecording == false
-        if ((Integer) noiseCheckForStart.invoke(SleepCheck, decibel) >= 1 && isRecording == false
+        int noiseCheckForStartVal = 0;
+        int noiseCheckVal = 0;
+        try {
+            noiseCheckForStartVal = (Integer) noiseCheckForStart.invoke(SleepCheck, decibel);
+            noiseCheckVal = (Integer) noiseCheck.invoke(SleepCheck, decibel);
+        }catch(Exception e){
+            noiseCheckForStartVal = kr.co.dwebss.soundanalysis.SleepCheck.noiseCheckForStart(decibel);
+            noiseCheckVal = kr.co.dwebss.soundanalysis.SleepCheck.noiseCheck(decibel);
+            if(errLoginCnt<6){
+                Log.e(LOG_TAG2, "패치 로드를 실패하여 jar 로직을 수행합니다. " + e.getMessage());
+                e.printStackTrace();
+                errLoginCnt++;
+            }
+        }
+        if ( noiseCheckForStartVal >= 1 && isRecording == false
                 && Math.floor((double) (audioData.length / (44100d * 16 * 1)) * 8) != Math.floor(times)) {
             Log.v(LOG_TAG2, (calcTime(times) + "(" + String.format("%.2f", times) + "s) 녹음 시작!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
             //recordStartingTIme = times;
@@ -254,7 +280,7 @@ try {
 //                    } else if (isRecording == true && (SleepCheck.noiseCheck(decibel)==0 || recodeFlag==false) ) {
             //} else if (isRecording == true && SleepCheck.noiseCheck(decibel) <= 100) {
         //} else if (isRecording == true && SleepCheck.noiseCheck(decibel) <= 100) {
-        } else if (isRecording == true && (Integer) noiseCheck.invoke(SleepCheck, decibel) <= 100) {
+        } else if (isRecording == true && noiseCheckVal <= 100) {
             Log.v(LOG_TAG2, (calcTime(times) + "(" + String.format("%.2f", times) + "s) 녹음 종료!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
             AllAnalysisRawDataList.add(maxARD);
             SimpleDateFormat dayTime = new SimpleDateFormat("yyyyMM_dd_HHmm");
@@ -428,41 +454,76 @@ try {
         if (encResult != 0) {
             baos.write(recordFragment.getMp3buffer(), 0, encResult);
         }
-        if (allFHAndDB != null && (Double) tmpMaxDb.get(SleepCheck) > 40) {
-            //Log.v(LOG_TAG3, (calcTime(times) + " " + hz + " " + db + " " + amp + " " + decibel + ", 100db: " + tmpMaxDb + "db, max: " + SleepCheck.getMaxDB() + ", min: " + SleepCheck.getMinDB() + " " + SleepCheck.noiseChkSum + " " + SleepCheck.noiseChkCnt));
-            Log.v(LOG_TAG3, (calcTime(times) + " " + hz + " " + db + " " + amp + " " + decibel + ", 100db: " + tmpMaxDb + "db, max: " + (Integer) noiseChkSum.get(SleepCheck) + " " + (Integer) noiseChkCnt.get(SleepCheck) ));
-        }
-        //SleepCheck.snoringCheck(allFHAndDB, decibel, times, snoringTermList, grindingTermList, maxARD);
-        snoringCheck.invoke(SleepCheck, allFHAndDB, decibel, times, snoringTermList, grindingTermList, maxARD);
-        if ((Integer) CHECKED_STATUS.get(SleepCheck) == (Integer) CHECKED_ERROR.get(SleepCheck) ) { //발생하지 않을 것 같지만 아주 만약을 위해 0 리턴하는 방어코드를 삽입하였다.
-            continue;
-        } else if ((Integer) CHECKED_STATUS.get(SleepCheck) == (Integer) allFHAndDb_NEED_INITIALIZE.get(SleepCheck) ) { //allFHAndDB가 초기화 되어야 한다.
-            allFHAndDB = null;
-        }
-        //SleepCheck.osaCheck(decibel, times, osaTermList, snoringTermList, noiseTermListForOsaList);
-        osaCheck.invoke(SleepCheck, decibel, times, osaTermList, snoringTermList, noiseTermListForOsaList);
-        if ((Integer) CHECKED_STATUS.get(SleepCheck) == (Integer) CHECKED_ERROR.get(SleepCheck) ) { //발생하지 않을 것 같지만 아주 만약을 위해 0 리턴하는 방어코드를 삽입하였다.
-            continue;
-        }
-        //SleepCheck.someNoiseCheck(times, amplitude, noiseTermListForOsaList);
-        someNoiseCheck.invoke(SleepCheck, times, amplitude, noiseTermListForOsaList);
-        if ((Integer) CHECKED_STATUS.get(SleepCheck) == (Integer) CHECKED_ERROR.get(SleepCheck) ) { //발생하지 않을 것 같지만 아주 만약을 위해 0 리턴하는 방어코드를 삽입하였다.
-            continue;
+        try {
+            tmpMaxDbVal = (Double) tmpMaxDb.get(SleepCheck);
+            noiseChkSumVal = (Integer) noiseChkSum.get(SleepCheck);
+            noiseChkCntVal = (Integer) noiseChkCnt.get(noiseChkCnt);
+        }catch(Exception e){
+            tmpMaxDbVal = kr.co.dwebss.soundanalysis.SleepCheck.tmpMaxDb;
+            noiseChkSumVal = kr.co.dwebss.soundanalysis.SleepCheck.noiseChkSum;
+            noiseChkCntVal = kr.co.dwebss.soundanalysis.SleepCheck.noiseChkCnt;
+            if(errLoginCnt<6){
+                Log.e(LOG_TAG2, "패치 로드를 실패하여 jar 로직을 수행합니다. " + e.getMessage());
+                e.printStackTrace();
+                errLoginCnt++;
+            }
         }
 
+        if (allFHAndDB != null && tmpMaxDbVal > 40) {
+            //Log.v(LOG_TAG3, (calcTime(times) + " " + hz + " " + db + " " + amp + " " + decibel + ", 100db: " + tmpMaxDb + "db, max: " + SleepCheck.getMaxDB() + ", min: " + SleepCheck.getMinDB() + " " + SleepCheck.noiseChkSum + " " + SleepCheck.noiseChkCnt));
+            Log.v(LOG_TAG3, (calcTime(times) + " " + hz + " " + db + " " + amp + " " + decibel + ", 100db: " + tmpMaxDbVal + "db, max: " + noiseChkSumVal + " " + noiseChkCntVal ));
+        }
+        try {
+            snoringCheck.invoke(SleepCheck, allFHAndDB, decibel, times, snoringTermList, grindingTermList, maxARD);
+            if ((Integer) CHECKED_STATUS.get(SleepCheck) == (Integer) CHECKED_ERROR.get(SleepCheck)) { //발생하지 않을 것 같지만 아주 만약을 위해 0 리턴하는 방어코드를 삽입하였다.
+                continue;
+            } else if ((Integer) CHECKED_STATUS.get(SleepCheck) == (Integer) allFHAndDb_NEED_INITIALIZE.get(SleepCheck)) { //allFHAndDB가 초기화 되어야 한다.
+                allFHAndDB = null;
+            }
+            //SleepCheck.osaCheck(decibel, times, osaTermList, snoringTermList, noiseTermListForOsaList);
+            osaCheck.invoke(SleepCheck, decibel, times, osaTermList, snoringTermList, noiseTermListForOsaList);
+            if ((Integer) CHECKED_STATUS.get(SleepCheck) == (Integer) CHECKED_ERROR.get(SleepCheck)) { //발생하지 않을 것 같지만 아주 만약을 위해 0 리턴하는 방어코드를 삽입하였다.
+                continue;
+            }
+            //SleepCheck.someNoiseCheck(times, amplitude, noiseTermListForOsaList);
+            someNoiseCheck.invoke(SleepCheck, times, amplitude, noiseTermListForOsaList);
+            if ((Integer) CHECKED_STATUS.get(SleepCheck) == (Integer) CHECKED_ERROR.get(SleepCheck)) { //발생하지 않을 것 같지만 아주 만약을 위해 0 리턴하는 방어코드를 삽입하였다.
+                continue;
+            }
+        }catch(Exception e){
+            kr.co.dwebss.soundanalysis.SleepCheck.snoringCheck(allFHAndDB, decibel, times, snoringTermList, grindingTermList, maxARD);
+            if (kr.co.dwebss.soundanalysis.SleepCheck.CHECKED_STATUS == kr.co.dwebss.soundanalysis.SleepCheck.CHECKED_ERROR) { //발생하지 않을 것 같지만 아주 만약을 위해 0 리턴하는 방어코드를 삽입하였다.
+                continue;
+            } else if (kr.co.dwebss.soundanalysis.SleepCheck.CHECKED_STATUS == kr.co.dwebss.soundanalysis.SleepCheck.allFHAndDb_NEED_INITIALIZE) { //allFHAndDB가 초기화 되어야 한다.
+                allFHAndDB = null;
+            }
+            kr.co.dwebss.soundanalysis.SleepCheck.osaCheck(decibel, times, osaTermList, snoringTermList, noiseTermListForOsaList);
+            if (kr.co.dwebss.soundanalysis.SleepCheck.CHECKED_STATUS == kr.co.dwebss.soundanalysis.SleepCheck.CHECKED_ERROR) { //발생하지 않을 것 같지만 아주 만약을 위해 0 리턴하는 방어코드를 삽입하였다.
+                continue;
+            }
+            kr.co.dwebss.soundanalysis.SleepCheck.someNoiseCheck(times, amplitude, noiseTermListForOsaList);
+            if (kr.co.dwebss.soundanalysis.SleepCheck.CHECKED_STATUS == kr.co.dwebss.soundanalysis.SleepCheck.CHECKED_ERROR) { //발생하지 않을 것 같지만 아주 만약을 위해 0 리턴하는 방어코드를 삽입하였다.
+                continue;
+            }
+            if(errLoginCnt<6){
+                Log.e(LOG_TAG2, "패치 로드를 실패하여 jar 로직을 수행합니다. " + e.getMessage());
+                e.printStackTrace();
+                errLoginCnt++;
+            }
+        }
 
         if (maxARD != null) {
             if (decibel > maxARD.getDecibel()) {
-                maxARD = new AnalysisRawData(times, amplitude, (double) tmpMaxDb.get(SleepCheck), frequency);
+                maxARD = new AnalysisRawData(times, amplitude, tmpMaxDbVal, frequency);
             }
         } else {
-            maxARD = new AnalysisRawData(times, amplitude, (double) tmpMaxDb.get(SleepCheck), frequency);
+            maxARD = new AnalysisRawData(times, amplitude, tmpMaxDbVal, frequency);
             timesForMaxArd = Math.floor(times);
         }
         if (Math.floor(times) > timesForMaxArd) {
             //코골이 기록용 vo 생성
             if (maxARD.getDecibel() == 0) {
-                maxARD.setDecibel((Double) tmpMaxDb.get(SleepCheck));
+                maxARD.setDecibel(tmpMaxDbVal);
             }
             //System.out.println(calcTime(times)+" "+snoringTermList.size()+" "+SleepCheck.isOSATerm+" "+SleepCheck.isBreathTerm+" "+SleepCheck.isOSAAnsStart);
             if (snoringTermList.size() > 0 && isRecording == true) {
@@ -524,11 +585,21 @@ try {
                             }
                             */
             }
-            maxARD = new AnalysisRawData(times, amplitude, (Double) tmpMaxDb.get(SleepCheck), frequency);
+            maxARD = new AnalysisRawData(times, amplitude, tmpMaxDbVal, frequency);
             timesForMaxArd = Math.floor(times);
 
-            tmpMaxDb.set(SleepCheck, 0);
-            tmpMinDb.set(SleepCheck, 99999);
+            try {
+                tmpMaxDb.set(SleepCheck, 0);
+                tmpMinDb.set(SleepCheck, 99999);
+            }catch(Exception e){
+                kr.co.dwebss.soundanalysis.SleepCheck.tmpMaxDb = 0;
+                kr.co.dwebss.soundanalysis.SleepCheck.tmpMinDb = 99999;
+                if(errLoginCnt<6){
+                    Log.e(LOG_TAG2, "패치 로드를 실패하여 jar 로직을 수행합니다. " + e.getMessage());
+                    e.printStackTrace();
+                    errLoginCnt++;
+                }
+            }
         }
     }
 }catch(Exception e){

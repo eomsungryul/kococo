@@ -84,6 +84,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import static kr.co.dwebss.kococo.activity.StaticVariables.patchCnt;
 import static kr.co.dwebss.kococo.activity.StaticVariables.patchDownloadSuccessful;
 import static kr.co.dwebss.kococo.activity.StaticVariables.patchDownloadInProgress;
+import static kr.co.dwebss.kococo.activity.StaticVariables.isCorrectPatch;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -245,6 +246,14 @@ public class MainActivity extends AppCompatActivity {
             public void onTabSelected(TabLayout.Tab tab) {
                 //다시 리스너를 만들때는 뷰페이저를 이동하라고 해줘야 뷰페이저가 움직임..
                 viewPager.setCurrentItem(tab.getPosition());
+                if(tab.getPosition()!=0){
+                    ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress) ;
+                    progressBar.setVisibility(View.INVISIBLE);
+                    TextView progressBarTxt = (TextView) findViewById(R.id.progressTxt) ;
+                    progressBarTxt.setVisibility(View.INVISIBLE);
+                }else{
+                    chkVersion();
+                }
             }
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
@@ -338,6 +347,15 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public Fragment getItem(int position) {
             System.out.println("========================getItem : "+position);
+            Log.e(TAG_YRSEO,"postion: "+position);
+            if(position!=0){
+                ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress) ;
+                progressBar.setVisibility(View.INVISIBLE);
+                TextView progressBarTxt = (TextView) findViewById(R.id.progressTxt) ;
+                progressBarTxt.setVisibility(View.INVISIBLE);
+            }else{
+                chkVersion();
+            }
             return mFragmentList.get(position);
         }
 
@@ -444,6 +462,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void chkVersion(){
+        isCorrectPatch = false;
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress) ;
         progressBar.setVisibility(View.INVISIBLE);
         TextView progressBarTxt = (TextView) findViewById(R.id.progressTxt) ;
@@ -500,40 +519,57 @@ public class MainActivity extends AppCompatActivity {
                 storage.setMaxDownloadRetryTimeMillis(60000);  // 1분 지나면 실패
                 StorageReference storageRef = storage.getReference();
                 StorageReference pathReference = storageRef.child("libs/SoundAnalysis_" + StaticVariables.version + ".jar");
-                File path = getFilesDir();
+                File path = new File(getFilesDir()+"/libs");
+                Log.e(TAG_YRSEO,"jar가 다운받아질 경로: "+path.getAbsolutePath());
                 File[] files = path.listFiles();
                 String filename = "";
-                boolean isCurrentPatch = false;
                 int tmpSizeForChk = 0;
+
+                final File tmpDir = getDir("dex", 0);
+                File[] files2 = tmpDir.listFiles();
+                for (int i = 0; i < files2.length; i++) {
+                    Log.e(TAG_YRSEO,files2[i].getAbsolutePath()+" asdasd");
+                }
+
                 if (StaticVariables.version == null || StaticVariables.version.equals("")) {
 
                 } else {
-                    for (int i = 0; i < files.length; i++) {
-                        filename = files[i].getName();
-
-                        if (filename.indexOf("jar") > -1) {
-                            Log.e(TAG_YRSEO, "jar checking: " + filename);
-                            if (filename.indexOf(StaticVariables.version) > -1) {
-                                Log.e(TAG_YRSEO, "name checking: " + filename);
-                                tmpSizeForChk = (int) new File(path + "/" + filename).length();
-                                Log.e(TAG_YRSEO, "size checking: " + tmpSizeForChk+"vs"+StaticVariables.size);
-                                if(tmpSizeForChk==StaticVariables.size){
-                                    isCurrentPatch = true;
+                    if (files != null) {
+                        for (int i = 0; i < files.length; i++) {
+                            filename = files[i].getName();
+                            Log.e(TAG_YRSEO, new File(path + "/" + filename).getAbsolutePath());
+                            if (filename.indexOf("jar") > -1) {
+                                Log.e(TAG_YRSEO, "jar checking: " + filename);
+                                if (filename.indexOf(StaticVariables.version) > -1) {
+                                    Log.e(TAG_YRSEO, "name checking: " + filename);
+                                    tmpSizeForChk = (int) new File(path + "/" + filename).length();
+                                    Log.e(TAG_YRSEO, "size checking: " + tmpSizeForChk + "vs" + StaticVariables.size);
+                                    if (tmpSizeForChk == StaticVariables.size) {
+                                        isCorrectPatch = true;
+                                        break;
+                                    }
                                 }
-                            } else {
-                                new File(path + "/" + filename).delete();
+                            }
+
+                            if (!isCorrectPatch) {
+                                if (!filename.equals("")) {
+                                    new File(path + "/" + filename).delete();
+
+                                }
+                                filename = "";
                             }
                         }
                     }
                 }
-                if(isCurrentPatch==false && patchCnt>3){
-                    progressBarTxt.setText("패치 서버에 오류가 있어 앱 실행을 중단합니다.");
+                progressBarTxt.setVisibility(View.VISIBLE);
+                if(isCorrectPatch==false && patchCnt>3){
+                    progressBarTxt.setText("패치 서버에 오류가 있어 구 버전의 앱을 실행합니다. 녹음결과 분석 중 수정안된 오차가 있을 수 있습니다.");
                 }else {
-                    if (isCurrentPatch) {
+                    if (isCorrectPatch) {
                         Log.e(TAG_YRSEO, "정상 버전임(version: " + StaticVariables.version + "): " + filename);
                         progressBarTxt.setText("최신 버전입니다");
                     } else {
-                        Log.e(TAG_YRSEO, "최신 버전이 아닙니다.(version: " + StaticVariables.version + "): " + filename);
+                        Log.e(TAG_YRSEO, "최신 버전이 아닙니다.(version: " + StaticVariables.version + "): " + (filename.equals("") ? "jar가 없음":filename));
                         progressBarTxt.setText("최신 버전이 아님으로 업데이트를 진행합니다.");
                         patchCnt++;
 
@@ -559,7 +595,9 @@ public class MainActivity extends AppCompatActivity {
         TextView progressBarTxt = (TextView) findViewById(R.id.progressTxt) ;
         try {
             File file = new File(path, "SoundAnalysis_" + version + ".jar");
-            if (path.exists()) {
+            if (!path.exists()) {
+                path.mkdir();
+            }
                 FileDownloadTask fileDownloadTask = pathReference.getFile(file);
 
                 //file size를 미리 가져와서 다운로드된 file size와 비교한다.
@@ -567,25 +605,17 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<FileDownloadTask.TaskSnapshot> task) {
                         try {
+                            progressBarTxt.setVisibility(View.VISIBLE);
                             //long total = task.getResult().getTotalByteCount();
                             long total = StaticVariables.size;
                             long trans = task.getResult().getBytesTransferred();
-                            Log.e(TAG, String.format("onComplete: bytes=%d total=%d", trans, total));
+                            Log.e(TAG_YRSEO, String.format("onComplete: bytes=%d total=%d", trans, total));
                             if (task.isSuccessful() && total == trans) {
                                 patchDownloadSuccessful = true;
-                                Log.d(TAG, "onComplete: SUCC" + file.getPath());
+                                Log.e(TAG_YRSEO, "다운로드 완료: 성공" + file.getPath());
                             } else {
                                 patchDownloadSuccessful = false;
-                                Log.d(TAG, "onComplete: FAIL " + task.getException().getMessage());
-                            }
-
-                            final File tmpDir = getDir("dex", 0);
-
-                            final DexClassLoader classloader = new DexClassLoader(file.getPath(), tmpDir.getAbsolutePath(), null, this.getClass().getClassLoader());
-                            try {
-                                final Class<Object> classToLoad = (Class<Object>) classloader.loadClass("kr.co.dwebss.soundanalysis.SleepCheck");
-                            } catch (ClassNotFoundException e) {
-                                e.printStackTrace();
+                                Log.e(TAG_YRSEO, "다운로드 완료: 실패 " + task!=null && task.getException()!=null ? task.getException().getMessage(): "사이즈가 맞지 않음. 다운받은 사이즈: "+trans+", 정상 사이즈: " +total);
                             }
                         }catch(Exception e){
                             e.printStackTrace();
@@ -594,10 +624,10 @@ public class MainActivity extends AppCompatActivity {
                         Log.e(TAG_YRSEO, "patchCnt: "+patchCnt+" patchDownloadSuccessful: "+patchDownloadSuccessful);
                         if (patchDownloadSuccessful == true) {
                             Log.e(TAG_YRSEO, "patch가 성공했습니다. ");
-                            progressBarTxt.setText("업데이트가 성공하였습니다. 적용을 위해 앱을 재시작 합니다.");
+                            progressBarTxt.setText("업데이트가 성공하였습니다. 적용을 위해 앱을 재시작 합니다."); //재시작은 아니고 현재 activity를 재시작함
                         } else {
                             Log.e(TAG_YRSEO, "patch가 실패했습니다. ");
-                            progressBarTxt.setText("업데이트가 실패하였습니다. 재적용을 위해 앱을 재시작 합니다.");
+                            progressBarTxt.setText("업데이트가 실패하였습니다. 업데이트를 재시도 합니다. 재시도 횟수: "+ patchCnt);
                         }
                         Intent intent = getIntent();
                         finish();
@@ -617,14 +647,14 @@ public class MainActivity extends AppCompatActivity {
                     public void onProgress(FileDownloadTask.TaskSnapshot taskSnapshot) {
                         patchDownloadInProgress = true;
                         int progress = (int) ((100 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount());
-                        //Log.e(TAG_YRSEO, "다운로드 진행 중: " + progress + String.format("(bytes=%d total=%d)", taskSnapshot.getBytesTransferred(), taskSnapshot.getTotalByteCount()));
+                        Log.e(TAG_YRSEO, "다운로드 진행 중: " + progress + String.format("(bytes=%d total=%d)", taskSnapshot.getBytesTransferred(), taskSnapshot.getTotalByteCount()));
 
                         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress) ;
                         progressBar.setProgress(progress) ;
+                        progressBarTxt.setVisibility(View.VISIBLE);
                         progressBarTxt.setText("다운로드 진행 중: " + progress + " "+String.format("(bytes=%d total=%d)", taskSnapshot.getBytesTransferred(), taskSnapshot.getTotalByteCount()));
                     }
                 });
-            }
 
         } catch (Exception e) {
             e.printStackTrace();
