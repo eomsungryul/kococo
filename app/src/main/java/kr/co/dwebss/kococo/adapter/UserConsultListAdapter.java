@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.activity.ProgressApplication;
 import kr.co.dwebss.kococo.activity.ResultActivity;
+import kr.co.dwebss.kococo.activity.UserConsultDetailActivity;
 import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.model.Record;
 import retrofit2.Call;
@@ -115,25 +116,25 @@ public class UserConsultListAdapter extends BaseAdapter {
         return convertView;
     }
 
+
     private void getConsultDetail(Context context,int position) {
         Record data = (Record) getItem(position);
-        Toast.makeText(context,"진행중",Toast.LENGTH_LONG).show();
-//        apiService.getRecord(data.getRecordId()).enqueue(new Callback<JsonObject>() {
-////        apiService.getRecord(335).enqueue(new Callback<JsonObject>() {
-//            @Override
-//            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-//                System.out.println(data.getRecordId()+" ========================response: "+response.body());
-//                //창 띄우기
-//                Intent intent = new Intent(context, ResultActivity.class);
-//                intent.putExtra("responseData",response.body().toString()); /*송신*/
-//                context.startActivity(intent);
-//                pa.progressOFF();
-//            }
-//            @Override
-//            public void onFailure(Call<JsonObject> call, Throwable t) {
-//                System.out.println(" ========================Throwable: "+ t);
-//            }
-//        });
+//        Toast.makeText(context,"진행중",Toast.LENGTH_LONG).show();
+        apiService.getRecord(data.getRecordId()).enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                System.out.println(data.getRecordId()+" ========================response: "+response.body());
+                //창 띄우기
+                Intent intent = new Intent(context, UserConsultDetailActivity.class);
+                intent.putExtra("responseData",response.body().toString()); /*송신*/
+                context.startActivity(intent);
+                pa.progressOFF();
+            }
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                System.out.println(" ========================Throwable: "+ t);
+            }
+        });
     }
 
     // 지정한 위치(position)에 있는 데이터와 관계된 아이템(row)의 ID를 리턴. : 필수 구현

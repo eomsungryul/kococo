@@ -17,12 +17,7 @@ package kr.co.dwebss.kococo.activity;
 
 import android.app.Activity;
 import android.app.Application;
-import android.app.ProgressDialog;
-import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.ColorDrawable;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDialog;
 import android.text.TextUtils;
 import android.widget.ImageView;
@@ -67,7 +62,6 @@ public class ProgressApplication extends Application {
             progressDialog.show();
 
         }
-
         ImageView img_loading_frame = (ImageView) progressDialog.findViewById(R.id.iv_frame_loading);
         Glide.with(progressDialog.getContext())
              .load(R.drawable.loading_bar)

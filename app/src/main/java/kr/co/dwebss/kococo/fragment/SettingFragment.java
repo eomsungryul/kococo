@@ -43,32 +43,13 @@ public class SettingFragment extends Fragment {
         listview.setAdapter(adapter);
         // 첫 번째 아이템 추가.
         adapter.addItem(res.getString(R.string.profile),1) ;
+        adapter.addItem(res.getString(R.string.expertConsultationHistory),2) ;
 
-        SettingListAdapter adapter2 = new SettingListAdapter(getContext()) ;
-        ListView listview2 = (ListView) v.findViewById(R.id.settingListview2);
-        listview2.setAdapter(adapter2);
-        adapter2.addItem(res.getString(R.string.expertConsultationHistory),2) ;
-        adapter2.addItem(res.getString(R.string.userMp3FileManage),3) ;
+//        SettingListAdapter adapter2 = new SettingListAdapter(getContext()) ;
+//        ListView listview2 = (ListView) v.findViewById(R.id.settingListview2);
+//        listview2.setAdapter(adapter2);
+//        adapter2.addItem(res.getString(R.string.userMp3FileManage),3) ;
 
-        // 두 번째 아이템 추가.
-//        adapter.addItem(ContextCompat.getDrawable(this, R.drawable.ic_account_circle_black_36dp),
-//                "Circle", "StatData Circle Black 36dp") ;
         return v;
     }
-
-//    @Override
-//    public void setUserVisibleHint(boolean isVisibleToUser) {
-//        System.out.println("=============="+LOG_TAG+"================"+isVisibleToUser);
-//        super.setUserVisibleHint(isVisibleToUser);
-//        if (isVisibleToUser) {
-//            // Refresh your fragment here
-//            refresh();
-//        }
-//    }
-//
-//    //프래그먼트 초기화 방법
-//    private  void refresh(){
-//        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-//        transaction.detach(this).attach(this).commit();
-//    }
 }

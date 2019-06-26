@@ -122,23 +122,24 @@ public class SettingListAdapter extends BaseAdapter {
                     Intent intent = new Intent(context, UserConsultListActivity.class);
                     v.getContext().startActivity(intent);
 
-                }else if(item.getSeq()==3){
-                    //사용자 음성 파일 관리
-//                    Toast.makeText(context,"준비중입니다. ",Toast.LENGTH_SHORT).show();
-                    apiService.getProfile(userAppId).enqueue(new Callback<JsonObject>() {
-                        @Override
-                        public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                            System.out.println(" ========================response: "+response.body());
-                            Intent intent = new Intent(v.getContext(), Mp3ManageActivity.class);
-                            intent.putExtra("responseData",response.body().toString()); /*송신*/
-                            v.getContext().startActivity(intent);
-                        }
-                        @Override
-                        public void onFailure(Call<JsonObject> call, Throwable t) {
-                            System.out.println(" ========================Throwable: "+t.getMessage());
-                        }
-                    });
                 }
+//                else if(item.getSeq()==3){
+//                    //사용자 음성 파일 관리
+////                    Toast.makeText(context,"준비중입니다. ",Toast.LENGTH_SHORT).show();
+//                    apiService.getProfile(userAppId).enqueue(new Callback<JsonObject>() {
+//                        @Override
+//                        public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+//                            System.out.println(" ========================response: "+response.body());
+//                            Intent intent = new Intent(v.getContext(), Mp3ManageActivity.class);
+//                            intent.putExtra("responseData",response.body().toString()); /*송신*/
+//                            v.getContext().startActivity(intent);
+//                        }
+//                        @Override
+//                        public void onFailure(Call<JsonObject> call, Throwable t) {
+//                            System.out.println(" ========================Throwable: "+t.getMessage());
+//                        }
+//                    });
+//                }
             }
         });
 

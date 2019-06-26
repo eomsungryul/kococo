@@ -11,7 +11,7 @@
     <ListView
         android:id="@+id/settingListview"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="320dp"
         android:divider="#ffffff"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -20,25 +20,25 @@
         tools:layout_editor_absoluteX="0dp" />
 
     <!--리스트뷰의 디폴트 선(item의 하단의 선 )을 없애는 법 :  android:divider = "#ffffff"-->
-    <ListView
-        android:id="@+id/settingListview2"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:divider="#ffffff"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/settingListview"
-        app:layout_constraintVertical_bias="0.010"
-        tools:layout_editor_absoluteX="16dp" />
+    <!--<ListView-->
+        <!--android:id="@+id/settingListview2"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="200dp"-->
+        <!--android:layout_marginTop="8dp"-->
+        <!--android:layout_marginBottom="8dp"-->
+        <!--android:divider="#ffffff"-->
+        <!--app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--app:layout_constraintTop_toBottomOf="@+id/settingListview"-->
+        <!--app:layout_constraintVertical_bias="0.010"-->
+        <!--tools:layout_editor_absoluteX="16dp" />-->
 
-    <View
-        android:id="@+id/divider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginStart="16dp"
-        android:background="@color/background_light"
-        app:layout_constraintTop_toBottomOf="@+id/settingListview"
-        app:layout_constraintBottom_toTopOf="@+id/settingListview2" />
+    <!--<View-->
+        <!--android:id="@+id/divider"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="1dp"-->
+        <!--android:layout_marginStart="16dp"-->
+        <!--android:background="@color/background_light"-->
+        <!--app:layout_constraintTop_toBottomOf="@+id/settingListview"-->
+        <!--app:layout_constraintBottom_toTopOf="@+id/settingListview2" />-->
 
 </android.support.constraint.ConstraintLayout>
