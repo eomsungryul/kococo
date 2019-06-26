@@ -16,10 +16,13 @@
 package kr.co.dwebss.kococo.adapter;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.CountDownTimer;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,6 +43,7 @@ import java.util.Date;
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.activity.ReportActivity;
 import kr.co.dwebss.kococo.model.RecordData;
+import kr.co.dwebss.kococo.util.FileUtil;
 import kr.co.dwebss.kococo.util.MediaPlayerUtility;
 
 public class RecordListAdapter extends BaseAdapter {
@@ -142,6 +146,18 @@ public class RecordListAdapter extends BaseAdapter {
             }
         });
 
+
+        ImageButton recordDelete = (ImageButton) convertView.findViewById(R.id.recordDelete);
+        recordDelete.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                showDeleteDialog(v.getContext(),listViewItem);
+            }
+        });
+
+
+
         if(playPosition==position){
             playBtn.setImageResource(R.drawable.baseline_pause_white_48dp);
         }else{
@@ -150,6 +166,7 @@ public class RecordListAdapter extends BaseAdapter {
 
         return convertView;
     }
+
 
     // 지정한 위치(position)에 있는 데이터와 관계된 아이템(row)의 ID를 리턴. : 필수 구현
     @Override
@@ -369,5 +386,29 @@ public class RecordListAdapter extends BaseAdapter {
     }
 
 
+    private void showDeleteDialog(Context context,RecordData listViewItem) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context,R.style.MyAlertDialogStyle);
+        builder.setTitle("음성 파일 삭제");
+        builder.setMessage("정말 삭제하시겠습니까?");
+        //setView()를 이용하여 view를 넣고 커스텀 할 수 있다.
+        //예일 경우에는 신고하기를 한다.
+        //1. 파이어베이스에 업로드를 한다.
+        //2. 업로드가 되면 신고하기 제출을 한다.
+        builder.setPositiveButton("예",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        FileUtil fu = new FileUtil();
+                        String result = fu.removeFiles(listViewItem.getAnalysisFileAppPath()+"/"+listViewItem.getAnalysisFileNm());
+                        Toast.makeText(context,result,Toast.LENGTH_LONG).show();
+                    }
+                });
+        builder.setNegativeButton("아니오",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+//                        Toast.makeText(context,"아니오",Toast.LENGTH_LONG).show();
+                    }
+                });
+        builder.show();
+    }
 
 }

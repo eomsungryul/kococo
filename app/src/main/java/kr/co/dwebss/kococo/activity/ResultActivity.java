@@ -363,7 +363,7 @@ public class ResultActivity extends AppCompatActivity {
                                             +df.longToStringFormat(((stringtoDateTimeFormat.parse(recordData.getAnalysisEndDt()).getTime()
                                             -stringtoDateTimeFormat.parse(recordData.getAnalysisStartDt()).getTime())))+"동안\n"
 //                                            +detectedTxt +"\n발생했습니다. "
-                                            +"코골이가 발생했습니다. "+detectedTxt
+                                            +"코골이가 발생했습니다. \n"+detectedTxt
                             );
                         }
                         //~시~분~초부터 ~시~분~초까지 코를 골았습니다. \n (무호흡 0회, )

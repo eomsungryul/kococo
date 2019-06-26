@@ -396,14 +396,16 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
 
         <Button
             android:id="@+id/consultBtn"
-            android:layout_width="100dp"
-            android:layout_height="30dp"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
             android:background="@drawable/button_shape_green"
+            android:drawableLeft="@drawable/customize_edit_button_size"
             android:text="전문가 상담"
+            android:textSize="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.972"

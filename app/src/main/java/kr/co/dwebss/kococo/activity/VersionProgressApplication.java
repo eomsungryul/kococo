@@ -348,7 +348,7 @@ public class VersionProgressApplication extends Application {
     {
         boolean isWiFi = activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
         confirmBtn.setVisibility(View.INVISIBLE);
-        if(isWiFi){
+        if(!isWiFi){
             progressBarTxt.setText("와이파이 데이터가 아닙니다. 데이터를 다운로드 하시겠습니까");
             noBtn.setVisibility(View.VISIBLE);
             yesBtn.setVisibility(View.VISIBLE);

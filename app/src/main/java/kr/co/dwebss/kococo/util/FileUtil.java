@@ -36,12 +36,12 @@ public class FileUtil {
         apiService = retrofit.create(ApiService.class);
     }
 
-    public void removeFiles(String filePath) {
+    public String removeFiles(String filePath) {
         File f = new File(filePath);
         if(f.delete()){
-            System.out.println("삭제성공");
+            return "정상적으로 삭제되었습니다.";
         }else{
-            System.out.println("삭제실패");
+            return "이미 삭제된 파일입니다.";
         }
     }
 
