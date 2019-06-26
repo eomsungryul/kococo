@@ -106,6 +106,8 @@ public class MainActivity extends AppCompatActivity {
     Retrofit retrofit;
     ApiService apiService;
 
+    VersionProgressApplication vpa;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
@@ -117,6 +119,9 @@ public class MainActivity extends AppCompatActivity {
         float density = metrics.density;
         int width = metrics.widthPixels;
         int height = metrics.heightPixels;
+
+//        vpa = new VersionProgressApplication();
+//        vpa.progressON(this,"");
 
         //기기의 스토리지에 AppIp.text가 존재하지않으면 앱ID를 생성해주고 기기에 저장하는 기능
         //두번째 로그인에는 앱아이디가 존재하므로 그냥 조회만 해줌
@@ -474,10 +479,7 @@ public class MainActivity extends AppCompatActivity {
         retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();
         apiService = retrofit.create(ApiService.class);
 
-        System.out.println(" ===========http 통신=============statr: ");
-
         apiService.getApiCode().enqueue(new Callback<JsonObject>() {
-
             @Override
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
 
@@ -515,6 +517,7 @@ public class MainActivity extends AppCompatActivity {
                     patchCnt = 0;
                 }
                 System.out.println(" ============getApiCode2============result: " + codeList);
+
                 FirebaseStorage storage = FirebaseStorage.getInstance("gs://kococo-2996f.appspot.com/");
                 storage.setMaxDownloadRetryTimeMillis(60000);  // 1분 지나면 실패
                 StorageReference storageRef = storage.getReference();

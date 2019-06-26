@@ -18,6 +18,7 @@ package kr.co.dwebss.kococo.activity;
 import android.app.Activity;
 import android.app.Application;
 import android.app.ProgressDialog;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AppCompatDialog;
 import android.text.TextUtils;
@@ -30,20 +31,19 @@ import com.bumptech.glide.request.target.DrawableImageViewTarget;
 import kr.co.dwebss.kococo.R;
 
 
-public class ProgressApplication extends Application {
+public class VersionProgressApplication extends Application {
 
-    private static ProgressApplication ProgressApplication;
-//    AppCompatDialog progressDialog;
-    ProgressDialog progressDialog;
+    private static VersionProgressApplication versionProgressApplication;
+    AppCompatDialog progressDialog;
 
-    public static ProgressApplication getInstance() {
-        return ProgressApplication;
+    public static VersionProgressApplication getInstance() {
+        return versionProgressApplication;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        ProgressApplication = this;
+        versionProgressApplication = this;
     }
 
     public void progressON(Activity activity, String message) {
@@ -52,24 +52,18 @@ public class ProgressApplication extends Application {
             return;
         }
 
-
-//        if (progressDialog != null && progressDialog.isShowing()) {
         if (progressDialog != null && progressDialog.isShowing()) {
-//            progressSET(message);
+            progressSET(message);
         } else {
 
-//            progressDialog = new AppCompatDialog(activity);
-//            progressDialog.setCancelable(false);
-//            progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-//            progressDialog.setContentView(R.layout.progress_loading);
-//            progressDialog.show();
-
-            progressDialog = new ProgressDialog(activity,R.style.MyTheme);
+            progressDialog = new AppCompatDialog(activity);
             progressDialog.setCancelable(false);
-            progressDialog.setProgressStyle(android.R.style.Widget_ProgressBar_Small);
+            progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.BLACK));
+            progressDialog.setContentView(R.layout.progress_version);
             progressDialog.show();
 
         }
+
 //        ImageView img_loading_frame = (ImageView) progressDialog.findViewById(R.id.iv_frame_loading);
 //        Glide.with(progressDialog.getContext())
 //             .load(R.drawable.loading_bar)
@@ -79,6 +73,8 @@ public class ProgressApplication extends Application {
 //        if (!TextUtils.isEmpty(message)) {
 //            tv_progress_message.setText(message);
 //        }
+
+
     }
 
     public void progressSET(String message) {
