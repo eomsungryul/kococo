@@ -56,26 +56,26 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tabs">
 
-        <ProgressBar
-            android:id="@+id/progress"
-            style="@android:style/Widget.ProgressBar.Horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.555"
-            tools:layout_editor_absoluteX="34dp" />
+        <!--<ProgressBar-->
+            <!--android:id="@+id/progress"-->
+            <!--style="@android:style/Widget.ProgressBar.Horizontal"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="2"-->
+            <!--app:layout_constraintBottom_toBottomOf="parent"-->
+            <!--app:layout_constraintTop_toTopOf="parent"-->
+            <!--app:layout_constraintVertical_bias="0.555"-->
+            <!--tools:layout_editor_absoluteX="34dp" />-->
 
-        <TextView
-            android:id="@+id/progressTxt"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="업데이트를 확인합니다."
-            android:textAlignment="center"
-            app:layout_constraintTop_toBottomOf="@+id/progress"
-            tools:layout_editor_absoluteX="16dp" />
+        <!--<TextView-->
+            <!--android:id="@+id/progressTxt"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="1"-->
+            <!--android:text="업데이트를 확인합니다."-->
+            <!--android:textAlignment="center"-->
+            <!--app:layout_constraintTop_toBottomOf="@+id/progress"-->
+            <!--tools:layout_editor_absoluteX="16dp" />-->
 
         <android.support.v4.view.ViewPager
             android:id="@+id/view_pager"

@@ -18,14 +18,10 @@ package kr.co.dwebss.kococo.activity;
 import android.app.Activity;
 import android.app.Application;
 import android.app.ProgressDialog;
-import android.graphics.drawable.ColorDrawable;
-import android.support.v7.app.AppCompatDialog;
 import android.text.TextUtils;
-import android.widget.ImageView;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.DrawableImageViewTarget;
 
 import kr.co.dwebss.kococo.R;
 
@@ -35,7 +31,6 @@ public class ProgressApplication extends Application {
     private static ProgressApplication ProgressApplication;
 //    AppCompatDialog progressDialog;
     ProgressDialog progressDialog;
-
     public static ProgressApplication getInstance() {
         return ProgressApplication;
     }
@@ -75,10 +70,6 @@ public class ProgressApplication extends Application {
 //             .load(R.drawable.loading_bar)
 //             .into(new DrawableImageViewTarget(img_loading_frame));
 //
-//        TextView tv_progress_message = (TextView) progressDialog.findViewById(R.id.tv_progress_message);
-//        if (!TextUtils.isEmpty(message)) {
-//            tv_progress_message.setText(message);
-//        }
     }
 
     public void progressSET(String message) {

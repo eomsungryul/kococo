@@ -65,6 +65,10 @@
 
     <!--btn-->
     <string name="saveBtn">저장하기</string>
+    <string name="confirmBtn">확인</string>
+    <string name="cancelBtn">취소</string>
+    <string name="yesBtn">예</string>
+    <string name="noBtn">아니오</string>
 
 
     <!--error property-->

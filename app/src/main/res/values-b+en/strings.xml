@@ -64,6 +64,10 @@
 
     <!--btn-->
     <string name="saveBtn">Save</string>
+    <string name="confirmBtn">confirm</string>
+    <string name="cancelBtn">cancel</string>
+    <string name="yesBtn">yes</string>
+    <string name="noBtn">no</string>
 
     <!--error property-->
     <string name="error_server">server error</string>
