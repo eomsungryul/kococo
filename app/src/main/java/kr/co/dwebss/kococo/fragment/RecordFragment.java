@@ -343,14 +343,10 @@ public class RecordFragment extends Fragment  {
                 String holderId = DataHolderApplication.getInstance().putDataHolder(response.body().toString());
                 intent.putExtra("holderId", holderId);
                 startActivity(intent);
-
-
-
             }
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {
                 Log.v(LOG_TAG2,(" ============녹음 종료 시 DB 저장============Throwable: "+ t));
-
             }
         });
     }

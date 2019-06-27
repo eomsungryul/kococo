@@ -331,7 +331,7 @@ public class MainActivity extends AppCompatActivity {
 //                TextView progressBarTxt = (TextView) findViewById(R.id.progressTxt) ;
 //                progressBarTxt.setVisibility(View.INVISIBLE);
             }else{
-                vpa.progressON(thisMainActivity);
+//                vpa.progressON(thisMainActivity);
                 //chkVersion();
             }
             return mFragmentList.get(position);
