@@ -72,7 +72,7 @@
 
     <!--reportActivity-->
     <string name="reportHeader">report</string>
-    <string name="reportContentsTxt">If you do not like the results, please submit it.</string>
+    <string name="reportContentsTxt">If you do not like the results,\n please submit it.</string>
 
 
     <!--error property-->
