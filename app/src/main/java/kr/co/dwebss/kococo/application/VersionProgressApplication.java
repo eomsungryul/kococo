@@ -338,13 +338,13 @@ public class VersionProgressApplication extends Application {
 //                    progressBarTxt.setText("다운로드 진행 중: " + progress + " "+String.format("(bytes=%d total=%d)", taskSnapshot.getBytesTransferred(), taskSnapshot.getTotalByteCount()));
                     if(!isWiFi){
                         progressBarTxt.setText(
-                                "패치 데이터 다운로드 중입니다.\n"
-                                +"("+getFileSize(taskSnapshot.getBytesTransferred())+"/"+getFileSize((long) StaticVariables.size)+")"
+                                "패치 받을 데이터가 있습니다. 데이터의 용량은 "+getFileSize((long) StaticVariables.size)+"입니다. "
+                                        +"Wifi연결이 안되어 있는데 그래도 데이터 다운로드 하시겠습니까?\n"
+                                        +"("+getFileSize(taskSnapshot.getBytesTransferred())+"/"+getFileSize((long) StaticVariables.size)+")"
                         );
                     }else{
                         progressBarTxt.setText(
-                                "패치 받을 데이터가 있습니다. 데이터의 용량은 "+getFileSize((long) StaticVariables.size)+"입니다. "
-                                        +"Wifi연결이 안되어 있는데 그래도 데이터 다운로드 하시겠습니까?\n"
+                                "패치 데이터 다운로드 중입니다.\n"
                                         +"("+getFileSize(taskSnapshot.getBytesTransferred())+"/"+getFileSize((long) StaticVariables.size)+")"
                         );
                     }
