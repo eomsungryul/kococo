@@ -16,15 +16,9 @@
 package kr.co.dwebss.kococo.activity;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.content.res.Configuration;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -35,39 +29,20 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TableLayout;
-import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.BuildConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.reflect.TypeToken;
 
-import java.io.File;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import dalvik.system.DexClassLoader;
 import kr.co.dwebss.kococo.R;
+import kr.co.dwebss.kococo.application.VersionProgressApplication;
 import kr.co.dwebss.kococo.fragment.DiaryFragment;
 import kr.co.dwebss.kococo.fragment.RecordFragment;
 import kr.co.dwebss.kococo.fragment.SettingFragment;
@@ -76,16 +51,7 @@ import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.main.SectionsPagerAdapter;
 import kr.co.dwebss.kococo.util.FindAppIdUtil;
 import kr.co.dwebss.kococo.util.TabLayoutUtils;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-
-import static kr.co.dwebss.kococo.activity.StaticVariables.patchCnt;
-import static kr.co.dwebss.kococo.activity.StaticVariables.patchDownloadSuccessful;
-import static kr.co.dwebss.kococo.activity.StaticVariables.patchDownloadInProgress;
-import static kr.co.dwebss.kococo.activity.StaticVariables.isCorrectPatch;
 
 
 public class MainActivity extends AppCompatActivity {

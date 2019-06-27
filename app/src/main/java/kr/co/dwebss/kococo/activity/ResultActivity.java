@@ -61,6 +61,7 @@ import java.util.TimerTask;
 
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.adapter.RecordListAdapter;
+import kr.co.dwebss.kococo.application.DataHolderApplication;
 import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.model.RecordData;
 import kr.co.dwebss.kococo.util.DateFormatter;
@@ -128,7 +129,10 @@ public class ResultActivity extends AppCompatActivity {
     float barWidth=0f;
     boolean timerFlag=false;
 
-    @Override
+    //인텐트 데이터 전송 대체제
+    DataHolderApplication dha;
+
+   @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
         //세로모드에서 가로모드로 전환 시 onCreate함수가 다시 호출
@@ -142,11 +146,14 @@ public class ResultActivity extends AppCompatActivity {
         float density = metrics.density;
 
         super.onCreate(savedInstanceState);
+        dha = DataHolderApplication.getInstance();
 
         //데이터 수신
         Intent intent = getIntent();
-        if(getIntent().hasExtra("responseData")){
-            responseData = new JsonParser().parse(getIntent().getStringExtra("responseData")).getAsJsonObject();
+//        if(getIntent().hasExtra("responseData")){
+        if(getIntent().hasExtra("holderId")){
+//            responseData = new JsonParser().parse(getIntent().getStringExtra("responseData")).getAsJsonObject();
+            responseData = new JsonParser().parse(dha.popDataHolder(getIntent().getStringExtra("holderId")).toString()).getAsJsonObject();
 
             //뒤로가기 버튼
             ImageButton bt = (ImageButton) findViewById(R.id.previousButton);

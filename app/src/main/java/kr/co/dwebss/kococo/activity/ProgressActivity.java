@@ -16,9 +16,8 @@
 package kr.co.dwebss.kococo.activity;
 
 import android.app.Activity;
-import android.support.v7.app.AppCompatDialog;
 
-import kr.co.dwebss.kococo.R;
+import kr.co.dwebss.kococo.application.ProgressApplication;
 
 
 public class ProgressActivity extends Activity {

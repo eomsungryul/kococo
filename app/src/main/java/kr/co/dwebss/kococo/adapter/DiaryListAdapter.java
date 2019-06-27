@@ -25,13 +25,15 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.google.android.gms.common.data.DataHolder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 
 import kr.co.dwebss.kococo.R;
-import kr.co.dwebss.kococo.activity.ProgressApplication;
+import kr.co.dwebss.kococo.application.DataHolderApplication;
+import kr.co.dwebss.kococo.application.ProgressApplication;
 import kr.co.dwebss.kococo.activity.ResultActivity;
 import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.model.Record;
@@ -116,7 +118,10 @@ public class DiaryListAdapter extends BaseAdapter {
                 System.out.println(data.getRecordId()+" ========================response: "+response.body());
                 //창 띄우기
                 Intent intent = new Intent(context, ResultActivity.class);
-                intent.putExtra("responseData",response.body().toString()); /*송신*/
+//                intent.putExtra("responseData",response.body().toString()); /*송신*/
+                String holderId = DataHolderApplication.getInstance().putDataHolder(response.body().toString());
+                intent.putExtra("holderId", holderId);
+
                 context.startActivity(intent);
                 pa.progressOFF();
             }

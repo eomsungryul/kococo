@@ -13,25 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kr.co.dwebss.kococo.activity;
+package kr.co.dwebss.kococo.application;
 
 import android.app.Activity;
 import android.app.Application;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDialog;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -50,6 +47,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import kr.co.dwebss.kococo.R;
+import kr.co.dwebss.kococo.activity.StaticVariables;
 import kr.co.dwebss.kococo.http.ApiService;
 import retrofit2.Call;
 import retrofit2.Callback;

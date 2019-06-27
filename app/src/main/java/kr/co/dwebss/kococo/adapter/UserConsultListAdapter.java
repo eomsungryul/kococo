@@ -15,7 +15,6 @@
  */
 package kr.co.dwebss.kococo.adapter;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.constraint.ConstraintLayout;
@@ -24,7 +23,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -32,8 +30,7 @@ import com.google.gson.JsonObject;
 import java.util.ArrayList;
 
 import kr.co.dwebss.kococo.R;
-import kr.co.dwebss.kococo.activity.ProgressApplication;
-import kr.co.dwebss.kococo.activity.ResultActivity;
+import kr.co.dwebss.kococo.application.ProgressApplication;
 import kr.co.dwebss.kococo.activity.UserConsultDetailActivity;
 import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.model.Record;

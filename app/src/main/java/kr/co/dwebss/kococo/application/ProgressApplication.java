@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package kr.co.dwebss.kococo.activity;
+package kr.co.dwebss.kococo.application;
 
 import android.app.Activity;
 import android.app.Application;
 import android.app.ProgressDialog;
 import android.text.TextUtils;
-import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 import kr.co.dwebss.kococo.R;
