@@ -102,14 +102,18 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
     -->
 
     <android.support.constraint.ConstraintLayout
+        android:id="@+id/constraintLayout3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/declareBtn"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/declareTxtBody"
-        app:layout_constraintVertical_bias="0.288">
+        app:layout_constraintVertical_bias="0.107">
 
         <EditText
             android:id="@+id/claimContents"
@@ -119,8 +123,8 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
             android:layout_marginTop="8dp"
             android:layout_marginRight="10dp"
             android:layout_marginBottom="8dp"
-            android:gravity="top|left"
             android:background="@drawable/button_shape_darkgray"
+            android:gravity="top|left"
             android:inputType="textMultiLine"
             android:lines="5"
             android:scrollHorizontally="false"
@@ -131,7 +135,7 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
             app:layout_constraintHorizontal_bias="0.473"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.035" />
+            app:layout_constraintVertical_bias="0.0" />
     </android.support.constraint.ConstraintLayout>
 
     <Button
@@ -142,13 +146,14 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/button_shape_puple"
+        android:background="@drawable/button_shape_green"
         android:text="제출하기"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.972"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout3"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.753" />
+        app:layout_constraintVertical_bias="0.718" />
 
 </android.support.constraint.ConstraintLayout>

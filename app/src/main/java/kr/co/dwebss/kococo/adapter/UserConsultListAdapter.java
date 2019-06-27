@@ -15,6 +15,7 @@
  */
 package kr.co.dwebss.kococo.adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.constraint.ConstraintLayout;
@@ -22,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.gson.JsonArray;
@@ -109,6 +111,21 @@ public class UserConsultListAdapter extends BaseAdapter {
                 getConsultDetail(context,position);
             }
         });
+
+
+        ImageView consultReportBtn = (ImageView) convertView.findViewById(R.id.consultReport) ;
+        //뷰 전체를 클릭 했을 경우 페이지로 넘어간다.
+        consultReportBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                pa.progressON((Activity)v.getContext(),"");
+                getConsultDetail(context,position);
+            }
+        });
+
+
+
+
 
         return convertView;
     }

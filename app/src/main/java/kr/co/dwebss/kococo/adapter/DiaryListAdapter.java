@@ -23,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.common.data.DataHolder;
@@ -98,6 +99,16 @@ public class DiaryListAdapter extends BaseAdapter {
         ConstraintLayout diaryRow = (ConstraintLayout) convertView.findViewById(R.id.diaryRow) ;
         //뷰 전체를 클릭 했을 경우 페이지로 넘어간다.
         diaryRow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pa.progressON((Activity)v.getContext(),"");
+                getRecord(context,position);
+            }
+        });
+
+        ImageView diaryReportBtn = (ImageView) convertView.findViewById(R.id.diaryReport) ;
+        //뷰 전체를 클릭 했을 경우 페이지로 넘어간다.
+        diaryReportBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 pa.progressON((Activity)v.getContext(),"");

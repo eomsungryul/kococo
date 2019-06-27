@@ -22,6 +22,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatDialog;
 import android.text.TextUtils;
@@ -43,6 +44,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -80,6 +82,8 @@ public class VersionProgressApplication extends Application {
     ConnectivityManager cm;
     NetworkInfo activeNetwork;
 
+    boolean isWiFi=false;
+
     public static VersionProgressApplication getInstance() {
         return versionProgressApplication;
     }
@@ -104,13 +108,12 @@ public class VersionProgressApplication extends Application {
             progressDialog.setCancelable(false);
             progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             progressDialog.setContentView(R.layout.progress_version);
-            progressDialog.show();
+
             chkVersion(activity);
         }
         //인터넷 연결 유형
         cm = (ConnectivityManager)activity.getSystemService(activity.CONNECTIVITY_SERVICE);
         activeNetwork = cm.getActiveNetworkInfo();
-
 
         noBtn = (TextView) progressDialog.findViewById(R.id.noBtn);
         yesBtn = (TextView) progressDialog.findViewById(R.id.yesBtn);
@@ -152,11 +155,10 @@ public class VersionProgressApplication extends Application {
 
         isCorrectPatch = false;
         progressBarTxt = (TextView) progressDialog.findViewById(R.id.progressTxt) ;
-        progressBarTxt.setVisibility(View.INVISIBLE);
+//        progressBarTxt.setVisibility(View.INVISIBLE);
 
-        progressBarTxt.setText("업데이트를 확인합니다.");
-        progressBarTxt.setVisibility(View.VISIBLE);
-
+//        progressBarTxt.setText("패치데이터를 확인합니다.");
+//        progressBarTxt.setVisibility(View.VISIBLE);
         //http 통신
         retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();
         apiService = retrofit.create(ApiService.class);
@@ -253,10 +255,12 @@ public class VersionProgressApplication extends Application {
                 }else {
                     if (isCorrectPatch) {
                         Log.e(TAG_VERSION, "정상 버전임(version: " + StaticVariables.version + "): " + filename);
-                        progressBarTxt.setText("최신 버전입니다");
-                        confirmBtn.setVisibility(View.VISIBLE);
+//                        progressBarTxt.setText("최신 버전입니다");
+//                        confirmBtn.setVisibility(View.VISIBLE);
+                        progressOFF();
                     } else {
                         Log.e(TAG_VERSION, "최신 버전이 아닙니다.(version: " + StaticVariables.version + "): " + (filename.equals("") ? "jar가 없음":filename));
+                        progressDialog.show();
                         progressBarTxt.setText("최신 버전이 아님으로 업데이트를 진행합니다.");
                         patchCnt++;
                         //데이터 와이파이인지의 여부를 물어봐야하는 곳
@@ -331,7 +335,19 @@ public class VersionProgressApplication extends Application {
                     int progress = (int) ((100 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount());
                     Log.e(TAG_VERSION, "다운로드 진행 중: " + progress + String.format("(bytes=%d total=%d)", taskSnapshot.getBytesTransferred(), taskSnapshot.getTotalByteCount()));
 
-                    progressBarTxt.setText("다운로드 진행 중: " + progress + " "+String.format("(bytes=%d total=%d)", taskSnapshot.getBytesTransferred(), taskSnapshot.getTotalByteCount()));
+//                    progressBarTxt.setText("다운로드 진행 중: " + progress + " "+String.format("(bytes=%d total=%d)", taskSnapshot.getBytesTransferred(), taskSnapshot.getTotalByteCount()));
+                    if(isWiFi){
+                        progressBarTxt.setText(
+                                "패치 데이터 다운로드 중입니다.\n"
+                                +"("+getFileSize(taskSnapshot.getBytesTransferred())+"/"+getFileSize((long) StaticVariables.size)+")"
+                        );
+                    }else{
+                        progressBarTxt.setText(
+                                "패치 받을 데이터가 있습니다. 데이터의 용량은 "+getFileSize((long) StaticVariables.size)+"입니다. "
+                                        +"Wifi연결이 안되어 있는데 그래도 데이터 다운로드 하시겠습니까?\n"
+                                        +"("+getFileSize(taskSnapshot.getBytesTransferred())+"/"+getFileSize((long) StaticVariables.size)+")"
+                        );
+                    }
                 }
             });
 
@@ -344,10 +360,17 @@ public class VersionProgressApplication extends Application {
 
     void wifiCheck(File path, StorageReference pathReference, String version, Activity activity)
     {
-        boolean isWiFi = activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
+        isWiFi = activeNetwork.getType() == ConnectivityManager.TYPE_WIFI;
         confirmBtn.setVisibility(View.INVISIBLE);
-        if(!isWiFi){
-            progressBarTxt.setText("와이파이 데이터가 아닙니다. 데이터를 다운로드 하시겠습니까");
+
+//        if(!isWiFi){
+        //TODO 테스트데이터
+        if(isWiFi){
+            progressBarTxt.setText(
+                    "패치 받을 데이터가 있습니다. 데이터의 용량은 "+getFileSize((long) StaticVariables.size)+"입니다. "
+                            +"Wifi연결이 안되어 있는데 그래도 데이터 다운로드 하시겠습니까?\n"
+                            +"("+0+"/"+getFileSize((long) StaticVariables.size)+")"
+            );
             noBtn.setVisibility(View.VISIBLE);
             yesBtn.setVisibility(View.VISIBLE);
             yesBtn.setOnClickListener(new Button.OnClickListener() {
@@ -365,7 +388,7 @@ public class VersionProgressApplication extends Application {
                 public void onClick(View v) {
                     noBtn.setVisibility(View.INVISIBLE);
                     yesBtn.setVisibility(View.INVISIBLE);
-                    progressBarTxt.setText("기존 데이터 그대로 사용합니다.");
+                    progressBarTxt.setText("기존 패치 데이터 그대로 사용합니다.");
                     confirmBtn.setVisibility(View.VISIBLE);
                     patchCnt = 0;
                 }
@@ -377,6 +400,25 @@ public class VersionProgressApplication extends Application {
                 }
             }.start();
         }
+    }
+
+    public String getFileSize(Long size)
+    {
+        DecimalFormat df = new DecimalFormat("0.00");
+
+        float sizeKb = 1024.0f;
+        float sizeMb = sizeKb * sizeKb;
+        float sizeGb = sizeMb * sizeKb;
+        float sizeTerra = sizeGb * sizeKb;
+
+        if(size < sizeMb)
+            return df.format(size / sizeKb)+ " Kb";
+        else if(size < sizeGb)
+            return df.format(size / sizeMb) + " Mb";
+        else if(size < sizeTerra)
+            return df.format(size / sizeGb) + " Gb";
+
+        return "";
     }
 
 

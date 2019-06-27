@@ -5,6 +5,7 @@
     커스텀 할 수 있는 방법이 있을까?
   -->
 <android.support.constraint.ConstraintLayout
+    android:id="@+id/settingRow"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"

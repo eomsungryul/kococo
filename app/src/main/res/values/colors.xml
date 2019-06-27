@@ -25,7 +25,9 @@
 
 
     <color name="background_gray">#5D5D70</color>
-    <color name="background_red">#fc4e4e</color>
+    <color name="background_red">#FC9696</color>
+    <color name="background_blue">#61C6FC</color>
+    <color name="background_grayBtn">#D1D1D1</color>
 
 
 </resources>

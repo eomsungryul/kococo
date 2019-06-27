@@ -22,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.gson.JsonObject;
@@ -74,11 +75,11 @@ public class SettingListAdapter extends BaseAdapter {
         // "listview_item" Layout을 inflate하여 convertView 참조 획득.
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.layout_diary_row, parent, false);
+            convertView = inflater.inflate(R.layout.layout_setting_row, parent, false);
         }
 
         // 화면에 표시될 View(Layout이 inflate된)으로부터 위젯에 대한 참조 획득
-        TextView titleTextView = (TextView) convertView.findViewById(R.id.diaryNameText) ;
+        TextView titleTextView = (TextView) convertView.findViewById(R.id.settingNameText) ;
 
         // Data Set(listViewItemList)에서 position에 위치한 데이터 참조 획득
         listViewItem = listViewItemList.get(position);
@@ -93,55 +94,24 @@ public class SettingListAdapter extends BaseAdapter {
         retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();
         apiService = retrofit.create(ApiService.class);
 
-        ConstraintLayout diaryRow = (ConstraintLayout) convertView.findViewById(R.id.diaryRow) ;
+        ConstraintLayout settingRow = (ConstraintLayout) convertView.findViewById(R.id.settingRow) ;
         //뷰 전체를 클릭 했을 경우 페이지로 넘어간다.
-        diaryRow.setOnClickListener(new View.OnClickListener() {
+        settingRow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                Setting item = (Setting) getItem(position);
-
-                if(item.getSeq()==1){
-                    //프로필 페이지
-                    apiService.getProfile(userAppId).enqueue(new Callback<JsonObject>() {
-                        @Override
-                        public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                            System.out.println(" ========================response: "+response.body());
-                            Intent intent = new Intent(v.getContext(), ProfileActivity.class);
-                            intent.putExtra("responseData",response.body().toString()); /*송신*/
-                            v.getContext().startActivity(intent);
-                        }
-                        @Override
-                        public void onFailure(Call<JsonObject> call, Throwable t) {
-                            System.out.println(" ========================Throwable: "+t.getMessage());
-                        }
-                    });
-                }else if(item.getSeq()==2){
-                    //전문가 상담내역 페이지
-//                    Toast.makeText(context,"페이지 준비중입니다. ",Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(context, UserConsultListActivity.class);
-                    v.getContext().startActivity(intent);
-
-                }
-//                else if(item.getSeq()==3){
-//                    //사용자 음성 파일 관리
-////                    Toast.makeText(context,"준비중입니다. ",Toast.LENGTH_SHORT).show();
-//                    apiService.getProfile(userAppId).enqueue(new Callback<JsonObject>() {
-//                        @Override
-//                        public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-//                            System.out.println(" ========================response: "+response.body());
-//                            Intent intent = new Intent(v.getContext(), Mp3ManageActivity.class);
-//                            intent.putExtra("responseData",response.body().toString()); /*송신*/
-//                            v.getContext().startActivity(intent);
-//                        }
-//                        @Override
-//                        public void onFailure(Call<JsonObject> call, Throwable t) {
-//                            System.out.println(" ========================Throwable: "+t.getMessage());
-//                        }
-//                    });
-//                }
+                onClickEvt(context,v,position);
             }
         });
+
+        ImageView settingReportBtn = (ImageView) convertView.findViewById(R.id.settingReport) ;
+        //뷰 전체를 클릭 했을 경우 페이지로 넘어간다.
+        settingReportBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onClickEvt(context,v,position);
+            }
+        });
+
 
         return convertView;
     }
@@ -165,6 +135,31 @@ public class SettingListAdapter extends BaseAdapter {
             String name,int seq) {
         Setting item = new Setting(name,seq);
         listViewItemList.add(item);
+    }
+
+    public void onClickEvt(Context context, View v, int position){
+        Setting item = (Setting) getItem(position);
+        if(item.getSeq()==1){
+            //프로필 페이지
+            apiService.getProfile(userAppId).enqueue(new Callback<JsonObject>() {
+                @Override
+                public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                    System.out.println(" ========================response: "+response.body());
+                    Intent intent = new Intent(v.getContext(), ProfileActivity.class);
+                    intent.putExtra("responseData",response.body().toString()); /*송신*/
+                    v.getContext().startActivity(intent);
+                }
+                @Override
+                public void onFailure(Call<JsonObject> call, Throwable t) {
+                    System.out.println(" ========================Throwable: "+t.getMessage());
+                }
+            });
+        }else if(item.getSeq()==2){
+            //전문가 상담내역 페이지
+//                    Toast.makeText(context,"페이지 준비중입니다. ",Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(context, UserConsultListActivity.class);
+            v.getContext().startActivity(intent);
+        }
     }
 
 }
