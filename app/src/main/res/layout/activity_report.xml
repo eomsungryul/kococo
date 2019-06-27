@@ -65,7 +65,7 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:text="신고하기"
+        android:text="@string/reportHeader"
         android:textSize="15dp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -75,6 +75,8 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.011" />
 
+    <!--줄넘기 정책-->
+    <!--android:breakStrategy="simple"-->
     <TextView
         android:id="@+id/declareTxtBody"
         android:layout_width="wrap_content"
@@ -84,12 +86,13 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:text="신고내용"
-        android:textSize="18dp"
+        android:text="@string/reportContentsTxt"
+        android:textSize="17dp"
         android:textStyle="bold"
+        android:breakStrategy="simple"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.024"
+        app:layout_constraintHorizontal_bias="0.444"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/previousButton"
         app:layout_constraintVertical_bias="0.05" />
@@ -105,15 +108,12 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         android:id="@+id/constraintLayout3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/declareTxtBody"
-        app:layout_constraintVertical_bias="0.107">
+        app:layout_constraintVertical_bias="0.076">
 
         <EditText
             android:id="@+id/claimContents"
@@ -147,13 +147,12 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:background="@drawable/button_shape_green"
-        android:text="제출하기"
+        android:text="@string/sendBtn"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.972"
+        app:layout_constraintHorizontal_bias="0.966"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/constraintLayout3"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.718" />
+        app:layout_constraintVertical_bias="0.101" />
 
 </android.support.constraint.ConstraintLayout>

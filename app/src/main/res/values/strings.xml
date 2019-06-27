@@ -69,6 +69,12 @@
     <string name="cancelBtn">취소</string>
     <string name="yesBtn">예</string>
     <string name="noBtn">아니오</string>
+    <string name="sendBtn">보내기</string>
+
+    <!--reportActivity-->
+    <string name="reportHeader">잘못된 결과가 나왔나요?</string>
+    <string name="reportContentsTxt">이 결과가 마음에 들지 않는다면 저희에게 알려주세요</string>
+
 
 
     <!--error property-->

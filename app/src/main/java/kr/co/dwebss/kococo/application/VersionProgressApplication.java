@@ -339,7 +339,7 @@ public class VersionProgressApplication extends Application {
                     if(!isWiFi){
                         progressBarTxt.setText(
                                 "패치 받을 데이터가 있습니다. 데이터의 용량은 "+getFileSize((long) StaticVariables.size)+"입니다. "
-                                        +"Wifi연결이 안되어 있는데 그래도 데이터 다운로드 하시겠습니까?\n"
+                                        +"다운로드 시 데이터 이용료가 부과될 수 잇습니다. 계속 진행 하시겠습니까?\n"
                                         +"("+getFileSize(taskSnapshot.getBytesTransferred())+"/"+getFileSize((long) StaticVariables.size)+")"
                         );
                     }else{
@@ -366,7 +366,7 @@ public class VersionProgressApplication extends Application {
         if(!isWiFi){
             progressBarTxt.setText(
                     "패치 받을 데이터가 있습니다. 데이터의 용량은 "+getFileSize((long) StaticVariables.size)+"입니다. "
-                            +"Wifi연결이 안되어 있는데 그래도 데이터 다운로드 하시겠습니까?\n"
+                            +"다운로드 시 데이터 이용료가 부과될 수 잇습니다. 계속 진행 하시겠습니까?\n"
                             +"("+0+"/"+getFileSize((long) StaticVariables.size)+")"
             );
             noBtn.setVisibility(View.VISIBLE);

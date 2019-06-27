@@ -68,6 +68,12 @@
     <string name="cancelBtn">cancel</string>
     <string name="yesBtn">yes</string>
     <string name="noBtn">no</string>
+    <string name="sendBtn">send</string>
+
+    <!--reportActivity-->
+    <string name="reportHeader">report</string>
+    <string name="reportContentsTxt">If you do not like the results, please submit it.</string>
+
 
     <!--error property-->
     <string name="error_server">server error</string>

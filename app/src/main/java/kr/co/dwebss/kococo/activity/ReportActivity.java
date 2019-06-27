@@ -98,10 +98,10 @@ public class ReportActivity extends AppCompatActivity {
         float density = metrics.density;
         super.onCreate(savedInstanceState);
 
-        TextView test  = findViewById(R.id.declareTxtHeader);
+//        TextView test  = findViewById(R.id.declareTxtHeader);
         Intent intent = getIntent();
         recordData = (RecordData) intent.getSerializableExtra("testData");
-        test.setText(recordData.getTitle()+" 신고하기");
+//        test.setText(recordData.getTitle()+" 신고하기");
 
         retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();
         apiService = retrofit.create(ApiService.class);
@@ -115,11 +115,11 @@ public class ReportActivity extends AppCompatActivity {
         });
 
         claimContents = (EditText)findViewById(R.id.claimContents);
-        claimContents.setText("recordData : "+recordData.getAnalysisFileAppPath()
-                +"/"+recordData.getAnalysisFileNm()
-                +"/getAnalysisDetailsId :"+recordData.getAnalysisDetailsId()
-                +"/getAnalysisId :"+recordData.getAnalysisId()
-        );
+//        claimContents.setText("recordData : "+recordData.getAnalysisFileAppPath()
+//                +"/"+recordData.getAnalysisFileNm()
+//                +"/getAnalysisDetailsId :"+recordData.getAnalysisDetailsId()
+//                +"/getAnalysisId :"+recordData.getAnalysisId()
+//        );
 
         Button declareBtn = (Button) findViewById(R.id.declareBtn);
         declareBtn.setOnClickListener(new Button.OnClickListener() {
