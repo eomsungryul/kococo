@@ -20,7 +20,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
@@ -37,7 +36,6 @@ import android.widget.Toast;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.LegendEntry;
-import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
@@ -132,6 +130,10 @@ public class ResultActivity extends AppCompatActivity {
     //인텐트 데이터 전송 대체제
     DataHolderApplication dha;
 
+    String headerTextDate;
+
+    JsonArray analysisFilePathList;
+
    @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
@@ -147,6 +149,8 @@ public class ResultActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         dha = DataHolderApplication.getInstance();
+
+       analysisFilePathList = new JsonArray();
 
         //데이터 수신
         Intent intent = getIntent();
@@ -189,9 +193,13 @@ public class ResultActivity extends AppCompatActivity {
                 }else{
                     dateTxtHeader.setText(transFormat.format(recordStartD)+" "+recodeText);
                 }
+                headerTextDate = transFormat.format(recordStartD)+" "
+                        + DateTimeToStringFormat.format(recordStartDT)+"부터 "+DateTimeToStringFormat.format(recordEndDT)+"까지";
             }else{
                 dateTxtHeader.setText(transFormat.format(recordStartD)+" "
                         + DateTimeToStringFormat.format(recordStartDT)+" ~ "+transFormat.format(recordEndD)+" "+DateTimeToStringFormat.format(recordEndDT));
+                headerTextDate = transFormat.format(recordStartD)+" "
+                        + DateTimeToStringFormat.format(recordStartDT)+"부터 "+transFormat.format(recordEndD)+" "+DateTimeToStringFormat.format(recordEndDT)+"까지";
             }
 
             // 하단에 녹음 검출리스트 파일 리스트  Adapter 생성
@@ -255,6 +263,12 @@ public class ResultActivity extends AppCompatActivity {
                         recordData.setAnalysisEndDt(jncu.JsonStringNullCheck(analysisObj,"analysisEndDt"));
                         analysisId = analysisObj.get("analysisId").getAsInt();
                         analysisServerUploadPath = jncu.JsonStringNullCheck(analysisObj,"analysisFileAppPath")+"/"+jncu.JsonStringNullCheck(analysisObj,"analysisFileNm");
+
+                        JsonObject analysisPathList = new JsonObject();
+                        analysisPathList.addProperty("analysisId",analysisId);
+                        analysisPathList.addProperty("analysisServerUploadPath",analysisServerUploadPath);
+                        analysisFilePathList.add(analysisPathList);
+
 
                         Date analysisStartDt =  stringtoDateTimeFormat.parse(recordData.getAnalysisStartDt());
                         Date analysisEndDt = stringtoDateTimeFormat.parse(recordData.getAnalysisEndDt());
@@ -580,7 +594,8 @@ public class ResultActivity extends AppCompatActivity {
                                 intent.putExtra("responseData",response.body().toString()); /*송신*/
                                 intent.putExtra("analysisId",analysisId); /*송신*/
                                 intent.putExtra("recordId",recordId); /*송신*/
-                                intent.putExtra("analysisServerUploadPath",analysisServerUploadPath); /*송신*/
+                                intent.putExtra("analysisList",analysisFilePathList.toString()); /*송신*/
+                                intent.putExtra("headerTextDate", headerTextDate);
                                 v.getContext().startActivity(intent);
                             }else{
                                 //프로필 없음 프로필페이지로 이동

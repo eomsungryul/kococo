@@ -42,6 +42,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import org.w3c.dom.Text;
+
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.http.ApiService;
 import okhttp3.MediaType;
@@ -57,6 +59,7 @@ public class ConsultActivity extends AppCompatActivity {
     ApiService apiService;
 
     JsonObject responseData;
+    JsonArray analysisList;
 
     int recordId;
     int analysisId;
@@ -68,6 +71,7 @@ public class ConsultActivity extends AppCompatActivity {
     EditText consultTitle;
 
     ScrollView sv;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +97,11 @@ public class ConsultActivity extends AppCompatActivity {
 
             analysisId = getIntent().getIntExtra("analysisId",0);
             recordId = getIntent().getIntExtra("recordId",0);
-            analysisServerUploadPath = getIntent().getStringExtra("analysisServerUploadPath");
+
+            analysisList = new JsonParser().parse(getIntent().getStringExtra("analysisList")).getAsJsonArray();
+
+            TextView consultTxtHeader = (TextView) findViewById(R.id.consultTxtHeader);
+            consultTxtHeader.setText(getIntent().getStringExtra("headerTextDate")+" \n분석된 내용을 바탕으로 전문가 상담을 의뢰합니다.");
 
             //뒤로가기 버튼
             ImageButton bt = (ImageButton) findViewById(R.id.previousButton);
@@ -210,11 +218,6 @@ public class ConsultActivity extends AppCompatActivity {
         JsonObject requestJson = new JsonObject();
         requestJson.addProperty("consultingTitle",consultTitle.getText().toString());
         requestJson.addProperty("consultingContents",consultContents.getText().toString());
-        JsonArray analysisList = new JsonArray();
-        JsonObject analysisObj = new JsonObject();
-        analysisObj.addProperty("analysisId",analysisId);
-        analysisObj.addProperty("analysisServerUploadPath",analysisServerUploadPath);
-        analysisList.add(analysisObj);
         requestJson.add("analysisList",analysisList);
 
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();

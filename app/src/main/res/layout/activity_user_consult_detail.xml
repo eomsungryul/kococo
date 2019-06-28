@@ -96,7 +96,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginRight="10dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/button_shape_darkgray"
+        android:background="@drawable/edit_text_shape_gray"
         android:gravity="top|left"
         android:lines="5"
         android:scrollHorizontally="false"
@@ -144,7 +144,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginRight="10dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/button_shape_darkgray"
+        android:background="@drawable/edit_text_shape_gray"
         android:gravity="top|left"
         android:inputType="textMultiLine"
         android:lines="10"
@@ -153,10 +153,10 @@
         android:textCursorDrawable="@color/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.894"
+        app:layout_constraintHorizontal_bias="0.526"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/contents_txt"
-        app:layout_constraintVertical_bias="0.013" />
+        app:layout_constraintVertical_bias="0.045" />
 
 
     <TextView
@@ -193,7 +193,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginRight="10dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/button_shape_darkgray"
+        android:background="@drawable/edit_text_shape_gray"
         android:gravity="top|left"
         android:inputType="textMultiLine"
         android:lines="5"
