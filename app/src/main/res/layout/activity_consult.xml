@@ -186,7 +186,7 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.972"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.833" />
+        app:layout_constraintTop_toBottomOf="@+id/contents_val"
+        app:layout_constraintVertical_bias="0.105" />
 
 </android.support.constraint.ConstraintLayout>

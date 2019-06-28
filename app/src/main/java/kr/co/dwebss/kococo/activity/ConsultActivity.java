@@ -97,12 +97,11 @@ public class ConsultActivity extends AppCompatActivity {
             });
 
             consultTitle = (EditText)findViewById(R.id.title_val);
-            consultTitle.setText("analysisId : "+analysisId +"/recordId : "+recordId
-            );
+//            consultTitle.setText("analysisId : "+analysisId +"/recordId : "+recordId            );
             consultContents = (EditText)findViewById(R.id.contents_val);
-            consultContents.setText("analysisServerUploadPath : "+analysisServerUploadPath
-                    +"responseData : "+responseData
-            );
+//            consultContents.setText("analysisServerUploadPath : "+analysisServerUploadPath
+//                    +"responseData : "+responseData
+//            );
 
             Button declareBtn = (Button) findViewById(R.id.declareBtn);
             declareBtn.setOnClickListener(new Button.OnClickListener() {
