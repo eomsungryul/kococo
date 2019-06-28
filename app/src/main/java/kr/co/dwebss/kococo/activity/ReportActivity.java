@@ -29,10 +29,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -83,9 +86,9 @@ public class ReportActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         //인터넷 연결 유형
-        cm =
-                (ConnectivityManager)getApplicationContext().getSystemService(getApplicationContext().CONNECTIVITY_SERVICE);
+        cm =(ConnectivityManager)getApplicationContext().getSystemService(getApplicationContext().CONNECTIVITY_SERVICE);
 
         activeNetwork = cm.getActiveNetworkInfo();
 
@@ -110,6 +113,7 @@ public class ReportActivity extends AppCompatActivity {
         bt.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
+                imm.hideSoftInputFromWindow(claimContents.getWindowToken(),0);
                 ReportActivity.super.onBackPressed();
             }
         });
@@ -128,6 +132,18 @@ public class ReportActivity extends AppCompatActivity {
                 showDeclareDialog();
             }
         });
+
+        ScrollView sv = (ScrollView) findViewById(R.id.scrollVew);
+        claimContents.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    sv.fullScroll(sv.FOCUS_DOWN);
+                } else {
+                }
+            }
+        } );
+
 
     }
 
@@ -298,6 +314,8 @@ public class ReportActivity extends AppCompatActivity {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         Log.v(TAG, "onConfigurationChanged " + newConfig.screenWidthDp + "," + newConfig.screenHeightDp);
+
+
     }
 
 }

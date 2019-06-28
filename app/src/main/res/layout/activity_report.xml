@@ -104,6 +104,18 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         gravity 커서의 위치 변경 top left 같이 하면 왼쪽 상단에 커서로 바뀐다.
     -->
 
+    <ScrollView
+        android:id="@+id/scrollVew"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constrainedHeight="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/declareTxtBody"
+        app:layout_constraintVertical_bias="0.01"
+        tools:layout_editor_absoluteX="16dp">
+
     <android.support.constraint.ConstraintLayout
         android:id="@+id/constraintLayout3"
         android:layout_width="match_parent"
@@ -118,7 +130,7 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
         <EditText
             android:id="@+id/claimContents"
             android:layout_width="0dp"
-            android:layout_height="300dp"
+            android:layout_height="200dp"
             android:layout_marginLeft="10dp"
             android:layout_marginTop="8dp"
             android:layout_marginRight="10dp"
@@ -136,23 +148,26 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0" />
+
+        <Button
+            android:id="@+id/declareBtn"
+            android:layout_width="100dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/button_shape_green"
+            android:text="@string/sendBtn"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.966"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/claimContents"
+            app:layout_constraintVertical_bias="0.101" />
+
     </android.support.constraint.ConstraintLayout>
 
-    <Button
-        android:id="@+id/declareBtn"
-        android:layout_width="100dp"
-        android:layout_height="30dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/button_shape_green"
-        android:text="@string/sendBtn"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.966"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout3"
-        app:layout_constraintVertical_bias="0.101" />
+    </ScrollView>
 
 </android.support.constraint.ConstraintLayout>

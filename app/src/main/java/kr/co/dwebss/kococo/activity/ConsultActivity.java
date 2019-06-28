@@ -19,15 +19,20 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,8 +67,11 @@ public class ConsultActivity extends AppCompatActivity {
     EditText consultContents;
     EditText consultTitle;
 
+    ScrollView sv;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
 
         setTheme(R.style.AppTheme);
         //세로모드에서 가로모드로 전환 시 onCreate함수가 다시 호출
@@ -92,6 +100,7 @@ public class ConsultActivity extends AppCompatActivity {
             bt.setOnClickListener(new Button.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    imm.hideSoftInputFromWindow(consultTitle.getWindowToken(),0);
                     ConsultActivity.super.onBackPressed();
                 }
             });
@@ -110,6 +119,36 @@ public class ConsultActivity extends AppCompatActivity {
                     showConsultDialog();
                 }
             });
+            sv = (ScrollView) findViewById(R.id.scrollVew);
+//            consultContents.setOnTouchListener(new View.OnTouchListener() {
+//                @Override
+//                public boolean onTouch(View v, MotionEvent event) {
+//                    sv.fullScroll(sv.FOCUS_DOWN);
+//                    return false;
+//                }
+//            });
+            consultTitle.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (hasFocus) {
+
+                    } else {
+                        sv.fullScroll(sv.FOCUS_DOWN);
+                    }
+                }
+            });
+            consultContents.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (hasFocus) {
+                        sv.fullScroll(sv.FOCUS_DOWN);
+                    } else {
+                    }
+                }
+            } );
+
+
+
 
 
         }else{
@@ -212,6 +251,7 @@ public class ConsultActivity extends AppCompatActivity {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         Log.v(TAG, "onConfigurationChanged " + newConfig.screenWidthDp + "," + newConfig.screenHeightDp);
+
     }
 
     @Override
