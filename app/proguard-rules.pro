@@ -73,3 +73,5 @@
 -dontnote okhttp3.**
 
 -dontwarn android.support.**
+
+#-dontwarn kr.co.dwebss.kococo.**

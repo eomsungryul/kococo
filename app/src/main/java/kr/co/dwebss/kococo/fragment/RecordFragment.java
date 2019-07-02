@@ -43,6 +43,7 @@ import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.util.FileUtil;
 import kr.co.dwebss.kococo.util.FindAppIdUtil;
 import kr.co.dwebss.kococo.util.SimpleLame;
+import kr.co.dwebss.kococo.util.WaveFormatConverter;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -413,8 +414,14 @@ public class RecordFragment extends Fragment  {
         Log.v(LOG_TAG2, "Recording has started");
         mShouldContinue = true;
 
+        String savePath = getContext().getFilesDir().getAbsolutePath(); // 이경로는 adb pull 이 안됨.
+
+        WaveFormatConverter wfc = new WaveFormatConverter();
+        int folderNm = wfc.subDirList(savePath+"/rec_data/");
+        System.out.println("=======파일 저장 ======초기=="+folderNm);
+
         //Audio_Recording();
-        recordingThread = new RecordingThread(this);
+        recordingThread = new RecordingThread(this, String.valueOf(folderNm));
         recordingThread.setPriority(Thread.MAX_PRIORITY);
         //recordingThread.start(getContext(), mShouldContinue, record, recordStartDtL, recodeFlag, recordData, mp3buffer);
         recordingThread.start();

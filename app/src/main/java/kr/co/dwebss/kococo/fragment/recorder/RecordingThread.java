@@ -74,9 +74,11 @@ public class RecordingThread extends Thread {
     Field noiseChkSum;
     Field noiseChkCnt;
     int errLoginCnt = 0;
+    String folderName;
 
-    public RecordingThread(RecordFragment recordFragment) {
+    public RecordingThread(RecordFragment recordFragment,String folderName) {
         this.recordFragment = recordFragment;
+        this.folderName = folderName;
 
         try{
             final String libPath = recordFragment.getThisContext().getFilesDir().getAbsolutePath() + "/libs/SoundAnalysis_" + StaticVariables.version + ".jar";
@@ -295,7 +297,7 @@ try {
             //WaveFormatConverter wfc = new WaveFormatConverter(44100, (short)1, waveData, 0, waveData.length-1);
             WaveFormatConverter wfc = new WaveFormatConverter();
             //String[] fileInfo = wfc.saveLongTermWave(fileName, getContext());
-            String[] fileInfo = wfc.saveLongTermMp3(fileName, recordFragment.getThisContext(), waveData);
+            String[] fileInfo = wfc.saveLongTermMp3(folderName,fileName, recordFragment.getThisContext(), waveData);
 
             Log.v(LOG_TAG2, ("=====녹음중 분석 종료, 분석정보 시작====="));
             Log.v(LOG_TAG2, ("녹음파일 길이(s): " + ((double) (recordingLength / (44100d * 16 * 1))) * 8));
@@ -619,7 +621,7 @@ e.printStackTrace();
             //TODO 녹음된 파일이 저장되는 시점
             //WaveFormatConverter wfc = new WaveFormatConverter(44100, (short)1, waveData, 0, waveData.length-1);
             WaveFormatConverter wfc = new WaveFormatConverter();
-            String[] fileInfo = wfc.saveLongTermMp3(fileName, recordFragment.getThisContext(), waveData);
+            String[] fileInfo = wfc.saveLongTermMp3(folderName,fileName, recordFragment.getThisContext(), waveData);
 
             Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
             Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (recordingLength/ (44100d * 16 * 1))) * 8));

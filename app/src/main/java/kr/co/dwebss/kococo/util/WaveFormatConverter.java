@@ -94,21 +94,23 @@ public class WaveFormatConverter {
 	// ------------------------------------------------------------
 
 
-	public String[] saveLongTermMp3(String fileName, Context x, byte[] waveData) {
+	public String[] saveLongTermMp3(String folderName ,String fileName, Context x, byte[] waveData) {
 //		File myDir = new File(Environment.getExternalStorageDirectory(), "rec_data/");
 		//Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 		String[] fileInfo = new String[2];
 		if(x!=null){
 			String savePath = x.getFilesDir().getAbsolutePath(); // 이경로는 adb pull 이 안됨.
-
 //		savePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath(); //테스트하려고 임시로 쓴 경로
-//		System.out.println(savePath+"/rec_data/"+ "----------------------save rec_data/rec_data/rec_data/rec_data/rec_data/rec_data/");
-			subDirList(savePath+"/rec_data/");
-			folderCnt++;
-			File myDir = new File(savePath, "rec_data/"+folderCnt+"/");
+
+//			subDirList(savePath+"/rec_data/");
+//			folderCnt++;
+			File myDir = new File(savePath, "rec_data/"+folderName+"/");
 			if(!myDir.exists()){
 				myDir.mkdirs();
 			}
+
+			System.out.println("=======파일 저장 ======saveLongTermMp3=="+myDir.toString());
+
 //		System.out.println(fileName+ "----------------------save start");
 //		System.out.println(myDir.toString()+ "----------------------save wdawdawdawdawdawdawdadw");
 			String filename = "snoring-"+fileName+"_"+System.currentTimeMillis()+".mp3";
@@ -132,41 +134,7 @@ public class WaveFormatConverter {
 		return fileInfo;
 	}
 
-
-	public String[] saveLongTermWave(String fileName, Context x) {
-//		File myDir = new File(Environment.getExternalStorageDirectory(), "rec_data/");
-		System.out.println(x.getFilesDir().getAbsolutePath()+"/rec_data/"+ "=======save rec_data");
-		subDirList(x.getFilesDir().getAbsolutePath()+"/rec_data/");
-		folderCnt++;
-		File myDir = new File(x.getFilesDir().getAbsolutePath(), "rec_data/"+folderCnt+"/");
-		if(!myDir.exists()){
-			myDir.mkdirs();
-		}
-
-		System.out.println("============save===fileName=========="+fileName);
-		System.out.println("============myDir.toString()======"+myDir.toString());
-		String filename = "snoring-"+fileName+"_"+System.currentTimeMillis()+".wav";
-		try {
-			File path=new File(myDir,filename);
-			FileOutputStream outFile = new FileOutputStream(path);
-			outFile.write(output);
-			outFile.close();
-//			filename = path.getAbsolutePath();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			filename = "e1";
-		} catch (IOException e) {
-			filename = "e2";
-			e.printStackTrace();
-		}
-		System.out.println(fileName+ "----------------------save end");
-		String[] fileInfo = new String[2];
-		fileInfo[0] = myDir.toString();
-		fileInfo[1] = filename;
-		return fileInfo;
-	}
-
-	public void subDirList(String source){
+	public int subDirList(String source){
 		folderCnt = 0;
 		File dir = new File(source);
 		if(!dir.exists()){
@@ -186,39 +154,12 @@ public class WaveFormatConverter {
 				// 서브디렉토리가 존재하면 재귀적 방법으로 다시 탐색
 //					subDirList(file.getCanonicalPath().toString());
 			}
-
 		}
+		//마지막에서 +1 인 폴더를 생성해야되기 때문에 추가
+		folderCnt++;
 
-	}
+		return  folderCnt;
 
-
-	public String[] saveLongTermMp3Test(String fileName, Context x, byte[] waveData) {
-//		File myDir = new File(Environment.getExternalStorageDirectory(), "rec_data/");
-		//Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-		String savePath = x.getFilesDir().getAbsolutePath(); // 이경로는 adb pull 이 안됨.
-		savePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath(); //테스트하려고 임시로 쓴 경로
-		System.out.println("============savePath======="+savePath);
-		File myDir = new File(savePath);
-		if(!myDir.exists()){
-			myDir.mkdirs();
-		}
-		String filename = "test.mp3";
-		try {
-			File path=new File(myDir,filename);
-			FileOutputStream outFile = new FileOutputStream(path);
-			outFile.write(waveData,0,waveData.length);
-			outFile.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			filename = "e1";
-		} catch (IOException e) {
-			filename = "e2";
-			e.printStackTrace();
-		}
-		String[] fileInfo = new String[2];
-		fileInfo[0] = myDir.toString();
-		fileInfo[1] = filename;
-		return fileInfo;
 	}
 
 }
