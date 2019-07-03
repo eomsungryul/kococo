@@ -75,6 +75,8 @@ public class RecordingThread extends Thread {
     Field noiseChkCnt;
     int errLoginCnt = 0;
     String folderName;
+    Method getMaxDB;
+    Method getMinDB;
 
     public RecordingThread(RecordFragment recordFragment,String folderName) {
         this.recordFragment = recordFragment;
@@ -124,6 +126,8 @@ public class RecordingThread extends Thread {
                 }
                 Log.e("yrseo", "--------------------------------------------");
 
+                getMaxDB = SleepCheck.getMethod("getMaxDB");
+                getMinDB = SleepCheck.getMethod("getMinDB");
                 setMaxDB = SleepCheck.getMethod("setMaxDB", double.class);
                 setMinDB = SleepCheck.getMethod("setMinDB", double.class);
                 tmpMinDb = SleepCheck.getDeclaredField("tmpMinDb");
@@ -189,7 +193,7 @@ try {
             decibel = audioCalculator.getDecibel();
             frequency = audioCalculator.getFrequency();
         } catch (ArrayIndexOutOfBoundsException e) {
-            Log.v(LOG_TAG2, e.getMessage());
+            Log.e(LOG_TAG2, e.getMessage());
             continue;
         }
 
@@ -264,11 +268,10 @@ try {
                 errLoginCnt++;
             }
         }
-        Log.e(LOG_TAG3,(calcTime(times)+" "+hz +" "+db+" "+amp+" "+decibel+","+noiseCheckForStartVal+" "+noiseCheckVal));
-
+        Log.v(LOG_TAG3,(calcTime(times)+" "+hz +" "+db+" "+amp+" "+decibel+"vs"+getMaxDB.invoke(SleepCheck))+","+ getMinDB.invoke(SleepCheck)+","+noiseChkSumVal+" "+noiseChkCntVal+" "+noiseCheckForStartVal+" "+noiseCheckVal);
         if ( noiseCheckForStartVal >= StaticVariables.forNoiseCheckForStartVal && isRecording == false
                 && Math.floor((double) (audioData.length / (44100d * 16 * 1)) * 8) != Math.floor(times)) {
-            Log.v(LOG_TAG2, (calcTime(times) + "(" + String.format("%.2f", times) + "s) 녹음 시작!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
+            Log.e(LOG_TAG2, (calcTime(times) + "(" + String.format("%.2f", times) + "s) 녹음 시작!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
             //recordStartingTIme = times;
             recordStartingTIme = System.currentTimeMillis();
             baos = new ByteArrayOutputStream();
@@ -284,7 +287,7 @@ try {
             //} else if (isRecording == true && SleepCheck.noiseCheck(decibel) <= 100) {
         //} else if (isRecording == true && SleepCheck.noiseCheck(decibel) <= 100) {
         } else if (isRecording == true && noiseCheckVal <= StaticVariables.forNoiseCheckVal) {
-            Log.v(LOG_TAG2, (calcTime(times) + "(" + String.format("%.2f", times) + "s) 녹음 종료!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
+            Log.e(LOG_TAG2, (calcTime(times) + "(" + String.format("%.2f", times) + "s) 녹음 종료!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
             AllAnalysisRawDataList.add(maxARD);
             SimpleDateFormat dayTime = new SimpleDateFormat("yyyyMM_dd_HHmm");
             String fileName = dayTime.format(new Date(recordStartingTIme));
@@ -300,10 +303,10 @@ try {
             //String[] fileInfo = wfc.saveLongTermWave(fileName, getContext());
             String[] fileInfo = wfc.saveLongTermMp3(folderName,fileName, recordFragment.getThisContext(), waveData);
 
-            Log.v(LOG_TAG2, ("=====녹음중 분석 종료, 분석정보 시작====="));
-            Log.v(LOG_TAG2, ("녹음파일 길이(s): " + ((double) (recordingLength / (44100d * 16 * 1))) * 8));
-            Log.v(LOG_TAG2, ("tmpMinDb: " + tmpMinDb));
-            Log.v(LOG_TAG2, ("tmpMaxDb: " + tmpMaxDb));
+            Log.e(LOG_TAG2, ("=====녹음중 분석 종료, 분석정보 시작====="));
+            Log.e(LOG_TAG2, ("녹음파일 길이(s): " + ((double) (recordingLength / (44100d * 16 * 1))) * 8));
+            Log.e(LOG_TAG2, ("tmpMinDb: " + tmpMinDb));
+            Log.e(LOG_TAG2, ("tmpMaxDb: " + tmpMaxDb));
 
             JsonObject ans = new JsonObject();
             StartEnd tmpSE = new StartEnd(); //전체 분석 데이터를 변환하기 위해 임시로 vo를 생성
@@ -312,7 +315,7 @@ try {
             try {
                 Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                 String andRList = gson.toJson(printAnalysisRawDataList(tmpSE));
-                //Log.v(LOG_TAG2,andRList);
+                //Log.e(LOG_TAG2,andRList);
                 ans.addProperty("recordingData", andRList);
 
             } catch (NullPointerException e) {
@@ -347,7 +350,7 @@ try {
             }
             for (StartEnd se : snoringTermList) {
                 if (se.end != 0 && se.end > se.start) {
-                    Log.v(LOG_TAG2, se.getTerm());
+                    Log.e(LOG_TAG2, se.getTerm());
                     ansd = new JsonObject();
                     ansd.addProperty("termTypeCd", 200101);
                     ansd.addProperty("termStartDt", dayTimeDefalt.format(new Date((long) (recordFragment.getRecordStartDtl() + se.start * 1000))));
@@ -355,7 +358,7 @@ try {
                     try {
                         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                         String andRList = gson.toJson(printAnalysisRawDataList(se));
-                        Log.v(LOG_TAG2, andRList);
+                        Log.e(LOG_TAG2, andRList);
                         ansd.addProperty("analysisData", andRList);
 
                     } catch (NullPointerException e) {
@@ -391,7 +394,7 @@ try {
             }
             for (StartEnd se : grindingTermList) {
                 if (se.end != 0 && se.end > se.start) {
-                    Log.v(LOG_TAG2, se.getTerm());
+                    Log.e(LOG_TAG2, se.getTerm());
                     ansd = new JsonObject();
                     ansd.addProperty("termTypeCd", 200102);
                     ansd.addProperty("termStartDt", dayTimeDefalt.format(new Date((long) (recordFragment.getRecordStartDtl() + se.start * 1000))));
@@ -399,7 +402,7 @@ try {
                     try {
                         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                         String andRList = gson.toJson(printAnalysisRawDataList(se));
-                        Log.v(LOG_TAG2, andRList);
+                        Log.e(LOG_TAG2, andRList);
                         ansd.addProperty("analysisData", andRList);
 
                     } catch (NullPointerException e) {
@@ -416,7 +419,7 @@ try {
             }
             for (StartEnd se : osaTermList) {
                 if (se.end != 0 && se.end > se.start) {
-                    Log.v(LOG_TAG2, se.getTerm());
+                    Log.e(LOG_TAG2, se.getTerm());
                     ansd = new JsonObject();
                     ansd.addProperty("termTypeCd", 200103);
                     ansd.addProperty("termStartDt", dayTimeDefalt.format(new Date((long) (recordFragment.getRecordStartDtl() + se.start * 1000))));
@@ -424,7 +427,7 @@ try {
                     try {
                         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                         String andRList = gson.toJson(printAnalysisRawDataList(se));
-                        Log.v(LOG_TAG2, andRList);
+                        Log.e(LOG_TAG2, andRList);
                         ansd.addProperty("analysisData", andRList);
 
                     } catch (NullPointerException e) {
@@ -441,7 +444,7 @@ try {
             }
             ans.add("analysisDetailsList", ansDList);
             ansList.add(ans);
-            Log.v(LOG_TAG2, ("=====녹음중 분석 종료, 분석정보 끝====="));
+            Log.e(LOG_TAG2, ("=====녹음중 분석 종료, 분석정보 끝====="));
             recordStartingTIme = 0;
             isRecording = false;
         }
@@ -473,8 +476,8 @@ try {
         }
 
         if (allFHAndDB != null && tmpMaxDbVal > 40) {
-            //Log.v(LOG_TAG3, (calcTime(times) + " " + hz + " " + db + " " + amp + " " + decibel + ", 100db: " + tmpMaxDb + "db, max: " + SleepCheck.getMaxDB() + ", min: " + SleepCheck.getMinDB() + " " + SleepCheck.noiseChkSum + " " + SleepCheck.noiseChkCnt));
-            Log.v(LOG_TAG3, (calcTime(times) + " " + hz + " " + db + " " + amp + " " + decibel + ", 100db: " + tmpMaxDbVal + "db, max: " + noiseChkSumVal + " " + noiseChkCntVal ));
+            //Log.e(LOG_TAG3, (calcTime(times) + " " + hz + " " + db + " " + amp + " " + decibel + ", 100db: " + tmpMaxDb + "db, max: " + SleepCheck.getMaxDB() + ", min: " + SleepCheck.getMinDB() + " " + SleepCheck.noiseChkSum + " " + SleepCheck.noiseChkCnt));
+            Log.e(LOG_TAG3, (calcTime(times) + " " + hz + " " + db + " " + amp + " " + decibel + ", 100db: " + tmpMaxDbVal + "db, max: " + noiseChkSumVal + " " + noiseChkCntVal ));
         }
         try {
             snoringCheck.invoke(SleepCheck, allFHAndDB, decibel, times, snoringTermList, grindingTermList, maxARD);
@@ -552,28 +555,28 @@ try {
                 int tmpTime = (int) Math.floor(times);
                 //1초 혹은 1분 단위로 기록
                 if (tmpTime < 31 || AllAnalysisRawDataList.size() < 31) {
-                    Log.v(LOG_TAG2, (calcTime(times)) + " 1번");
+                    Log.e(LOG_TAG2, (calcTime(times)) + " 1번");
                     AllAnalysisRawDataList.add(maxARD);
                 }
                 //if(tmpTime>60 && tmpTime%30 ==2) {
                     /*
                     if(tmpTime%30 ==2) {
-                        Log.v(LOG_TAG2,(calcTime(times))+" 2번");
-                        //Log.v(LOG_TAG2,(calcTime(times)+" "+calcTime(maxARD.getTimes())+" "+maxARD.getDecibel()));
+                        Log.e(LOG_TAG2,(calcTime(times))+" 2번");
+                        //Log.e(LOG_TAG2,(calcTime(times)+" "+calcTime(maxARD.getTimes())+" "+maxARD.getDecibel()));
                         AllAnalysisRawDataList.add(maxARD);
                     }
                     */
 
-                //Log.v(LOG_TAG2,(calcTime(times))+" "+calcTime((System.currentTimeMillis()/1000)%60));
+                //Log.e(LOG_TAG2,(calcTime(times))+" "+calcTime((System.currentTimeMillis()/1000)%60));
                 if (tmpTime > 30 && AllAnalysisRawDataList.size() > 0) { //녹음이 새로 시작할 때 리스트가 0인 경우라면 오류가 발생한다. 앞에서 리스트가 31 미만이면 리스트를 추가하게 되어있으므로 size가 0인 경우는 없음.
 
                     double tmpCM = (times + (int) (recordFragment.getRecordStartDtl() / 1000) % 60);
                     double tmpBeforeCM = (AllAnalysisRawDataList.get(AllAnalysisRawDataList.size() - 1).getTimes() + (int) (recordFragment.getRecordStartDtl() / 1000) % 60);
                     int tmpM = calcMinute(tmpCM);
                     int tmpBeforeM = calcMinute(tmpBeforeCM);
-                    //Log.v(LOG_TAG2,(calcTime(times)+" "+tmpCM+" "+tmpBeforeCM+" "+tmpM+" "+tmpBeforeM));
+                    //Log.e(LOG_TAG2,(calcTime(times)+" "+tmpCM+" "+tmpBeforeCM+" "+tmpM+" "+tmpBeforeM));
                     if (tmpM != tmpBeforeM) {
-                        Log.v(LOG_TAG2, (calcTime(times)) + " 3번 " + tmpTime);
+                        Log.e(LOG_TAG2, (calcTime(times)) + " 3번 " + tmpTime);
                         AllAnalysisRawDataList.add(maxARD);
                     }
                 }
@@ -609,7 +612,7 @@ try {
 e.printStackTrace();
 }
         if (isRecording == true && recordFragment.getRecordeFlag() == false) {
-            Log.v(LOG_TAG2,(calcTime(times)+"("+String.format("%.2f", times) + "s) 녹음 종료 버튼을 눌러서 현재 진행되던 녹음을 종료!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
+            Log.e(LOG_TAG2,(calcTime(times)+"("+String.format("%.2f", times) + "s) 녹음 종료 버튼을 눌러서 현재 진행되던 녹음을 종료!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
             AllAnalysisRawDataList.add(maxARD);
             SimpleDateFormat dayTime = new SimpleDateFormat("yyyyMM_dd_HHmm");
             String fileName = dayTime.format(new Date(recordStartingTIme));
@@ -624,10 +627,10 @@ e.printStackTrace();
             WaveFormatConverter wfc = new WaveFormatConverter();
             String[] fileInfo = wfc.saveLongTermMp3(folderName,fileName, recordFragment.getThisContext(), waveData);
 
-            Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
-            Log.v(LOG_TAG2,("녹음파일 길이(s): " + ((double) (recordingLength/ (44100d * 16 * 1))) * 8));
-            Log.v(LOG_TAG2,("tmpMinDb: "+tmpMinDb));
-            Log.v(LOG_TAG2,("tmpMaxDb: "+tmpMaxDb));
+            Log.e(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 시작====="));
+            Log.e(LOG_TAG2,("녹음파일 길이(s): " + ((double) (recordingLength/ (44100d * 16 * 1))) * 8));
+            Log.e(LOG_TAG2,("tmpMinDb: "+tmpMinDb));
+            Log.e(LOG_TAG2,("tmpMaxDb: "+tmpMaxDb));
 
             JsonObject ans = new JsonObject();
             StartEnd tmpSE = new StartEnd(); //전체 분석 데이터를 변환하기 위해 임시로 vo를 생성
@@ -636,7 +639,7 @@ e.printStackTrace();
             try {
                 Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                 String andRList = gson.toJson(printAnalysisRawDataList(tmpSE));
-                //Log.v(LOG_TAG2,andRList);
+                //Log.e(LOG_TAG2,andRList);
                 ans.addProperty("recordingData", andRList);
 
             }catch(NullPointerException e){
@@ -669,7 +672,7 @@ e.printStackTrace();
             }
             for(StartEnd se : snoringTermList) {
                 if(se.end!=0 && se.end>se.start){
-                    Log.v(LOG_TAG2,se.getTerm());
+                    Log.e(LOG_TAG2,se.getTerm());
                     ansd = new JsonObject();
                     ansd.addProperty("termTypeCd",200101);
                     ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordFragment.getRecordStartDtl()+se.start*1000))));
@@ -677,7 +680,7 @@ e.printStackTrace();
                     try {
                         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                         String andRList = gson.toJson(printAnalysisRawDataList(se));
-                        Log.v(LOG_TAG2,andRList);
+                        Log.e(LOG_TAG2,andRList);
                         ansd.addProperty("analysisData", andRList);
 
                     }catch(NullPointerException e){
@@ -709,7 +712,7 @@ e.printStackTrace();
             }
             for(StartEnd se : grindingTermList) {
                 if(se.end!=0 && se.end>se.start){
-                    Log.v(LOG_TAG2,se.getTerm());
+                    Log.e(LOG_TAG2,se.getTerm());
                     ansd = new JsonObject();
                     ansd.addProperty("termTypeCd",200102);
                     ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordFragment.getRecordStartDtl()+se.start*1000))));
@@ -717,7 +720,7 @@ e.printStackTrace();
                     try {
                         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                         String andRList = gson.toJson(printAnalysisRawDataList(se));
-                        Log.v(LOG_TAG2,andRList);
+                        Log.e(LOG_TAG2,andRList);
                         ansd.addProperty("analysisData", andRList);
 
                     }catch(NullPointerException e){
@@ -730,7 +733,7 @@ e.printStackTrace();
             }
             for(StartEnd se : osaTermList) {
                 if(se.end!=0 && se.end>se.start){
-                    Log.v(LOG_TAG2,se.getTerm());
+                    Log.e(LOG_TAG2,se.getTerm());
                     ansd = new JsonObject();
                     ansd.addProperty("termTypeCd",200103);
                     ansd.addProperty("termStartDt",dayTimeDefalt.format(new Date((long) (recordFragment.getRecordStartDtl()+se.start*1000))));
@@ -738,7 +741,7 @@ e.printStackTrace();
                     try {
                         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
                         String andRList = gson.toJson(printAnalysisRawDataList(se));
-                        Log.v(LOG_TAG2,andRList);
+                        Log.e(LOG_TAG2,andRList);
                         ansd.addProperty("analysisData", andRList);
 
                     }catch(NullPointerException e){
@@ -752,7 +755,7 @@ e.printStackTrace();
             ans.add("analysisDetailsList", ansDList);
             ansList.add(ans);
 
-            Log.v(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 끝====="));
+            Log.e(LOG_TAG2,("=====녹음중 분석 종료, 분석정보 끝====="));
             recordStartingTIme = 0;
             isRecording = false;
         }
@@ -762,31 +765,31 @@ e.printStackTrace();
         recordFragment.getRecordData().addProperty("recordEndDt",dayTimeDefalt.format(new Date(System.currentTimeMillis())));
         recordFragment.getRecordData().add("analysisList", ansList);
 
-        Log.v(LOG_TAG2,(" =============녹음 종료버튼  ===========recordData: "+recordFragment.getRecordData().toString()));
+        Log.e(LOG_TAG2,(" =============녹음 종료버튼  ===========recordData: "+recordFragment.getRecordData().toString()));
 
-        //Log.v(LOG_TAG2,("audio length(s): " + ((double) (audioData.length / (44100d * 16 * 1))) * 8));
-        Log.v(LOG_TAG2,("녹음시작-종료(s): " + String.format("%.2f", times)));
+        //Log.e(LOG_TAG2,("audio length(s): " + ((double) (audioData.length / (44100d * 16 * 1))) * 8));
+        Log.e(LOG_TAG2,("녹음시작-종료(s): " + String.format("%.2f", times)));
 
-        Log.v(LOG_TAG2,( "코골이 구간 시작=========="));
-        Log.v(LOG_TAG2,( "코골이 " + snoringTermList.size()+"회 발생 "));
+        Log.e(LOG_TAG2,( "코골이 구간 시작=========="));
+        Log.e(LOG_TAG2,( "코골이 " + snoringTermList.size()+"회 발생 "));
         for(StartEnd se : snoringTermList) {
-            Log.v(LOG_TAG2,(se.getTerm()));
+            Log.e(LOG_TAG2,(se.getTerm()));
         }
-        Log.v(LOG_TAG2,( "코골이 구간 끝=========="));
-        Log.v(LOG_TAG2,( "이갈이 구간 시작=========="));
-        Log.v(LOG_TAG2,( "이갈이 " + grindingTermList.size()+"회 발생 "));
+        Log.e(LOG_TAG2,( "코골이 구간 끝=========="));
+        Log.e(LOG_TAG2,( "이갈이 구간 시작=========="));
+        Log.e(LOG_TAG2,( "이갈이 " + grindingTermList.size()+"회 발생 "));
         for(StartEnd se : grindingTermList) {
-            Log.v(LOG_TAG2,(se.getTerm()));
+            Log.e(LOG_TAG2,(se.getTerm()));
         }
-        Log.v(LOG_TAG2,( "이갈이 구간 끝=========="));
-        Log.v(LOG_TAG2,( "무호흡 구간 시작=========="));
-        Log.v(LOG_TAG2,( "무호흡" + osaTermList.size()+"회 발생 "));
+        Log.e(LOG_TAG2,( "이갈이 구간 끝=========="));
+        Log.e(LOG_TAG2,( "무호흡 구간 시작=========="));
+        Log.e(LOG_TAG2,( "무호흡" + osaTermList.size()+"회 발생 "));
         for(StartEnd se : osaTermList) {
-            Log.v(LOG_TAG2,(se.getTerm()));
+            Log.e(LOG_TAG2,(se.getTerm()));
         }
-        Log.v(LOG_TAG2,( "무호흡 구간 끝=========="));
+        Log.e(LOG_TAG2,( "무호흡 구간 끝=========="));
 
-        Log.v(LOG_TAG2, String.format("Recording  has stopped. Samples read: %d", shortsRead));
+        Log.e(LOG_TAG2, String.format("Recording  has stopped. Samples read: %d", shortsRead));
     }
 
     private byte[] shortToByte(short[] input, int elements) {
