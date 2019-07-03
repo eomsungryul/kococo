@@ -125,4 +125,7 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.9.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
 //    implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
+
+    implementation 'com.google.firebase:firebase-ads:17.2.0'     //구글 광고 lib (firebase에 연동된 admob)
+    implementation 'com.android.billingclient:billing:2.0.1' //구글 인앱결제를 위한 lib
 }

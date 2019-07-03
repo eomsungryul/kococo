@@ -31,6 +31,7 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_weight="3"
     tools:context="kr.co.dwebss.kococo.activity.MainActivity">
 
     <android.support.constraint.ConstraintLayout
@@ -48,44 +49,37 @@ wrap_content : 뷰가 그려질수있게 필요한 길이만 사용
 
     </android.support.constraint.ConstraintLayout>
 
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/view_content"
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        app:layout_constrainedHeight="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:layout_constraintTop_toBottomOf="@+id/tabs"
+        app:layout_constraintBottom_toTopOf="@+id/guideline"/>
+
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.9" />
+
+    <!--사이즈 속성 바꾸는 어트리뷰트-->
+    <!--ads:adSize="BANNER"-->
+    <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/publisherAdView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="bottom"
+        ads:adSize="FULL_BANNER"
+        ads:adUnitId="ca-app-pub-3940256099942544/6300978111"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tabs">
-
-        <!--<ProgressBar-->
-            <!--android:id="@+id/progress"-->
-            <!--style="@android:style/Widget.ProgressBar.Horizontal"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_weight="2"-->
-            <!--app:layout_constraintBottom_toBottomOf="parent"-->
-            <!--app:layout_constraintTop_toTopOf="parent"-->
-            <!--app:layout_constraintVertical_bias="0.555"-->
-            <!--tools:layout_editor_absoluteX="34dp" />-->
-
-        <!--<TextView-->
-            <!--android:id="@+id/progressTxt"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_weight="1"-->
-            <!--android:text="업데이트를 확인합니다."-->
-            <!--android:textAlignment="center"-->
-            <!--app:layout_constraintTop_toBottomOf="@+id/progress"-->
-            <!--tools:layout_editor_absoluteX="16dp" />-->
-
-        <android.support.v4.view.ViewPager
-            android:id="@+id/view_pager"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-    </android.support.constraint.ConstraintLayout>
+        app:layout_constraintTop_toBottomOf="@+id/view_pager"></com.google.android.gms.ads.AdView>
 
 </android.support.constraint.ConstraintLayout>

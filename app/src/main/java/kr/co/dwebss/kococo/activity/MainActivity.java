@@ -30,6 +30,14 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.doubleclick.PublisherAdRequest;
+import com.google.android.gms.ads.doubleclick.PublisherAdView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.BuildConfig;
@@ -76,12 +84,39 @@ public class MainActivity extends AppCompatActivity {
 
     VersionProgressApplication vpa = new VersionProgressApplication();
 
+
+    //전면광고
+    private InterstitialAd mInterstitialAd;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         thisMainActivity=this;
+
+        MobileAds.initialize(this,
+                "ca-app-pub-3940256099942544~3347511713");
+        //배너광고
+        AdView adView = (AdView)findViewById(R.id.publisherAdView);
+
+        AdRequest adRequest = new AdRequest.Builder().build();
+        // xml에 세팅하고 또 세팅하면  The ad size can only be set once on AdView. 에러 발생
+//                adView.setAdSize(AdSize.FULL_BANNER);
+        //adView.setAdUnitId("ca-app-pub-3940256099942544/6300978111");
+        adView.loadAd(adRequest);
+
+
+//        mPublisherAdView = findViewById(R.id.publisherAdView);
+//        PublisherAdRequest adRequest = new PublisherAdRequest.Builder().build();
+//        mPublisherAdView.loadAd(adRequest);
+
+        //전면광고
+        mInterstitialAd = new InterstitialAd(this);
+        //테스트값
+        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        //광고불러오기
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
 
         //나중에 density나 넓이 높이 등이 필요할때 사용 함
         DisplayMetrics metrics = getResources().getDisplayMetrics();
@@ -260,11 +295,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
     }
-
-
 
     // 화면전환이 일어난 경우에만 호출된다고 생각하지만 Locale 이나 각종 설정값이 바꼇을 경우도 호출
     @Override
@@ -300,7 +331,7 @@ public class MainActivity extends AppCompatActivity {
                     tabEnable();
                 }
             }
-        }), "RecodeFragment");
+        },mInterstitialAd), "RecodeFragment");
         adapter.addFrag(new DiaryFragment(), "Diary");
         adapter.addFrag(new StatFragment(), "Stat");
         adapter.addFrag(new SettingFragment(), "Setting");

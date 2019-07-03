@@ -17,6 +17,7 @@
     <string name="appName">Kococo</string>
 
     <!--recordFragement -->
+    <string name="recording">녹음 중입니다...</string>
     <string name="recordStart">녹음 시작</string>
     <string name="recordEnd">녹음 종료</string>
 

@@ -87,10 +87,11 @@ public class ConsultActivity extends AppCompatActivity {
     int uploadFileCnt=0;
 
     ProgressDialog uploadDialog;
+    InputMethodManager imm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
 
         setTheme(R.style.AppTheme);
         //세로모드에서 가로모드로 전환 시 onCreate함수가 다시 호출
@@ -139,17 +140,11 @@ public class ConsultActivity extends AppCompatActivity {
             declareBtn.setOnClickListener(new Button.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    imm.hideSoftInputFromWindow(consultContents.getWindowToken(),0);
                     showConsultDialog();
                 }
             });
             sv = (ScrollView) findViewById(R.id.scrollVew);
-//            consultContents.setOnTouchListener(new View.OnTouchListener() {
-//                @Override
-//                public boolean onTouch(View v, MotionEvent event) {
-//                    sv.fullScroll(sv.FOCUS_DOWN);
-//                    return false;
-//                }
-//            });
             consultTitle.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View v, boolean hasFocus) {

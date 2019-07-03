@@ -130,6 +130,10 @@
                 android:value="kr.co.dwebss.kococo.activity.UserConsultListActivity"/>
         </activity>
 
+        <!--광고를 매니페스트에 추가해야함 -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/>
     </application>
 
 </manifest>

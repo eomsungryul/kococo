@@ -18,6 +18,7 @@
 
     <!--recordFragement -->
     <string name="recordStart">Record Start</string>
+    <string name="recording">recording...</string>
     <string name="recordEnd">Record End</string>
 
     <!--resultActivity -->
