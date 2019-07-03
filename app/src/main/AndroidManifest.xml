@@ -12,6 +12,8 @@
     <!-- 네트워크 사용에 대한 퍼미션 -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!--Files under lib/ must have .so extension, found ' 해결법..-->
+    <!--라이브러리 false처리... android:extractNativeLibs="false" -->
     <application
         android:allowBackup="true"
         android:icon="@drawable/rally_app_icon"
