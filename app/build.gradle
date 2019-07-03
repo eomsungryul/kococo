@@ -57,7 +57,8 @@ android {
     }
     task buildNative(type: Exec, description: 'Compile JNI source via NDK') {
         if (nativeDebuggable) {
-            commandLine getNdkBuildPath(), 'NDK_DEBUG=1', '-C', file('src/main').absolutePath
+            //commandLine getNdkBuildPath(), 'NDK_DEBUG=1', '-C', file('src/main').absolutePath
+            commandLine getNdkBuildPath(), '-C', file('src/main').absolutePath
         } else {
             cmmandLine getNdkBuildPath(), '-C', file('src/main').absolutePath
         }
