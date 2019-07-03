@@ -195,6 +195,18 @@ public class VersionProgressApplication extends Application {
                             StaticVariables.size = 0;
                         }
                         Log.e(TAG_VERSION, "Size: " + StaticVariables.size);
+                    }else
+                    if (((Double) map.get("code")).intValue() == 900001) {
+                        String value = String.valueOf(map.get("codeValue"));
+                        int val = Integer.parseInt(value);
+                        StaticVariables.forNoiseCheckForStartVal  = val;
+                        Log.e(TAG_VERSION, "forNoiseCheckForStartVal: " + StaticVariables.forNoiseCheckForStartVal );
+                    }else
+                    if (((Double) map.get("code")).intValue() == 900002) {
+                        String value = String.valueOf(map.get("codeValue"));
+                        int val = Integer.parseInt(value);
+                        StaticVariables.forNoiseCheckVal = val;
+                        Log.e(TAG_VERSION, "forNoiseCheckVal: " + StaticVariables.forNoiseCheckVal);
                     }
                 }
                 if(isChangedVersion){
@@ -240,7 +252,19 @@ public class VersionProgressApplication extends Application {
 
                             if (!isCorrectPatch) {
                                 if (!filename.equals("")) {
-                                    new File(path + "/" + filename).delete();
+                                    File tmpFile = new File(path + "/" + filename);
+                                    if(tmpFile.isDirectory()){
+                                        File[] deleteFolderList = tmpFile.listFiles();
+                                        Log.e(TAG_VERSION, "deleting directory: " + path + "/" + filename);
+                                        for (int j = 0; j < deleteFolderList.length; j++  ) {
+                                            System.out.println();
+                                            Log.e(TAG_VERSION, "deleting file: " + deleteFolderList[j].getAbsolutePath());
+                                            deleteFolderList[j].delete();
+                                        }
+                                    }else{
+                                        Log.e(TAG_VERSION, "deleting file: " + path + "/" + filename);
+                                        tmpFile.delete();
+                                    }
 
                                 }
                                 filename = "";
