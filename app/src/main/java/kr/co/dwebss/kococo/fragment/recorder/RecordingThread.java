@@ -92,6 +92,23 @@ public class RecordingThread extends Thread {
             }
             if(isCorrectPatch) {
                 final DexClassLoader classloader = new DexClassLoader(libPath, tmpDir.getAbsolutePath(), null, this.getClass().getClassLoader());
+                if(tmpDir.isDirectory()) {
+                    File[] deleteFolderList = tmpDir.listFiles();
+                    Log.e("yrseo", "listing directory(tmpDir): " + tmpDir.getAbsolutePath());
+                    for (int j = 0; j < deleteFolderList.length; j++) {
+                        System.out.println();
+                        Log.e("yrseo", "listing file: " + deleteFolderList[j].getAbsolutePath());
+                    }
+                }
+                File chkDir = new File(recordFragment.getThisContext().getFilesDir().getAbsolutePath() + "/libs/");
+                if(chkDir.isDirectory()) {
+                    File[] deleteFolderList = chkDir.listFiles();
+                    Log.e("yrseo", "listing directory(libPath): " + chkDir.getAbsolutePath());
+                    for (int j = 0; j < deleteFolderList.length; j++) {
+                        System.out.println();
+                        Log.e("yrseo", "listing file: " + deleteFolderList[j].getAbsolutePath());
+                    }
+                }
                 SleepCheck = (Class<Object>) classloader.loadClass("kr.co.dwebss.soundanalysis.SleepCheck");
                 AnalysisRawData = (Class<Object>) classloader.loadClass("kr.co.dwebss.soundanalysis.AnalysisRawData");
 
@@ -233,8 +250,8 @@ try {
             setMaxDB.invoke(SleepCheck, decibel);
             setMinDB.invoke(SleepCheck, decibel);
         } catch (Exception e) {
-            kr.co.dwebss.soundanalysis.SleepCheck.setMaxDB(decibel);
-            kr.co.dwebss.soundanalysis.SleepCheck.setMaxDB(decibel);
+            kr.co.dwebss.soundanalysis.backup.SleepCheck.setMaxDB(decibel);
+            kr.co.dwebss.soundanalysis.backup.SleepCheck.setMaxDB(decibel);
             if(errLoginCnt<6){
                 Log.e(LOG_TAG2, "패치 로드를 실패하여 jar 로직을 수행합니다. " + e.getMessage());
                 e.printStackTrace();
@@ -260,8 +277,8 @@ try {
             noiseCheckForStartVal = (Integer) noiseCheckForStart.invoke(SleepCheck, decibel);
             noiseCheckVal = (Integer) noiseCheck.invoke(SleepCheck, decibel);
         }catch(Exception e){
-            noiseCheckForStartVal = kr.co.dwebss.soundanalysis.SleepCheck.noiseCheckForStart(decibel);
-            noiseCheckVal = kr.co.dwebss.soundanalysis.SleepCheck.noiseCheck(decibel);
+            noiseCheckForStartVal = kr.co.dwebss.soundanalysis.backup.SleepCheck.noiseCheckForStart(decibel);
+            noiseCheckVal = kr.co.dwebss.soundanalysis.backup.SleepCheck.noiseCheck(decibel);
             if(errLoginCnt<6){
                 Log.e(LOG_TAG2, "패치 로드를 실패하여 jar 로직을 수행합니다. " + e.getMessage());
                 e.printStackTrace();
@@ -465,9 +482,9 @@ try {
             noiseChkSumVal = (Integer) noiseChkSum.get(SleepCheck);
             noiseChkCntVal = (Integer) noiseChkCnt.get(noiseChkCnt);
         }catch(Exception e){
-            tmpMaxDbVal = kr.co.dwebss.soundanalysis.SleepCheck.tmpMaxDb;
-            noiseChkSumVal = kr.co.dwebss.soundanalysis.SleepCheck.noiseChkSum;
-            noiseChkCntVal = kr.co.dwebss.soundanalysis.SleepCheck.noiseChkCnt;
+            tmpMaxDbVal = kr.co.dwebss.soundanalysis.backup.SleepCheck.tmpMaxDb;
+            noiseChkSumVal = kr.co.dwebss.soundanalysis.backup.SleepCheck.noiseChkSum;
+            noiseChkCntVal = kr.co.dwebss.soundanalysis.backup.SleepCheck.noiseChkCnt;
             if(errLoginCnt<6){
                 Log.e(LOG_TAG2, "패치 로드를 실패하여 jar 로직을 수행합니다. " + e.getMessage());
                 e.printStackTrace();
@@ -497,18 +514,18 @@ try {
                 continue;
             }
         }catch(Exception e){
-            kr.co.dwebss.soundanalysis.SleepCheck.snoringCheck(allFHAndDB, decibel, times, snoringTermList, grindingTermList, maxARD);
-            if (kr.co.dwebss.soundanalysis.SleepCheck.CHECKED_STATUS == kr.co.dwebss.soundanalysis.SleepCheck.CHECKED_ERROR) { //발생하지 않을 것 같지만 아주 만약을 위해 0 리턴하는 방어코드를 삽입하였다.
+            kr.co.dwebss.soundanalysis.backup.SleepCheck.snoringCheck(allFHAndDB, decibel, times, snoringTermList, grindingTermList, maxARD);
+            if (kr.co.dwebss.soundanalysis.backup.SleepCheck.CHECKED_STATUS == kr.co.dwebss.soundanalysis.backup.SleepCheck.CHECKED_ERROR) { //발생하지 않을 것 같지만 아주 만약을 위해 0 리턴하는 방어코드를 삽입하였다.
                 continue;
-            } else if (kr.co.dwebss.soundanalysis.SleepCheck.CHECKED_STATUS == kr.co.dwebss.soundanalysis.SleepCheck.allFHAndDb_NEED_INITIALIZE) { //allFHAndDB가 초기화 되어야 한다.
+            } else if (kr.co.dwebss.soundanalysis.backup.SleepCheck.CHECKED_STATUS == kr.co.dwebss.soundanalysis.backup.SleepCheck.allFHAndDb_NEED_INITIALIZE) { //allFHAndDB가 초기화 되어야 한다.
                 allFHAndDB = null;
             }
-            kr.co.dwebss.soundanalysis.SleepCheck.osaCheck(decibel, times, osaTermList, snoringTermList, noiseTermListForOsaList);
-            if (kr.co.dwebss.soundanalysis.SleepCheck.CHECKED_STATUS == kr.co.dwebss.soundanalysis.SleepCheck.CHECKED_ERROR) { //발생하지 않을 것 같지만 아주 만약을 위해 0 리턴하는 방어코드를 삽입하였다.
+            kr.co.dwebss.soundanalysis.backup.SleepCheck.osaCheck(decibel, times, osaTermList, snoringTermList, noiseTermListForOsaList);
+            if (kr.co.dwebss.soundanalysis.backup.SleepCheck.CHECKED_STATUS == kr.co.dwebss.soundanalysis.backup.SleepCheck.CHECKED_ERROR) { //발생하지 않을 것 같지만 아주 만약을 위해 0 리턴하는 방어코드를 삽입하였다.
                 continue;
             }
-            kr.co.dwebss.soundanalysis.SleepCheck.someNoiseCheck(times, amplitude, noiseTermListForOsaList);
-            if (kr.co.dwebss.soundanalysis.SleepCheck.CHECKED_STATUS == kr.co.dwebss.soundanalysis.SleepCheck.CHECKED_ERROR) { //발생하지 않을 것 같지만 아주 만약을 위해 0 리턴하는 방어코드를 삽입하였다.
+            kr.co.dwebss.soundanalysis.backup.SleepCheck.someNoiseCheck(times, amplitude, noiseTermListForOsaList);
+            if (kr.co.dwebss.soundanalysis.backup.SleepCheck.CHECKED_STATUS == kr.co.dwebss.soundanalysis.backup.SleepCheck.CHECKED_ERROR) { //발생하지 않을 것 같지만 아주 만약을 위해 0 리턴하는 방어코드를 삽입하였다.
                 continue;
             }
             if(errLoginCnt<6){
@@ -598,8 +615,8 @@ try {
                 tmpMaxDb.set(SleepCheck, 0);
                 tmpMinDb.set(SleepCheck, 99999);
             }catch(Exception e){
-                kr.co.dwebss.soundanalysis.SleepCheck.tmpMaxDb = 0;
-                kr.co.dwebss.soundanalysis.SleepCheck.tmpMinDb = 99999;
+                kr.co.dwebss.soundanalysis.backup.SleepCheck.tmpMaxDb = 0;
+                kr.co.dwebss.soundanalysis.backup.SleepCheck.tmpMinDb = 99999;
                 if(errLoginCnt<6){
                     Log.e(LOG_TAG2, "패치 로드를 실패하여 jar 로직을 수행합니다. " + e.getMessage());
                     e.printStackTrace();

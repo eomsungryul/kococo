@@ -252,7 +252,19 @@ public class VersionProgressApplication extends Application {
 
                             if (!isCorrectPatch) {
                                 if (!filename.equals("")) {
-                                    new File(path + "/" + filename).delete();
+                                    File tmpFile = new File(path + "/" + filename);
+                                    if(tmpFile.isDirectory()){
+                                        File[] deleteFolderList = tmpFile.listFiles();
+                                        Log.e(TAG_VERSION, "deleting directory: " + path + "/" + filename);
+                                        for (int j = 0; j < deleteFolderList.length; j++  ) {
+                                            System.out.println();
+                                            Log.e(TAG_VERSION, "deleting file: " + deleteFolderList[j].getAbsolutePath());
+                                            deleteFolderList[j].delete();
+                                        }
+                                    }else{
+                                        Log.e(TAG_VERSION, "deleting file: " + path + "/" + filename);
+                                        tmpFile.delete();
+                                    }
 
                                 }
                                 filename = "";
