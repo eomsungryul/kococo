@@ -285,7 +285,11 @@ try {
                 errLoginCnt++;
             }
         }
-        Log.v(LOG_TAG3,(calcTime(times)+" "+hz +" "+db+" "+amp+" "+decibel+"vs"+getMaxDB.invoke(SleepCheck))+","+ getMinDB.invoke(SleepCheck)+","+noiseChkSumVal+" "+noiseChkCntVal+" "+noiseCheckForStartVal+" "+noiseCheckVal);
+        try {
+            Log.v(LOG_TAG3, (calcTime(times) + " " + hz + " " + db + " " + amp + " " + decibel + "vs" + getMaxDB.invoke(SleepCheck)) + "," + getMinDB.invoke(SleepCheck) + "," + noiseChkSumVal + " " + noiseChkCntVal + " " + noiseCheckForStartVal + " " + noiseCheckVal);
+        }catch(Exception e){
+            //백업로직 수행시 무시해야 함
+        }
         if ( noiseCheckForStartVal >= StaticVariables.forNoiseCheckForStartVal && isRecording == false
                 && Math.floor((double) (audioData.length / (44100d * 16 * 1)) * 8) != Math.floor(times)) {
             Log.e(LOG_TAG2, (calcTime(times) + "(" + String.format("%.2f", times) + "s) 녹음 시작!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
