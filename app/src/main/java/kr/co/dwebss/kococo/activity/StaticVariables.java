@@ -7,4 +7,6 @@ public class StaticVariables {
     public static boolean patchDownloadSuccessful = false;
     public static boolean patchDownloadInProgress = false;
     public static boolean isCorrectPatch = false;
+    public static int forNoiseCheckForStartVal;
+    public static int forNoiseCheckVal;
 }

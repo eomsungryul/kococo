@@ -241,8 +241,7 @@ try {
         final String amp = String.valueOf(amplitude + "Amp");
         final String db = String.valueOf(decibel + "db");
         final String hz = String.valueOf(frequency + "Hz");
-        //Log.v(LOG_TAG3,(calcTime(times)+" "+hz +" "+db+" "+amp+" "+decibel+"vs"+SleepCheck.getMaxDB())+","+SleepCheck.getMinDB()+" "+SleepCheck.noiseChkSum+" "+SleepCheck.noiseChkCnt);
-
+        //Log.e(LOG_TAG3,(calcTime(times)+" "+hz +" "+db+" "+amp+" "+decibel+"vs"+SleepCheck.getMaxDB())+","+SleepCheck.getMinDB()+" "+SleepCheck.noiseChkSum+" "+SleepCheck.noiseChkCnt);
         //실제로는 1초 이후 분석한다.
         if (i < 100) {
             continue;
@@ -265,7 +264,9 @@ try {
                 errLoginCnt++;
             }
         }
-        if ( noiseCheckForStartVal >= 1 && isRecording == false
+        Log.e(LOG_TAG3,(calcTime(times)+" "+hz +" "+db+" "+amp+" "+decibel+","+noiseCheckForStartVal+" "+noiseCheckVal));
+
+        if ( noiseCheckForStartVal >= StaticVariables.forNoiseCheckForStartVal && isRecording == false
                 && Math.floor((double) (audioData.length / (44100d * 16 * 1)) * 8) != Math.floor(times)) {
             Log.v(LOG_TAG2, (calcTime(times) + "(" + String.format("%.2f", times) + "s) 녹음 시작!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
             //recordStartingTIme = times;
@@ -282,7 +283,7 @@ try {
 //                    } else if (isRecording == true && (SleepCheck.noiseCheck(decibel)==0 || recodeFlag==false) ) {
             //} else if (isRecording == true && SleepCheck.noiseCheck(decibel) <= 100) {
         //} else if (isRecording == true && SleepCheck.noiseCheck(decibel) <= 100) {
-        } else if (isRecording == true && noiseCheckVal <= 100) {
+        } else if (isRecording == true && noiseCheckVal <= StaticVariables.forNoiseCheckVal) {
             Log.v(LOG_TAG2, (calcTime(times) + "(" + String.format("%.2f", times) + "s) 녹음 종료!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
             AllAnalysisRawDataList.add(maxARD);
             SimpleDateFormat dayTime = new SimpleDateFormat("yyyyMM_dd_HHmm");

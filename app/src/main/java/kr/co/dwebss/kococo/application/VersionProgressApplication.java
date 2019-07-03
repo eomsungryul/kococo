@@ -195,6 +195,18 @@ public class VersionProgressApplication extends Application {
                             StaticVariables.size = 0;
                         }
                         Log.e(TAG_VERSION, "Size: " + StaticVariables.size);
+                    }else
+                    if (((Double) map.get("code")).intValue() == 900001) {
+                        String value = String.valueOf(map.get("codeValue"));
+                        int val = Integer.parseInt(value);
+                        StaticVariables.forNoiseCheckForStartVal  = val;
+                        Log.e(TAG_VERSION, "forNoiseCheckForStartVal: " + StaticVariables.forNoiseCheckForStartVal );
+                    }else
+                    if (((Double) map.get("code")).intValue() == 900002) {
+                        String value = String.valueOf(map.get("codeValue"));
+                        int val = Integer.parseInt(value);
+                        StaticVariables.forNoiseCheckVal = val;
+                        Log.e(TAG_VERSION, "forNoiseCheckVal: " + StaticVariables.forNoiseCheckVal);
                     }
                 }
                 if(isChangedVersion){
