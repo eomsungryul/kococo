@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
 import com.google.gson.Gson;
@@ -170,6 +171,9 @@ public class RecordFragment extends Fragment  {
 
     //전면광고
     private InterstitialAd mInterstitialAd;
+    private AdView adView;
+    private AdRequest adRequest;
+    WindowManager.LayoutParams params;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -182,13 +186,17 @@ public class RecordFragment extends Fragment  {
         //화면이 자동으로 꺼지는것을 방지한다.
         getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-
-        WindowManager.LayoutParams params = getActivity().getWindow().getAttributes();
+        params = getActivity().getWindow().getAttributes();
 
         View v = inflater.inflate(R.layout.fragment_record, container, false);
+        //배너광고
+        adView = (AdView)v.findViewById(R.id.publisherAdView);
+        adRequest = new AdRequest.Builder().build();
+
         recodeBtn = (Button) v.findViewById(R.id.recodeBtn) ;
         recodeFlag = false;
         recodeBtn.setText("녹음 시작");
+        recodeBtn.setEnabled(true);
 
         recodeTxt = (TextView) v.findViewById(R.id.recordTxt);
         logo = (ImageView) v.findViewById(R.id.imageView);
@@ -234,44 +242,7 @@ public class RecordFragment extends Fragment  {
             public void onAdClosed() {
                 // Code to be executed when the interstitial ad is closed.
                 mInterstitialAd.loadAd(new AdRequest.Builder().build());
-
-                String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.RECORD_AUDIO};
-
-                int permissionReadStorage = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE);
-                int permissionWriteStorage = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
-                int permissionAudio = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.RECORD_AUDIO);
-                if(permissionReadStorage == PackageManager.PERMISSION_DENIED || permissionWriteStorage == PackageManager.PERMISSION_DENIED||permissionAudio == PackageManager.PERMISSION_DENIED) {
-                    Toast.makeText(getActivity(), " permission x", Toast.LENGTH_SHORT).show();
-                    requestPermissions(permissions, REQUEST_EXTERNAL_STORAGE);
-                    return;
-                } else {
-                    //녹음 시작 클릭
-                    Log.e(LOG_TAG2, "permission 승인");
-                    recodeBtn.setText("녹음 종료");
-                    //녹음버튼 누를 시에 밝기 최대한 줄이기
-                    try{
-                        now_bright_status = Settings.System.getInt(getContext().getContentResolver(),
-                                Settings.System.SCREEN_BRIGHTNESS);
-                        params.screenBrightness = (float) 1 / 100;
-                        getActivity().getWindow().setAttributes(params);
-                    }catch(Exception e){
-                        Log.e("Exception e "+e.getMessage(), null);
-                    }
-                    //녹음버튼 누를 시에 타이머 START
-                    recodeTxt.setVisibility(View.VISIBLE);
-                    recordTimer.setVisibility(View.VISIBLE);
-                    logo.setVisibility(View.INVISIBLE);
-                    recordTime=0;
-                    mTimer =  new Timer();
-                    mTimer.schedule(new CustomTimer(), 2000, 1000);
-
-                    recodeFlag = true;
-                    recordStartDt= dayTimeDefalt.format(new Date(System.currentTimeMillis()));
-                    recordStartDtL= System.currentTimeMillis();
-                    start();
-                    //녹음시에는 탭 막기
-                    tabEventUtil.tabEvent(recodeFlag);
-                }
+                recordStart();
             }
         });
 
@@ -280,24 +251,34 @@ public class RecordFragment extends Fragment  {
         recodeBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 if( recodeFlag == false){
-                    if (mInterstitialAd.isLoaded()) {
-                        mInterstitialAd.show();
+                    String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.RECORD_AUDIO};
+                    int permissionReadStorage = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE);
+                    int permissionWriteStorage = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                    int permissionAudio = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.RECORD_AUDIO);
+                    if(permissionReadStorage == PackageManager.PERMISSION_DENIED || permissionWriteStorage == PackageManager.PERMISSION_DENIED||permissionAudio == PackageManager.PERMISSION_DENIED) {
+                        Toast.makeText(getActivity(), " permission x", Toast.LENGTH_SHORT).show();
+                        requestPermissions(permissions, REQUEST_EXTERNAL_STORAGE);
+                        return;
                     } else {
-                        Log.d("TAG", "The interstitial wasn't loaded yet.");
-                        Toast.makeText(getActivity(), "예기치 않은 에러가 발생하였습니다. 다시 시도해주세요.", Toast.LENGTH_LONG).show();
+                        //녹음 시작 클릭
+                        Log.e(LOG_TAG2, "permission 승인");
+                        if (mInterstitialAd.isLoaded()) {
+                            mInterstitialAd.show();
+                        } else {
+                            Log.d("TAG", "The interstitial wasn't loaded yet.");
+                            Toast.makeText(getActivity(), "예기치 않은 에러가 발생하였습니다. 다시 시도해주세요.", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }else{
                     Toast.makeText(getActivity(), "분석중입니다 잠시만 기다려주세요...", Toast.LENGTH_LONG).show();
-                    recodeFlag = false;
+                    adView.destroy();
+                    adView.setVisibility(View.GONE);
                     stop(v);
 
                     //기존 밝기로 복귀
                     params.screenBrightness = (float) now_bright_status/100;
                     getActivity().getWindow().setAttributes(params);
-                    //탭 막기 해제
-                    tabEventUtil.tabEvent(recodeFlag);
                     Handler delayHandler = new Handler();
                     delayHandler.postDelayed(new Runnable() {
                         @Override
@@ -310,12 +291,15 @@ public class RecordFragment extends Fragment  {
 
                     //타이머 종료
                     mTimer.cancel();
-
+                    recodeBtn.setEnabled(false);
                     recodeBtn.setText("녹음 시작");
                     recodeTxt.setVisibility(View.INVISIBLE);
                     recordTimer.setVisibility(View.INVISIBLE);
                     logo.setVisibility(View.VISIBLE);
                     recordTime = 0;
+                    recodeFlag = false;
+                    //탭 막기 해제
+                    tabEventUtil.tabEvent(recodeFlag);
                 }
             }
         });
@@ -336,6 +320,7 @@ public class RecordFragment extends Fragment  {
     @Override
     public void onResume() {
         super.onResume();
+        recodeBtn.setEnabled(true);
     }
 
     class CustomTimer extends TimerTask {
@@ -348,7 +333,35 @@ public class RecordFragment extends Fragment  {
         }
     }
 
+    public void recordStart(){
+        adView.loadAd(adRequest);
+        adView.setVisibility(View.VISIBLE);
 
+        recodeBtn.setText("녹음 종료");
+        //녹음버튼 누를 시에 밝기 최대한 줄이기
+        try{
+            now_bright_status = Settings.System.getInt(getContext().getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS);
+            params.screenBrightness = (float) 1 / 100;
+            getActivity().getWindow().setAttributes(params);
+        }catch(Exception e){
+            Log.e("Exception e "+e.getMessage(), null);
+        }
+        //녹음버튼 누를 시에 타이머 START
+        recodeTxt.setVisibility(View.VISIBLE);
+        recordTimer.setVisibility(View.VISIBLE);
+        logo.setVisibility(View.INVISIBLE);
+        recordTime=0;
+        mTimer =  new Timer();
+        mTimer.schedule(new CustomTimer(), 2000, 1000);
+
+        recodeFlag = true;
+        recordStartDt= dayTimeDefalt.format(new Date(System.currentTimeMillis()));
+        recordStartDtL= System.currentTimeMillis();
+        start();
+        //녹음시에는 탭 막기
+        tabEventUtil.tabEvent(recodeFlag);
+    }
 
     public void addRecord(RequestBody requestData) {
         //POST /api/record를 호출한다.
@@ -458,49 +471,60 @@ public class RecordFragment extends Fragment  {
 //        Toast.makeText(getActivity(), "stopped Recording", Toast.LENGTH_SHORT).show();
     }
 
+    /*
+    * 권한 요청이 완료 된 후에 이벤트
+    * */
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case REQUEST_CAMERA:
-                for (int i = 0; i < permissions.length; i++) {
-                    String permission = permissions[i];
-                    int grantResult = grantResults[i];
-                    if (permission.equals(Manifest.permission.CAMERA)) {
-                        if(grantResult == PackageManager.PERMISSION_GRANTED) {
-                            Toast.makeText(getActivity(), "camera permission 승인", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(getActivity(), "camera permission denied", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-                break;
-            case REQUEST_EXTERNAL_STORAGE:
-                for (int i = 0; i < permissions.length; i++) {
-                    String permission = permissions[i];
-                    int grantResult = grantResults[i];
-                    if (permission.equals(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                        if(grantResult == PackageManager.PERMISSION_GRANTED) {
-                            Toast.makeText(getActivity(), "read/write storage permission 승인", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(getActivity(), "read/write storage permission denied", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-                break;
-            case REQUEST_MICROPHONE:
-                for (int i = 0; i < permissions.length; i++) {
-                    String permission = permissions[i];
-                    int grantResult = grantResults[i];
-                    if (permission.equals(Manifest.permission.RECORD_AUDIO)) {
-                        if(grantResult == PackageManager.PERMISSION_GRANTED) {
-                            Toast.makeText(getActivity(), "audio permission 승인", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(getActivity(), "audio permission denied", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-                break;
+        if(grantResults[0]==0&&grantResults[1]==0&&grantResults[2]==0){
+            if (mInterstitialAd.isLoaded()) {
+                mInterstitialAd.show();
+            } else {
+                Log.d("TAG", "The interstitial wasn't loaded yet.");
+                Toast.makeText(getActivity(), "예기치 않은 에러가 발생하였습니다. 다시 시도해주세요.", Toast.LENGTH_LONG).show();
+            }
         }
+//        switch (requestCode) {
+//            case REQUEST_CAMERA:
+//                for (int i = 0; i < permissions.length; i++) {
+//                    String permission = permissions[i];
+//                    int grantResult = grantResults[i];
+//                    if (permission.equals(Manifest.permission.CAMERA)) {
+//                        if(grantResult == PackageManager.PERMISSION_GRANTED) {
+//                            Toast.makeText(getActivity(), "camera permission 승인", Toast.LENGTH_SHORT).show();
+//                        } else {
+//                            Toast.makeText(getActivity(), "camera permission denied", Toast.LENGTH_SHORT).show();
+//                        }
+//                    }
+//                }
+//                break;
+//            case REQUEST_EXTERNAL_STORAGE:
+//                for (int i = 0; i < permissions.length; i++) {
+//                    String permission = permissions[i];
+//                    int grantResult = grantResults[i];
+//                    if (permission.equals(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+//                        if(grantResult == PackageManager.PERMISSION_GRANTED) {
+//                            Toast.makeText(getActivity(), "read/write storage permission 승인", Toast.LENGTH_SHORT).show();
+//                        } else {
+//                            Toast.makeText(getActivity(), "read/write storage permission denied", Toast.LENGTH_SHORT).show();
+//                        }
+//                    }
+//                }
+//                break;
+//            case REQUEST_MICROPHONE:
+//                for (int i = 0; i < permissions.length; i++) {
+//                    String permission = permissions[i];
+//                    int grantResult = grantResults[i];
+//                    if (permission.equals(Manifest.permission.RECORD_AUDIO)) {
+//                        if(grantResult == PackageManager.PERMISSION_GRANTED) {
+//                            Toast.makeText(getActivity(), "audio permission 승인", Toast.LENGTH_SHORT).show();
+//                        } else {
+//                            Toast.makeText(getActivity(), "audio permission denied", Toast.LENGTH_SHORT).show();
+//                        }
+//                    }
+//                }
+//                break;
+//        }
     }
 }

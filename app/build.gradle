@@ -28,7 +28,7 @@ android {
         applicationId "kr.co.dwebss.kococo"
         minSdkVersion 23
         targetSdkVersion 28
-        versionCode 2
+        versionCode 3
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -57,11 +57,13 @@ android {
     }
     task buildNative(type: Exec, description: 'Compile JNI source via NDK') {
         if (nativeDebuggable) {
-            commandLine getNdkBuildPath(), 'NDK_DEBUG=1', '-C', file('src/main').absolutePath
+            //commandLine getNdkBuildPath(), 'NDK_DEBUG=1', '-C', file('src/main').absolutePath
+            commandLine getNdkBuildPath(), '-C', file('src/main').absolutePath
         } else {
             cmmandLine getNdkBuildPath(), '-C', file('src/main').absolutePath
         }
     }
+
     tasks.withType(JavaCompile) {
         compileTask -> compileTask.dependsOn buildNative
     }

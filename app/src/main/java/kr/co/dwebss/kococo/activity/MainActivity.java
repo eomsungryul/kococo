@@ -95,6 +95,8 @@ public class MainActivity extends AppCompatActivity {
 
     //전면광고
     private InterstitialAd mInterstitialAd;
+//    private AdView adView;
+//    private AdRequest adRequest;
 
     //결제
     private BillingClient billingClient;
@@ -130,14 +132,14 @@ public class MainActivity extends AppCompatActivity {
 
         MobileAds.initialize(this,
                 "ca-app-pub-3940256099942544~3347511713");
-        //배너광고
-        AdView adView = (AdView)findViewById(R.id.publisherAdView);
-
-        AdRequest adRequest = new AdRequest.Builder().build();
+//        //배너광고
+//        adView = (AdView)findViewById(R.id.publisherAdView);
+//
+//        adRequest = new AdRequest.Builder().build();
         // xml에 세팅하고 또 세팅하면  The ad size can only be set once on AdView. 에러 발생
 //                adView.setAdSize(AdSize.FULL_BANNER);
         //adView.setAdUnitId("ca-app-pub-3940256099942544/6300978111");
-        adView.loadAd(adRequest);
+//        adView.loadAd(adRequest);
 
 
 //        mPublisherAdView = findViewById(R.id.publisherAdView);
