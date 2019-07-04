@@ -176,13 +176,18 @@ public class UserConsultListAdapter extends BaseAdapter {
             for(int i=0; i<resultDataList.size(); i++){
                 JsonObject recordObj = (JsonObject) resultDataList.get(i);
 //                System.out.println("=====consult=======addItems======recordObj=================="+recordObj);
+                JsonObject consultingReplies = recordObj.getAsJsonObject("consultingReplies");
+                Character consultingReplyYn = 'N';
+                if(consultingReplies!=null){
+                    consultingReplyYn='Y';
+                }
                 item = new Record(
                         recordObj.get("recordId").getAsInt()
                         ,recordObj.get("recordStartD").getAsString()
                         ,recordObj.get("recordEndD").getAsString()
                         ,recordObj.get("recordStartDt").getAsString()
                         ,recordObj.get("recordEndDt").getAsString()
-                        ,recordObj.get("consultingReplyYn").getAsCharacter()
+                        ,consultingReplyYn
                 );
                 listViewItemList.add(item);
             }

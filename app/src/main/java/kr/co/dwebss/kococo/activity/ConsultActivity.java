@@ -336,16 +336,25 @@ public class ConsultActivity extends AppCompatActivity {
     private void addConsult() {
         //형태
         // 아래 값중 값이 하나라도 빠져있으면, 400 bad request 발생
-        //{
-        //  "analysisServerUploadPath" : "/storage/rec_data",
-        //  "analysisDetailsList" : [ {
-        //    "claimReasonCd" : 100101, //100201-'코골이가아닙니다.', 100202-'기타'
-        //    "consultContents" : "테스트"
-        //  } ]
-        //}
+        //        {
+        //            "consultings" : [ {
+        //            "consultingTitle" : "컨설팅 제목2", //필수
+        //                    "consultingContents" : "컨설팅 내용2", //필수
+        //        } ],
+        //            "analysisList" : [ { //없어도 수정은 됨(모든 파일을 이미 업로드 한경우임)
+        //            "analysisId" : 11, //필수
+        //                    "analysisServerUploadPath" : "firebase/upload/" //필수
+        //        } ]
+        //        }
+
         JsonObject requestJson = new JsonObject();
-        requestJson.addProperty("consultingTitle",consultTitle.getText().toString());
-        requestJson.addProperty("consultingContents",consultContents.getText().toString());
+        JsonArray consultings = new JsonArray();
+        JsonObject consultingsObj = new JsonObject();
+        consultingsObj.addProperty("consultingTitle",consultTitle.getText().toString());
+        consultingsObj.addProperty("consultingContents",consultContents.getText().toString());
+        consultings.add(consultingsObj);
+        requestJson.add("consultings",consultings);
+
         requestJson.add("analysisList",analysisList);
 
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();

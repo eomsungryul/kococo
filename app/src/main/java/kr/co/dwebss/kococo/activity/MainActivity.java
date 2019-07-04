@@ -173,7 +173,6 @@ public class MainActivity extends AppCompatActivity {
 
         FindAppIdUtil fau = new FindAppIdUtil();
         fau.InitAppId(this);
-//        InitAppId();
 
         //Crashlytics 강제종료 테스트
 //        Crashlytics.getInstance().crash(); // Force a crash

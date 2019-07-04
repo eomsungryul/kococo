@@ -9,6 +9,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.SpannableString;
 import android.text.style.RelativeSizeSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,8 +26,14 @@ import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.github.mikephil.charting.utils.MPPointF;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -37,6 +44,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import kr.co.dwebss.kococo.R;
+import kr.co.dwebss.kococo.activity.StaticVariables;
 import kr.co.dwebss.kococo.adapter.StatAdapter;
 import kr.co.dwebss.kococo.http.ApiService;
 import kr.co.dwebss.kococo.model.RowData;
@@ -50,6 +58,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+
+import static kr.co.dwebss.kococo.activity.StaticVariables.isCorrectPatch;
+import static kr.co.dwebss.kococo.activity.StaticVariables.patchCnt;
 
 public class StatFragment extends Fragment implements SeekBar.OnSeekBarChangeListener {
     private String LOG_TAG = "StatFragment";
@@ -363,6 +374,144 @@ public class StatFragment extends Fragment implements SeekBar.OnSeekBarChangeLis
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.detach(this).attach(this).commit();
     }
+//
+//    public void initStatCode(){
+//
+//        apiService.getApiCode().enqueue(new Callback<JsonObject>() {
+//            @Override
+//            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+//                JsonArray codeList = response.body().getAsJsonObject("_embedded").getAsJsonArray("code");
+//                Gson gson = new Gson();
+//                Map<String, Object> map = new HashMap<String, Object>();
+//
+//                for (JsonElement je : codeList) {
+//                    map = (Map<String, Object>) gson.fromJson(je.getAsJsonObject(), map.getClass());
+//                    if (((Double) map.get("code")).intValue() == 999999) {
+//                        String value = String.valueOf(map.get("codeValue"));
+//                        if(!StaticVariables.version.equals(value)){
+//                            isChangedVersion = true;
+//                        }
+//                        StaticVariables.version = value;
+//                        Log.e(TAG_VERSION, "Version: " + StaticVariables.version);
+//                    }else
+//                    if (((Double) map.get("code")).intValue() == 999998) {
+//                        try {
+//                            int value = Integer.parseInt(((String) map.get("codeValue")));
+//                            if(StaticVariables.size!=value){
+//                                isChangedVersion = true;
+//                            }
+//                            StaticVariables.size = value;
+//                        }catch(ClassCastException e){
+//                            e.printStackTrace();
+//                            StaticVariables.size = 0;
+//                        }
+//                        Log.e(TAG_VERSION, "Size: " + StaticVariables.size);
+//                    }else
+//                    if (((Double) map.get("code")).intValue() == 900001) {
+//                        String value = String.valueOf(map.get("codeValue"));
+//                        int val = Integer.parseInt(value);
+//                        StaticVariables.forNoiseCheckForStartVal  = val;
+//                        Log.e(TAG_VERSION, "forNoiseCheckForStartVal: " + StaticVariables.forNoiseCheckForStartVal );
+//                    }else
+//                    if (((Double) map.get("code")).intValue() == 900002) {
+//                        String value = String.valueOf(map.get("codeValue"));
+//                        int val = Integer.parseInt(value);
+//                        StaticVariables.forNoiseCheckVal = val;
+//                        Log.e(TAG_VERSION, "forNoiseCheckVal: " + StaticVariables.forNoiseCheckVal);
+//                    }
+//                }
+//                if(isChangedVersion){
+//                    patchCnt = 0;
+//                }
+//                System.out.println(" ============getApiCode2============result: " + codeList);
+//
+//                FirebaseStorage storage = FirebaseStorage.getInstance("gs://kococo-2996f.appspot.com/");
+//                storage.setMaxDownloadRetryTimeMillis(60000);  // 1분 지나면 실패
+//                StorageReference storageRef = storage.getReference();
+//                StorageReference pathReference = storageRef.child("libs/SoundAnalysis_" + StaticVariables.version + ".jar");
+//                File path = new File(activity.getFilesDir()+"/libs");
+//                Log.e(TAG_VERSION,"jar가 다운받아질 경로: "+path.getAbsolutePath());
+//                File[] files = path.listFiles();
+//                String filename = "";
+//                int tmpSizeForChk = 0;
+//
+//                final File tmpDir = activity.getDir("dex", 0);
+//                File[] files2 = tmpDir.listFiles();
+//                for (int i = 0; i < files2.length; i++) {
+//                    Log.e(TAG_VERSION,files2[i].getAbsolutePath()+" asdasd");
+//                }
+//
+//                if (StaticVariables.version == null || StaticVariables.version.equals("")) {
+//
+//                } else {
+//                    if (files != null) {
+//                        for (int i = 0; i < files.length; i++) {
+//                            filename = files[i].getName();
+//                            Log.e(TAG_VERSION, new File(path + "/" + filename).getAbsolutePath());
+//                            if (filename.indexOf("jar") > -1) {
+//                                Log.e(TAG_VERSION, "jar checking: " + filename);
+//                                if (filename.indexOf(StaticVariables.version) > -1) {
+//                                    Log.e(TAG_VERSION, "name checking: " + filename);
+//                                    tmpSizeForChk = (int) new File(path + "/" + filename).length();
+//                                    Log.e(TAG_VERSION, "size checking: " + tmpSizeForChk + "vs" + StaticVariables.size);
+//                                    if (tmpSizeForChk == StaticVariables.size) {
+//                                        isCorrectPatch = true;
+//                                        break;
+//                                    }
+//                                }
+//                            }
+//
+//                            if (!isCorrectPatch) {
+//                                if (!filename.equals("")) {
+//                                    File tmpFile = new File(path + "/" + filename);
+//                                    if(tmpFile.isDirectory()){
+//                                        File[] deleteFolderList = tmpFile.listFiles();
+//                                        Log.e(TAG_VERSION, "deleting directory: " + path + "/" + filename);
+//                                        for (int j = 0; j < deleteFolderList.length; j++  ) {
+//                                            System.out.println();
+//                                            Log.e(TAG_VERSION, "deleting file: " + deleteFolderList[j].getAbsolutePath());
+//                                            deleteFolderList[j].delete();
+//                                        }
+//                                    }else{
+//                                        Log.e(TAG_VERSION, "deleting file: " + path + "/" + filename);
+//                                        tmpFile.delete();
+//                                    }
+//
+//                                }
+//                                filename = "";
+//                            }
+//                        }
+//                    }
+//                }
+//                progressBarTxt.setVisibility(View.VISIBLE);
+//                if(isCorrectPatch==false && patchCnt>3){
+//                    progressBarTxt.setText("패치 서버에 오류가 있어 구 버전의 앱을 실행합니다. 녹음결과 분석 중 수정안된 오차가 있을 수 있습니다.");
+//                    confirmBtn.setVisibility(View.VISIBLE);
+//                }else {
+//                    if (isCorrectPatch) {
+//                        Log.e(TAG_VERSION, "정상 버전임(version: " + StaticVariables.version + "): " + filename);
+////                        progressBarTxt.setText("최신 버전입니다");
+////                        confirmBtn.setVisibility(View.VISIBLE);
+//                        progressOFF();
+//                    } else {
+//                        Log.e(TAG_VERSION, "최신 버전이 아닙니다.(version: " + StaticVariables.version + "): " + (filename.equals("") ? "jar가 없음":filename));
+//                        progressDialog.show();
+//                        progressBarTxt.setText("최신 버전이 아님으로 업데이트를 진행합니다.");
+//                        patchCnt++;
+//                        //데이터 와이파이인지의 여부를 물어봐야하는 곳
+//                        wifiCheck(path, pathReference, StaticVariables.version,activity);
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<JsonObject> call, Throwable t) {
+//
+//            }
+//        });
+//
+//
+//    }
 
 
 }

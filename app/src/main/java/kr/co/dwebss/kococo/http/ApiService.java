@@ -15,9 +15,9 @@ import retrofit2.http.Query;
 public interface ApiService {
     //API url
     //회사 내컴
-//    public static final String API_URL = "http://192.168.0.2:8080/";
+    public static final String API_URL = "http://192.168.0.2:8080/";
     //aws 주소
-    public static final String API_URL = "http://52.79.88.47:8080/kococo/";
+//    public static final String API_URL = "http://52.79.88.47:8080/kococo/";r
 
     //json으로도 받을 수 있는 형태
     @Headers({
@@ -28,7 +28,10 @@ public interface ApiService {
     Call<JsonObject> getApiCode();
 
     @POST("api/userappid")
-    Call<JsonObject> getAppid();
+    Call<JsonObject> registAppid();
+
+    @GET("api/userappid/{userAppId}")
+    Call<JsonObject> getAppid(@Path("userAppId")String userAppId);
 
     //녹음 종료시 저장
     //json으로도 받을 수 있는 형태
@@ -73,8 +76,8 @@ public interface ApiService {
     @GET("api/statistics")
     Call<JsonObject> getStats(@Query("userappid") String userAppId,@Query("dateCd") String dateCd);
 
-    @GET("api/recordOnly/search/findByUserAppIdAndConsultingYn")
-    Call<JsonObject> getConsultList(@Query("userAppId") String userAppId,@Query("sort") String sort,@Query("consultingYn") String consultingYn);
+    @GET("api/recordOnly/search/findByUserAppIdAndConsultingsNotNull")
+    Call<JsonObject> getConsultList(@Query("userAppId") String userAppId,@Query("sort") String sort);
 
 //    Call<JSONObject> addRecord(@Body JSONObject data);
 //    Call<JsonObject> addRecord(JsonObject data);

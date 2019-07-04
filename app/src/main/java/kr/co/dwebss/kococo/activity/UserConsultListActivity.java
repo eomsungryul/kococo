@@ -84,7 +84,7 @@ public class UserConsultListActivity extends AppCompatActivity {
             retrofit = new Retrofit.Builder().baseUrl(ApiService.API_URL).addConverterFactory(GsonConverterFactory.create()).build();
             apiService = retrofit.create(ApiService.class);
 
-            apiService.getConsultList(userAppId,"recordId,desc","Y").enqueue(new Callback<JsonObject>() {
+            apiService.getConsultList(userAppId,"recordId,desc").enqueue(new Callback<JsonObject>() {
                 @Override
                 public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
                     System.out.println(" ============getConsultList============response: "+response);

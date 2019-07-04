@@ -185,9 +185,7 @@ public class RecordFragment extends Fragment  {
                              Bundle savedInstanceState) {
         //화면이 자동으로 꺼지는것을 방지한다.
         getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
         params = getActivity().getWindow().getAttributes();
-
         View v = inflater.inflate(R.layout.fragment_record, container, false);
         //배너광고
         adView = (AdView)v.findViewById(R.id.publisherAdView);
@@ -247,10 +245,12 @@ public class RecordFragment extends Fragment  {
         });
 
 
+        FindAppIdUtil fau = new FindAppIdUtil();
         //xml 내에서 onclick으로 가능하다. 하지만 그건 activity 내에서만 가능하고 프래그먼트에서는 onclickListener()로 해야함
         recodeBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
+                userAppId = fau.getAppid(getContext());
                 if( recodeFlag == false){
                     String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.RECORD_AUDIO};
                     int permissionReadStorage = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE);
@@ -269,11 +269,15 @@ public class RecordFragment extends Fragment  {
                             Log.d("TAG", "The interstitial wasn't loaded yet.");
                             Toast.makeText(getActivity(), "예기치 않은 에러가 발생하였습니다. 다시 시도해주세요.", Toast.LENGTH_LONG).show();
                         }
+//                        recordStart();
                     }
                 }else{
                     Toast.makeText(getActivity(), "분석중입니다 잠시만 기다려주세요...", Toast.LENGTH_LONG).show();
                     adView.destroy();
                     adView.setVisibility(View.GONE);
+                    recodeFlag = false;
+                    //탭 막기 해제
+                    tabEventUtil.tabEvent(recodeFlag);
                     stop(v);
 
                     //기존 밝기로 복귀
@@ -289,6 +293,9 @@ public class RecordFragment extends Fragment  {
                         }
                     }, 5000);
 
+
+
+
                     //타이머 종료
                     mTimer.cancel();
                     recodeBtn.setEnabled(false);
@@ -297,15 +304,11 @@ public class RecordFragment extends Fragment  {
                     recordTimer.setVisibility(View.INVISIBLE);
                     logo.setVisibility(View.VISIBLE);
                     recordTime = 0;
-                    recodeFlag = false;
-                    //탭 막기 해제
-                    tabEventUtil.tabEvent(recodeFlag);
+
                 }
             }
         });
 
-        FindAppIdUtil fau = new FindAppIdUtil();
-        userAppId = fau.getAppid(getContext());
 
         timerMessegeHandler = new Handler(){
             public void handleMessage(Message msg){

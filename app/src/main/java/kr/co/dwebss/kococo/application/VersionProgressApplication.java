@@ -293,6 +293,7 @@ public class VersionProgressApplication extends Application {
                 }
             }
 
+
             @Override
             public void onFailure(Call<JsonObject> call, Throwable t) {
 

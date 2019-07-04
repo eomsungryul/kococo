@@ -9,4 +9,6 @@ public class StaticVariables {
     public static boolean isCorrectPatch = false;
     public static int forNoiseCheckForStartVal;
     public static int forNoiseCheckVal;
+
+
 }

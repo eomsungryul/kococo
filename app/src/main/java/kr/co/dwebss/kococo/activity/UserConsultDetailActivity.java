@@ -42,6 +42,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -98,23 +99,38 @@ public class UserConsultDetailActivity extends AppCompatActivity {
         if(getIntent().hasExtra("responseData")){
             responseData = new JsonParser().parse(getIntent().getStringExtra("responseData")).getAsJsonObject();
 
-            EditText consultTitle = (EditText)findViewById(R.id.title_val);
-            consultTitle.setText(responseData.get("consultingTitle").getAsString());
-            consultTitle.setEnabled(false);
-            EditText consultContents = (EditText)findViewById(R.id.contents_val);
-            consultContents.setText(responseData.get("consultingContents").getAsString());
-            //enable false but allow scrolling
-            consultContents.setKeyListener(null);
-            consultContents.setFocusable( false );
-            consultContents.setCursorVisible(false);
+            if(responseData.has("consultings")){
+                JsonArray consultings= responseData.getAsJsonArray("consultings");
 
+                if(consultings.size()>0){
+                    JsonObject consulting = consultings.get(0).getAsJsonObject();
 
-            if(responseData.has("consultingReplyContents")){
-                answerVal.setText(responseData.get("consultingReplyContents").getAsString());
-                answerTxt.setVisibility(View.VISIBLE);
-                answerVal.setVisibility(View.VISIBLE);
-                answerVal.setEnabled(false);
+                    EditText consultTitle = (EditText)findViewById(R.id.title_val);
+                    consultTitle.setText(consulting.get("consultingTitle").getAsString());
+                    consultTitle.setEnabled(false);
+                    EditText consultContents = (EditText)findViewById(R.id.contents_val);
+                    consultContents.setText(consulting.get("consultingContents").getAsString());
+                    //enable false but allow scrolling
+                    consultContents.setKeyListener(null);
+                    consultContents.setFocusable( false );
+                    consultContents.setCursorVisible(false);
+
+                    if(consulting.has("consultingReplies")){
+                        JsonArray consultingReplies= consulting.getAsJsonArray("consultingReplies");
+                        if(consultingReplies.size()>0){
+                            JsonObject consultingReplie = consultingReplies.get(0).getAsJsonObject();
+                            answerVal.setText(consultingReplie.get("consultingReplyContents").getAsString());
+                            answerTxt.setVisibility(View.VISIBLE);
+                            answerVal.setVisibility(View.VISIBLE);
+                            answerVal.setEnabled(false);
+                        }
+                    }
+
+                }
+
             }
+
+
 
         }else{
             Toast.makeText(this,"알수 없는 에러가 발생하였습니다. 뒤로 이동합니다.",Toast.LENGTH_SHORT).show();
