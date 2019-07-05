@@ -26,10 +26,13 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -134,6 +137,9 @@ public class ResultActivity extends AppCompatActivity {
 
     JsonArray analysisFilePathList;
 
+
+    Spinner statusVal;
+
    @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
@@ -158,6 +164,7 @@ public class ResultActivity extends AppCompatActivity {
         if(getIntent().hasExtra("holderId")){
 //            responseData = new JsonParser().parse(getIntent().getStringExtra("responseData")).getAsJsonObject();
             responseData = new JsonParser().parse(dha.popDataHolder(getIntent().getStringExtra("holderId")).toString()).getAsJsonObject();
+
 
             //뒤로가기 버튼
             ImageButton bt = (ImageButton) findViewById(R.id.previousButton);

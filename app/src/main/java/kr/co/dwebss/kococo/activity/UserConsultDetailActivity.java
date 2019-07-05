@@ -125,9 +125,7 @@ public class UserConsultDetailActivity extends AppCompatActivity {
                             answerVal.setEnabled(false);
                         }
                     }
-
                 }
-
             }
 
 
