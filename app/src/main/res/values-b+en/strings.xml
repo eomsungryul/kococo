@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 <resources>
-    <string name="appName">Kococo</string>
+    <string name="appName">ezSleep</string>
 
     <!--recordFragement -->
     <string name="recordStart">Record Start</string>
