@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
@@ -31,6 +32,11 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.reward.RewardedVideoAd;
+import com.google.android.gms.ads.rewarded.RewardItem;
+import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewarded.RewardedAdCallback;
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -42,6 +48,7 @@ import java.util.TimerTask;
 import kr.co.dwebss.kococo.R;
 import kr.co.dwebss.kococo.activity.ProgressActivity;
 import kr.co.dwebss.kococo.activity.ResultActivity;
+import kr.co.dwebss.kococo.activity.StaticVariables;
 import kr.co.dwebss.kococo.application.DataHolderApplication;
 import kr.co.dwebss.kococo.fragment.recorder.RecordingThread;
 import kr.co.dwebss.kococo.http.ApiService;
@@ -160,20 +167,57 @@ public class RecordFragment extends Fragment  {
     }
 
     @SuppressLint("ValidFragment")
-    public RecordFragment(TabEventUtil tabEventUtil, InterstitialAd mInterstitialAd) {
+    public RecordFragment(TabEventUtil tabEventUtil, RewardedAd rewardedAd) {
         // Required empty public constructor
         this.tabEventUtil = tabEventUtil;
-        this.mInterstitialAd = mInterstitialAd;
+        //this.mInterstitialAd = mInterstitialAd;
+        this.rewardedAd = rewardedAd;
     }
 
     Button testBtn;
     boolean testFlag=false;
 
     //전면광고
-    private InterstitialAd mInterstitialAd;
+    //private InterstitialAd mInterstitialAd;
+    private RewardedAd rewardedAd;
     private AdView adView;
     private AdRequest adRequest;
     WindowManager.LayoutParams params;
+
+    RewardedAdLoadCallback adLoadCallback = new RewardedAdLoadCallback() {
+        @Override
+        public void onRewardedAdLoaded() {
+            Log.e("ad","onRewardedAdLoaded");
+        }
+
+        @Override
+        public void onRewardedAdFailedToLoad(int errorCode) {
+            Log.e("ad","onRewardedAdFailedToLoad: "+errorCode);
+        }
+    };
+
+    RewardedAdCallback adCallback = new RewardedAdCallback() {
+        public void onRewardedAdOpened() {
+            Log.e("ad","onRewardedAdOpened");
+        }
+
+        public void onRewardedAdClosed() {
+            Log.e("ad","onRewardedAdClosed");
+            rewardedAd = new RewardedAd(getThisContext(), StaticVariables.REAL_REWARD_AD_KEY); //실제
+            //rewardedAd = new RewardedAd(getThisContext(), StaticVariables.TEST_REWARD_AD_KEY); //테스트
+            rewardedAd.loadAd(new AdRequest.Builder().build(), adLoadCallback);
+        }
+
+        public void onUserEarnedReward(@NonNull RewardItem reward) {
+            Log.e("ad","onUserEarnedReward");
+            recordStart();
+        }
+
+        public void onRewardedAdFailedToShow(int errorCode) {
+            Log.e("ad","onRewardedAdFailedToLoad: "+errorCode);
+            rewardedAd.loadAd(new AdRequest.Builder().build(), adLoadCallback);
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -228,7 +272,8 @@ public class RecordFragment extends Fragment  {
 //                }
 //            }
 //        });
-
+        rewardedAd.loadAd(new AdRequest.Builder().build(), adLoadCallback);
+        /*
         mInterstitialAd.setAdListener(new AdListener() {
             @Override
             public void onAdFailedToLoad(int errorCode) {
@@ -243,7 +288,7 @@ public class RecordFragment extends Fragment  {
                 recordStart();
             }
         });
-
+*/
 
         FindAppIdUtil fau = new FindAppIdUtil();
         //xml 내에서 onclick으로 가능하다. 하지만 그건 activity 내에서만 가능하고 프래그먼트에서는 onclickListener()로 해야함
@@ -263,11 +308,21 @@ public class RecordFragment extends Fragment  {
                     } else {
                         //녹음 시작 클릭
                         Log.e(LOG_TAG2, "permission 승인");
-                        if (mInterstitialAd.isLoaded()) {
-                            mInterstitialAd.show();
+                        if (rewardedAd.isLoaded()) {
+                            rewardedAd.show(getActivity(), adCallback);
                         } else {
-                            Log.d("TAG", "The interstitial wasn't loaded yet.");
-                            Toast.makeText(getActivity(), "예기치 않은 에러가 발생하였습니다. 다시 시도해주세요.", Toast.LENGTH_LONG).show();
+                            rewardedAd.loadAd(new AdRequest.Builder().build(), adLoadCallback);
+                            if (rewardedAd.isLoaded()) {
+                                rewardedAd.show(getActivity(), adCallback);
+                            }else {
+                                rewardedAd.loadAd(new AdRequest.Builder().build(), adLoadCallback);
+                                if (rewardedAd.isLoaded()) {
+                                    rewardedAd.show(getActivity(), adCallback);
+                                }else {
+                                    Log.e("ad", "The rewardedAd wasn't loaded yet.");
+                                    Toast.makeText(getActivity(), "예기치 않은 에러가 발생하였습니다. 다시 시도해주세요.", Toast.LENGTH_LONG).show();
+                                }
+                            }
                         }
 //                        recordStart();
                     }
@@ -480,12 +535,19 @@ public class RecordFragment extends Fragment  {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        rewardedAd.loadAd(new AdRequest.Builder().build(), adLoadCallback);
         if(grantResults[0]==0&&grantResults[1]==0&&grantResults[2]==0){
-            if (mInterstitialAd.isLoaded()) {
-                mInterstitialAd.show();
+            if (rewardedAd.isLoaded()) {
+                rewardedAd.show(getActivity(), adCallback);
             } else {
-                Log.d("TAG", "The interstitial wasn't loaded yet.");
-                Toast.makeText(getActivity(), "예기치 않은 에러가 발생하였습니다. 다시 시도해주세요.", Toast.LENGTH_LONG).show();
+                rewardedAd.loadAd(new AdRequest.Builder().build(), adLoadCallback);
+                rewardedAd.show(getActivity(), adCallback);
+                if (rewardedAd.isLoaded()) {
+                    rewardedAd.show(getActivity(), adCallback);
+                }else {
+                    Log.e("ad", "The rewardedAd wasn't loaded yet.");
+                    Toast.makeText(getActivity(), "예기치 않은 에러가 발생하였습니다. 다시 시도해주세요.", Toast.LENGTH_LONG).show();
+                }
             }
         }
 //        switch (requestCode) {

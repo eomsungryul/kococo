@@ -45,6 +45,8 @@ import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.doubleclick.PublisherAdRequest;
 import com.google.android.gms.ads.doubleclick.PublisherAdView;
+import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.BuildConfig;
@@ -94,7 +96,8 @@ public class MainActivity extends AppCompatActivity {
 
 
     //전면광고
-    private InterstitialAd mInterstitialAd;
+    //private InterstitialAd mInterstitialAd;
+    private RewardedAd rewardedAd;
 //    private AdView adView;
 //    private AdRequest adRequest;
 
@@ -130,8 +133,7 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
 
-        MobileAds.initialize(this,
-                "ca-app-pub-3940256099942544~3347511713");
+        MobileAds.initialize(this, StaticVariables.REAL_AD_APP_KEY);
 //        //배너광고
 //        adView = (AdView)findViewById(R.id.publisherAdView);
 //
@@ -147,11 +149,25 @@ public class MainActivity extends AppCompatActivity {
 //        mPublisherAdView.loadAd(adRequest);
 
         //전면광고
-        mInterstitialAd = new InterstitialAd(this);
+        //mInterstitialAd = new InterstitialAd(this);
+        rewardedAd = new RewardedAd(this, StaticVariables.REAL_REWARD_AD_KEY); //실제
+        //rewardedAd = new RewardedAd(this, StaticVariables.TEST_REWARD_AD_KEY); //테스트
         //테스트값
-        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        //mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
         //광고불러오기
-        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+        //mInterstitialAd.loadAd(new AdRequest.Builder().build());
+        RewardedAdLoadCallback adLoadCallback = new RewardedAdLoadCallback() {
+            @Override
+            public void onRewardedAdLoaded() {
+                Log.e("ad","onRewardedAdLoaded");
+            }
+
+            @Override
+            public void onRewardedAdFailedToLoad(int errorCode) {
+                Log.e("ad","onRewardedAdFailedToLoad: "+errorCode);
+            }
+        };
+        rewardedAd.loadAd(new AdRequest.Builder().build(), adLoadCallback);
 
         //나중에 density나 넓이 높이 등이 필요할때 사용 함
         DisplayMetrics metrics = getResources().getDisplayMetrics();
@@ -365,7 +381,7 @@ public class MainActivity extends AppCompatActivity {
                     tabEnable();
                 }
             }
-        },mInterstitialAd), "RecodeFragment");
+        },rewardedAd), "RecodeFragment");
         adapter.addFrag(new DiaryFragment(), "Diary");
         adapter.addFrag(new StatFragment(), "Stat");
         adapter.addFrag(new SettingFragment(), "Setting");
